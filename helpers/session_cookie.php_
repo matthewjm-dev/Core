@@ -1,0 +1,63 @@
+<?php // IPS-CORE Session
+
+class ipsCore_session {
+	private $session_id;
+
+	public $logged_in;
+	public $user_id;
+	//public $user_name;
+	//public $user_email;
+
+	public function __construct() {
+		$session_data = false;
+		$this->logged_in = false;
+
+		if (isset($_COOKIE['ips_core_user'])) {
+			$session_data = unserialize($_COOKIE['ips_core_user']);
+			$session_id = $session_data['session_id'];
+			$session_auth = $session_data['auth_code'];
+			$session_user_id = $session_data['user_id'];
+
+			$db_session = $this->get_session($session_id);
+			if ($db_session && ($db_session['auth'] == $session_auth) && ($session_user_id == $db_session['user_id'])) {
+				$this->session_id = $session_id; // replace session ID with a KEY
+
+				$this->logged_in = true;
+				$this->user_id = $db_session['user_id'];
+				//$this->user_name = $db_session['user_name'];
+				//$this->user_email = $db_session['user_email'];
+			}
+		}
+	}
+
+	private function get_session() {
+		global $es_core_database;
+		$result = $es_core_database->get_session($session_id);
+
+		if ($result) { return $result; }
+		return false;
+	}
+
+	public function create_session($user_id) {
+		global $es_core_database;
+		$auth = md5(substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 20));
+		$time = time();
+
+		$result = $es_core_database->create_session($auth, $user_id, $time);
+		$cookie = serialise(array(
+			'session_id'	=> $result,
+			'auth_code'		=> $auth,
+			'user_id'		=> $user_id
+		));
+		setcookie('ips_core_user', $cookie);
+
+		$this->logged_in = true;
+		$this->user_id = $user_id;
+	}
+
+	public function end_session() {
+		unset($_COOKIE['user']);
+		$this->logged_in = false;
+		$this->session_id = null;
+	}
+}
