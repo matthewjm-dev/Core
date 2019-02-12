@@ -1,0 +1,16 @@
+{
+	"name" : "inphasesolutionsprojects/core-v1.00",
+	"description" : "IPS Core v1.00",
+	"authors" : [
+		{
+			"name": "Matthew Murray",
+			"email": "admin@matdragon.com",
+			"role": "Author"
+		}
+	],
+	"type" : "ips-core",
+	"require": {
+		"php": ">=5.4",
+		"composer/installers": "^1.0"
+	}
+}
