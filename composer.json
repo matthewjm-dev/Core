@@ -8,7 +8,7 @@
 			"role": "Author"
 		}
 	],
-	"type" : "project",
+	"type" : "cakephp-plugin",
 	"require": {
 		"php": ">=5.4",
 		"composer/installers": "^1.0"
