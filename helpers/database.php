@@ -25,6 +25,13 @@ class ipsCore_database {
 		}
 	}
 
+	public function is_connected() {
+		if ( $this->connected ) {
+			return true;
+		}
+		return false;
+	}
+
 	public function query( $sql, $params = [], $return_data = false ) {
 		if ( $this->is_connected() ) {
 			try {
@@ -35,15 +42,13 @@ class ipsCore_database {
 						$value  = $param[1];
 						if ( !is_array( $value ) ) {
 							$type   = ( isset( $param[2] ) ) ? $param[2] : PDO::PARAM_STR;
-							if ( !$query->bindValue( $name, $value, $type) ) {
+							if ( !$query->bindValue( $name, $value, $type ) ) {
 								$error = 'Failed to bind parameter: ' . $name . ' ' . $value . ' ' . $type . ' ' . $length . ' to query.';
-								ipsCore::add_error( $error );
-								die( $error );
+								ipsCore::add_error( $error, true );
 							}
 						} else {
 							$error = 'Query parameter binding failed due to array received. Name: ' . $name;
-							ipsCore::add_error( $error );
-							die( $error );
+							ipsCore::add_error( $error, true );
 						}
 					}
 				}
@@ -55,13 +60,11 @@ class ipsCore_database {
 					}
 				} else {
 					ipsCore::add_error( 'Failed to execute query.' );
-					die ( 'Failed to execute query.' );
 					$result = false;
 				}
 			}
 			catch ( PDOException $e ) {
 				ipsCore::add_error( 'Database query failure: ' . $e->getMessage() );
-				die ( 'Database query failure: ' . $e->getMessage() );
 				return false;
 			}
 			return $result;
@@ -71,17 +74,109 @@ class ipsCore_database {
 		return false;
 	}
 
+	public function does_table_exist( $table ) {
+		$sql = 'SELECT 1 FROM ' . $table . ' LIMIT 1';
+
+		if ( $this->query( $sql ) !== false ) {
+			return true;
+		} return false;
+	}
+
+	public function get_table_schema( $table ) {
+		$sql = 'SHOW COLUMNS FROM ' . $table;
+
+		$schema = $this->query( $sql, [], true );
+
+		return $schema;
+	}
+
+	public function create_table( $table, $fields ) {
+		if ( !$this->does_table_exist( $table ) ) {
+			$primary_key_tag = 'PRIMARY KEY';
+			$has_primary = false;
+			$sql = 'CREATE TABLE ' . $table . ' (';
+
+			foreach ( $fields as $field ) {
+				if ( isset( $field[ 'name' ] ) ) {
+					$sql .= $field[ 'name' ] . ' ';
+					$sql .= ( isset( $field[ 'type' ] ) ? $field[ 'type' ] : 'text' );
+					$sql .= ( isset( $field[ 'length' ] ) ? '(' . $field[ 'length' ] . ')' : '' );
+
+					if ( $has_primary === false ) {
+						if ( $key_item = array_search( $primary_key_tag, $field[ 'extras' ] ) ) {
+							unshift( $field[ 'extras' ][ $key_item ] );
+							$has_primary = $field[ 'name' ];
+						}
+					}
+
+					$sql .= ( isset( $field[ 'extras' ] ) ? ' ' . implode( ' ', $field[ 'extras' ] ) : '' ) . ', ';
+				}
+			}
+
+			if ( $has_primary !== false ) {
+				$sql .= $primary_key_tag . '(' . $has_primary . ')';
+			}
+
+			$sql .= ');';
+
+			$this->query( $sql );
+		} else {
+			ipsCore::add_error( 'The table ' . $table . ' allready exists.' );
+			return false;
+		}
+	}
+
+	public function remove_table( $table ) {
+
+	}
+
+	public function select( $table, $fields = '*', $where = false, $limit = false, $join = false, $group = false ) {
+		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $table;
+		$params = [];
+
+		if ( $join !== false ) {
+
+		}
+
+		if ( $group !== false ) {
+
+		}
+
+		if ( $where !== false ) {
+			if ( is_array( $where ) ) {
+				$sql .= ' WHERE ';
+				foreach ( $where as $where_key => $where_value ) {
+					$sql .= $where_key . ' :' . $where_key;
+					$params[]  = [ ':' . $where_key, $where_value ];
+				}
+			} else {
+				$sql .= '';
+			}
+		}
+
+		if ( $limit !== false ) {
+			$sql .= ' LIMIT ' . $limit;
+		}
+
+		if ( $data = $this->query( $sql, $params, true ) ) {
+			return $data;
+		}
+		ipsCore::add_error( 'Failed to retreive requested data from ' . $table . '.'  );
+		return false;
+	}
+
 	public function insert( $sql, $params ) {
 		if ( $this->query( $sql, $params ) ) {
 			return $this->connection->lastInsertId();
 		} return false;
 	}
 
-	public function is_connected() {
-		if ( $this->connected ) {
-			return true;
-		}
-		return false;
+	public function update( $sql ) {
+
+	}
+
+	public function delete( $sql ) {
+
 	}
 
 	/*public function get_field($field) {

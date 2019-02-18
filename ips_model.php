@@ -15,13 +15,27 @@ class ipsCore_model {
 	// Construct
 	public function __construct( $model ) {
 		$this->set_name( $model );
-		$this->table = DB_PREFIX . $model;
 
 		ipsCore::$database = new ipsCore_database();
 		ipsCore::$session = new ipsCore_session();
+
+		if ( $this->table !== false ) {
+			$this->table = DB_PREFIX . $model;
+			$this->set_schema();
+		}
 	}
 
 	// Methods
+	public function set_schema() {
+		if ( $this->table && ipsCore::$database->does_table_exist( $this->table ) ) {
+			$fields = ipsCore::$database->get_table_schema( $this->table );
+
+			foreach ( $fields as $field ) {
+				$this->$field;
+			}
+		}
+	}
+
 	public function get_flash() {
 		if ( ipsCore::$session->read( 'flash_message' ) ) {
 			return ipsCore::$session->read( 'flash_message' );
@@ -37,7 +51,9 @@ class ipsCore_model {
 	}
 
 	public function create_table() {
-
+		if ( ipsCore::$database->create_table( $this->table ) ) {
+			return true;
+		} return false;
 	}
 
 	public function remove_table() {
@@ -45,21 +61,10 @@ class ipsCore_model {
 	}
 
 	public function get_all( $where ) {
+		$items = ipsCore::$database->select( $this->table, '*', $where );
 
-
-
-		$sql = 'SELECT *
-        FROM ' . $this->table . '
-        WHERE ' . $field . ' = :value
-        LIMIT 1';
-		$params = [
-			[ ':value', $value, $data_type ]
-		];
-
-		$result = ipsCore::$database->query( $sql, $params, true )[0];
-
-		if ( $result ) {
-			return $result;
+		if ( $items ) {
+			return $items;
 		} return false;
 	}
 

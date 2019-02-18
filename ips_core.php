@@ -14,10 +14,9 @@ class ipsCore {
 	public static $path_core_helpers;
 	public static $path_libraries;
 	public static $path_public;
-	public static $path_assets;
-	public static $path_assets_css;
-	public static $path_assets_js;
-	public static $path_assets_img;
+	public static $path_public_css;
+	public static $path_public_js;
+	public static $path_public_img;
 
 	public static $site_protocol;
 	public static $site_url;
