@@ -56,7 +56,7 @@ class ipsCore_router {
 			rtrim( ipsCore::$uri, '/' )
 		];
 
-		die( var_dump( $this->routes ) );
+		//die( var_dump( $this->routes ) );
 		
 		// check for matching routes
 		foreach ( $uri_variations as $uri ) {
