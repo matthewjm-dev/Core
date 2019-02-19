@@ -5,6 +5,7 @@ class ipsCore {
 	public static $app;
 	public static $uri;
 	public static $uri_parts;
+	public static $environment;
 
 	public static $path_base;
 	public static $path_apps;
@@ -58,6 +59,7 @@ class ipsCore {
 		}
 
 		//die( self::$path_core );
+		self::set_environment();
 		
 		require_once( self::$path_core . '/ips_controller.php' );
 		require_once( self::$path_core . '/ips_model.php' );
@@ -73,6 +75,12 @@ class ipsCore {
 	}
 
 	// METHODS
+	public static function set_environment() {
+		$env_settings = parse_ini_file( ipsCore::$path_base . 'environment.ini', true );
+
+		self::$environment = ( isset( $env_settings['environment_settings']['environment'] ) ? $env_settings['environment_settings']['environment'] : 'live' );
+	}
+
 	public static function add_error( $error, $fatal = false ) {
 		if ( $fatal ) {
 			die( 'Fatal Error: ' . $error );
