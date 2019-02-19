@@ -120,15 +120,29 @@ class ipsCore_database {
 			$sql .= ');';
 
 			$this->query( $sql );
-		} else {
-			ipsCore::add_error( 'The table ' . $table . ' allready exists.' );
-			return false;
+			return true;
 		}
+        ipsCore::add_error( 'The table ' . $table . ' allready exists.' );
+        return false;
 	}
 
 	public function remove_table( $table ) {
 
 	}
+
+	public function create_column( $table, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
+	    $sql = 'ALTER TABLE ' . $table . ' ADD ' . $name . ' ' . strtoupper( $type );
+
+        $sql .= ( $length ? '(' . $length . ')' : '' );
+        $sql .= ( $extra ? ' ' . $extra : '' );
+        $sql .= ( $default ? ' DEFAULT ' . ( substr( $default, -2 ) == '()' ? $default : '"' . $default . '"' ) : '' );
+
+	    if ( $this->query( $sql ) ) {
+	        return true;
+        }
+        ipsCore::add_error( 'The column ' . $name . ' could not be created in ' . $table . '.' );
+        return false;
+    }
 
 	public function select( $table, $fields = '*', $where = false, $limit = false, $join = false, $group = false ) {
 		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $table;
@@ -145,9 +159,12 @@ class ipsCore_database {
 		if ( $where !== false ) {
 			if ( is_array( $where ) ) {
 				$sql .= ' WHERE ';
+				$first = true;
 				foreach ( $where as $where_key => $where_value ) {
-					$sql .= $where_key . ' :' . $where_key;
+				    $sql .= ( !$first ? ' AND ' : ' ' );
+					$sql .= $where_key . ' = :' . $where_key;
 					$params[]  = [ ':' . $where_key, $where_value ];
+                    $first = false;
 				}
 			} else {
 				$sql .= '';
@@ -161,7 +178,7 @@ class ipsCore_database {
 		if ( $data = $this->query( $sql, $params, true ) ) {
 			return $data;
 		}
-		ipsCore::add_error( 'Failed to retreive requested data from ' . $table . '.'  );
+		ipsCore::add_error( 'Failed to retrieve requested data from ' . $table . '.'  );
 		return false;
 	}
 
