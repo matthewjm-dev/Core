@@ -84,22 +84,31 @@ class ipsCore_controller {
 
 	public function add_stylesheet( $stylesheets ) {
 
-		if ( is_array( $stylesheets ) ) {
-			foreach ( $stylesheets as $stylesheet ) {
-				ipsCore::$data[ 'stylesheets' ][] = $stylesheet;
+		if ( !is_array( $stylesheets ) ) {
+			$stylesheets = [ $stylesheets ];
+		}
+
+		foreach ( $stylesheets as $stylesheet ) {
+			if ( ipsCore::is_environment_dev() ) {
+				$stylesheet = 'src/' . $stylesheet;
+			} else {
+				$stylesheet = 'dist/' . $stylesheet . '.min';
 			}
-		} else {
-			ipsCore::$data[ 'stylesheets' ][] = $stylesheets;
+			ipsCore::$data[ 'stylesheets' ][] = '/css/' . $stylesheet . '.css';
 		}
 	}
 
 	public function add_script( $scripts ) {
-		if ( is_array( $scripts ) ) {
-			foreach ( $scripts as $script ) {
-				ipsCore::$data[ 'scripts' ][] = '/assets/js/' . $script . '.js';
+		if ( !is_array( $scripts ) ) {
+			$scripts = [ $scripts ];
+		}
+		foreach ( $scripts as $script ) {
+			if ( ipsCore::is_environment_dev() ) {
+				$script = 'src/' . $script;
+			} else {
+				$script = 'dist/' . $script . '.min';
 			}
-		} else {
-			ipsCore::$data[ 'scripts' ][] = '/assets/js/' . $scripts . '.js';
+			ipsCore::$data[ 'scripts' ][] = '/js/' . $script . '.js';
 		}
 	}
 

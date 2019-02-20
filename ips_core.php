@@ -81,6 +81,18 @@ class ipsCore {
 		self::$environment = ( isset( $env_settings['environment_settings']['environment'] ) ? $env_settings['environment_settings']['environment'] : 'live' );
 	}
 
+	public static function is_environment_dev() {
+		if ( self::$environment == 'development' ) {
+			return true;
+		} return false;
+	}
+
+	public static function is_environment_live() {
+		if ( self::$environment == 'live' ) {
+			return true;
+		} return false;
+	}
+
 	public static function add_error( $error, $fatal = false ) {
 		if ( $fatal ) {
 			die( 'Fatal Error: ' . $error );
@@ -134,7 +146,7 @@ class ipsCore {
 
 	public static function requires_model( $models, $app = false ) {
 		if ( !is_array( $models ) ) {
-			$models = array( $models );
+			$models = [ $models ];
 		}
 		foreach ( $models as $model ) {
 			$model_path = self::get_model_route( $model, $app );
@@ -146,12 +158,30 @@ class ipsCore {
 		}
 	}
 
+	public static function requires_object( $objects, $app = false ) {
+		if ( !is_array( $objects ) ) {
+			$objects = [ $objects ];
+		}
+		foreach ( $objects as $object ) {
+			$object_path = self::get_object_path_route( $object, $app );
+			if ( file_exists( $object_path ) ) {
+				require_once( $object_path );
+			} else {
+				self::add_error( 'Required Object "' . $object . '" does not exist.' );
+			}
+		}
+	}
+
 	public static function get_controller_route( $controller, $app = false ) {		
 		return self::get_file_route( $controller, 'controllers', $app );
 	}
 
 	public static function get_model_route( $model, $app = false ) {
 		return self::get_file_route( $model, 'models', $app );
+	}
+
+	public static function get_object_route( $object, $app = false ) {
+		return self::get_file_route( $object, 'objects', $app );
 	}
 
 	public static function get_view_route( $view ) {
