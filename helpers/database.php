@@ -5,7 +5,6 @@ class ipsCore_database {
 	private $db_name = DB_NAME;
 	private $db_user = DB_USER;
 	private $db_pass = DB_PASS;
-	private $query;
 	public $connected = false;
 	public $connection;
 	public $connection_error = false;
@@ -21,7 +20,7 @@ class ipsCore_database {
 		if ( !$this->connection_error ) {
 			$this->connected = true;
 		} else {
-			ipsCore::add_error( 'Database connection failure: ' . $e->getMessage() );
+			ipsCore::add_error( 'Database connection failure: ' . $e->getMessage(), true );
 		}
 	}
 

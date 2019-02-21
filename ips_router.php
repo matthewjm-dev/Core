@@ -38,11 +38,8 @@ class ipsCore_router {
 	public function get_route() { return $this->route; }
 
 	public function init() {
-		ipsCore::$path_app = ipsCore::$path_apps . ipsCore::$app->get_directory();
-		
-		require_once( ipsCore::$path_app . '/config.php' ); // App config
 		require_once( ipsCore::$path_app . '/routes.php' ); // load App routes
-		require_once( ipsCore::$path_apps . '/routes.php' ); // load shared routes
+		require_once( ipsCore::$path_apps . 'routes.php' ); // load shared routes
 
 		$found_route = FALSE;
 		$controller = 'pages';
