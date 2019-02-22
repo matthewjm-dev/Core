@@ -80,7 +80,7 @@ class ipsCore_model {
         } return false;
     }
 
-	public function get_all( $where ) {
+	public function get_all( $where = false ) {
 		$items = ipsCore::$database->select( $this->table, '*', $where );
 
 		if ( $items ) {

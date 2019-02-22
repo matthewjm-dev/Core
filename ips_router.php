@@ -47,9 +47,14 @@ class ipsCore_router {
 		$action = false;
 
 		// create URI match variations
+        /*if ( ipsCore::$app->get_uri() != '' ) {
+            $appless_uri = str_replace( '/' . ipsCore::$app->get_uri(), '', ipsCore::$uri );
+        } else {
+            $appless_uri = ipsCore::$uri;
+        }*/
 		$uri_variations = [
-			ipsCore::$uri,
-			ipsCore::$uri . '/',
+            ipsCore::$uri,
+            ipsCore::$uri . '/',
 			rtrim( ipsCore::$uri, '/' )
 		];
 
@@ -73,6 +78,13 @@ class ipsCore_router {
 			} else {
 				$path_parts_controller = $path_parts[0];
 			}*/
+
+            if ( ipsCore::$app->get_uri() != '' ) {
+                $appless_uri = str_replace( '/' . ipsCore::$app->get_uri(), '', ipsCore::$uri );
+            } else {
+                $appless_uri = ipsCore::$uri;
+            }
+            $path_parts = explode( '/', trim( $appless_uri, '/' ) );
 
 			if ( !empty( $path_parts ) ) {
 				if ( isset( $path_parts[0] ) && $this->check_controller_exists( $path_parts[0] ) ) {

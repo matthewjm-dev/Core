@@ -39,8 +39,7 @@ class ipsCore_controller {
 		if ( class_exists( $model_name ) ) {
 			$this->{ $name } = new $model_name( $name );
 		} else {
-			die( 'Requested Model Class "' . $model_name . '" Does Not Exist' );
-			ipsCore::add_error( 'Requested Model Class "' . $model_name . '" Does Not Exist' );
+			ipsCore::add_error( 'Requested Model Class "' . $model_name . '" Does Not Exist', true );
 		}
 	}
 
@@ -89,10 +88,10 @@ class ipsCore_controller {
 		}
 
 		foreach ( $stylesheets as $stylesheet ) {
-			if ( ipsCore::is_environment_dev() ) {
-				$stylesheet = 'src/' . $stylesheet;
+			if ( ipsCore::is_environment_live() ) {
+                $stylesheet = 'dist/' . $stylesheet . '.min';
 			} else {
-				$stylesheet = 'dist/' . $stylesheet . '.min';
+                $stylesheet = 'src/' . $stylesheet;
 			}
 			ipsCore::$data[ 'stylesheets' ][] = '/css/' . $stylesheet . '.css';
 		}
@@ -103,10 +102,10 @@ class ipsCore_controller {
 			$scripts = [ $scripts ];
 		}
 		foreach ( $scripts as $script ) {
-			if ( ipsCore::is_environment_dev() ) {
-				$script = 'src/' . $script;
+			if ( ipsCore::is_environment_live() ) {
+                $script = 'dist/' . $script . '.min';
 			} else {
-				$script = 'dist/' . $script . '.min';
+                $script = 'src/' . $script;
 			}
 			ipsCore::$data[ 'scripts' ][] = '/js/' . $script . '.js';
 		}

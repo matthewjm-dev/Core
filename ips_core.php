@@ -145,6 +145,9 @@ class ipsCore {
     }
 
     public static function requires_model( $models, $app = false ) {
+        if ( !$app ) {
+            $app = ipsCore::$app->get_directory();
+        }
         if ( !is_array( $models ) ) {
             $models = [ $models ];
         }
