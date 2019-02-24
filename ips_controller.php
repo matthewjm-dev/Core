@@ -31,13 +31,14 @@ class ipsCore_controller {
 		$this->error404();
 	}
 
-	public function load_model( $model, $name = false ) {
-		if ( !$name ) { $name = $model; }
+	public function load_model( $model, $name = false, $table = '' ) {
+		if ( $name ) { $name = $model; }
+		if ( $table == '' ) { $table = $model; }
 		$name = str_replace( '/', '_', $name );
 		$model_name  = str_replace( '/', '_', $model ) . '_model';
 
 		if ( class_exists( $model_name ) ) {
-			$this->{ $name } = new $model_name( $name );
+			$this->{ $name } = new $model_name( $name, $table );
 		} else {
 			ipsCore::add_error( 'Requested Model Class "' . $model_name . '" Does Not Exist', true );
 		}

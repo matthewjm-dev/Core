@@ -9,13 +9,19 @@ class ipsCore_model {
 
 	// Getters
 	public function get_name() { return $this->name; }
+	public function get_table() { return $this->table; }
 
 	// Setters
 	public function set_name( $name ) { $this->name = $name; }
+	public function set_table( $table ) { $this->table = $table; }
 
 	// Construct
-	public function __construct( $model ) {
+	public function __construct( $model, $table = false ) {
 		$this->set_name( $model );
+		if ( !$table ) {
+			$table = $model;
+		}
+		$this->set_table( $table );
 
 		ipsCore::$database = new ipsCore_database();
 		ipsCore::$session = new ipsCore_session();
