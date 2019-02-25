@@ -16,9 +16,9 @@ class ipsCore_model {
 	public function set_table( $table ) { $this->table = $table; }
 
 	// Construct
-	public function __construct( $model, $table = false ) {
+	public function __construct( $model, $table = ' ' ) {
 		$this->set_name( $model );
-		if ( !$table ) {
+		if ( $table == ' ' ) {
 			$table = $model;
 		}
 		$this->set_table( $table );
@@ -27,7 +27,7 @@ class ipsCore_model {
 		ipsCore::$session = new ipsCore_session();
 
 		if ( $this->table !== false ) {
-			$this->table = DB_PREFIX . $model;
+			$this->table = DB_PREFIX . $table;
 			$this->set_schema();
 		}
 	}
@@ -40,8 +40,11 @@ class ipsCore_model {
 			$fields = ipsCore::$database->get_table_schema( $this->table );
 
 			foreach ( $fields as $field ) {
-				$this->$field;
-				$this->fields[] = $field;
+			    $name = $field[ 'Field' ];
+			    $type = $field[ 'Type' ];
+
+				$this->$name = false;
+				$this->fields[$name] = [ 'type' => $type ];
 			}
 		}
 	}

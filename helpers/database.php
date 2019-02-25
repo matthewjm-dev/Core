@@ -177,7 +177,7 @@ class ipsCore_database {
 		if ( $data = $this->query( $sql, $params, true ) ) {
 			return $data;
 		}
-		ipsCore::add_error( 'Failed to retrieve requested data from ' . $table . '.'  );
+		//ipsCore::add_error( 'Failed to retrieve requested data from ' . $table . '.'  ); // no need to throw error as query might be empty
 		return false;
 	}
 

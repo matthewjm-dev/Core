@@ -31,9 +31,9 @@ class ipsCore_controller {
 		$this->error404();
 	}
 
-	public function load_model( $model, $name = false, $table = '' ) {
-		if ( $name ) { $name = $model; }
-		if ( $table == '' ) { $table = $model; }
+	public function load_model( $model, $name = false, $table = ' ' ) {
+		if ( !$name ) { $name = $model; }
+		if ( $table == ' ' ) { $table = $model; }
 		$name = str_replace( '/', '_', $name );
 		$model_name  = str_replace( '/', '_', $model ) . '_model';
 
