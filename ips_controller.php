@@ -47,9 +47,10 @@ class ipsCore_controller {
 	public function build_view( $build = 'html', $show_in_layout = true ) {
 
 		if ( $build == 'html' ) {
-			if ( $flash = $this->model->get_flash() ) {
+
+			if ( $flash = $this->get_flash() ) {
 				ipsCore::$data[ 'flash_message' ] = $flash;
-				$this->model->remove_flash();
+				$this->remove_flash();
 			} else {
 				ipsCore::$data[ 'flash_message' ] = false;
 			}
@@ -126,12 +127,18 @@ class ipsCore_controller {
 		ipsCore::$data[ 'breadcrumbs' ] = $breadcrumbs;
 	}
 
-	public function add_flash( $type, $message ) {
-		if ( !$this->model->get_flash() ) {
-			$this->model->add_flash( [ 'type' => $type, 'message' => $message ] );
-		} else {
-			ipsCore::add_error( 'A flash message is allready queued.' );
-		}
+	public function get_flash() {
+		if ( ipsCore::$session->read( 'flash_message' ) ) {
+			return ipsCore::$session->read( 'flash_message' );
+		} return false;
+	}
+
+	public function add_flash( $content ) {
+		ipsCore::$session->write( 'flash_message', $content );
+	}
+
+	public function remove_flash() {
+		ipsCore::$session->write( 'flash_message', false );
 	}
 
 }

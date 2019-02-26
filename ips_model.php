@@ -27,7 +27,7 @@ class ipsCore_model {
 		ipsCore::$session = new ipsCore_session();
 
 		if ( $this->table !== false ) {
-			$this->table = DB_PREFIX . $table;
+			$this->table = ( substr( $table, 0, strlen( DB_PREFIX ) ) === DB_PREFIX ? $table : DB_PREFIX . $table );
 			$this->set_schema();
 		}
 	}
@@ -47,20 +47,6 @@ class ipsCore_model {
 				$this->fields[$name] = [ 'type' => $type ];
 			}
 		}
-	}
-
-	public function get_flash() {
-		if ( ipsCore::$session->read( 'flash_message' ) ) {
-			return ipsCore::$session->read( 'flash_message' );
-		} return false;
-	}
-
-	public function add_flash( $content ) {
-		ipsCore::$session->write( 'flash_message', $content );
-	}
-
-	public function remove_flash() {
-		ipsCore::$session->write( 'flash_message', false );
 	}
 
 	public function create_table( $id = 'id' ) {
@@ -89,11 +75,29 @@ class ipsCore_model {
         } return false;
     }
 
-	public function get_all( $where = false ) {
+	public function get_all_data( $where = false ) {
 		$items = ipsCore::$database->select( $this->table, '*', $where );
 
-		if ( $items ) {
+		if ( !empty( $items ) ) {
 			return $items;
+		} return false;
+	}
+
+	public function get_all( $where = false ) {
+		$items = $this->get_all_data( $where );
+		$model = get_class( $this );
+		$objects = [];
+
+		foreach ( $items as $item ) {
+			$object = new $model( $this->name, $this->table );
+			foreach ( $item as $item_data_key => $item_data ) {
+				$object->{ $item_data_key } = $item_data;
+			}
+			$objects[] = $object;
+		}
+
+		if ( !empty( $objects ) ) {
+			return $objects;
 		} return false;
 	}
 
