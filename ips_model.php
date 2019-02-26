@@ -101,15 +101,32 @@ class ipsCore_model {
 		} return false;
 	}
 
-	public function retrieve( $field, $value ) {
-        $where = [];
-	    $where[ $field ] = $value;
+	public function get( $where ) {
+        $item = ipsCore::$database->select( $this->table, '*', $where, 1 );
 
-        $item = ipsCore::$database->select( $this->table, '*', $where );
+        if ( !empty( $item ) ) {
+            return $item[0];
+        } return false;
+    }
+
+	public function retrieve( $field, $value = false ) {
+	    if ( $value === false ) {
+	        $value = $field;
+	        if ( isset( $this->fields ) ) {
+                $field = key( $this->fields );
+            } else {
+                $field = 'id';
+            }
+        }
+
+	    $where = [ $field => $value ];
+
+        $item = ipsCore::$database->select( $this->table, '*', $where )[0];
 
         if ( $item ) {
-
-
+            foreach ( $item as $item_data_key => $item_data ) {
+                $this->{ $item_data_key } = $item_data;
+            }
             return true;
         } return false;
 	}

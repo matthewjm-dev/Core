@@ -42,7 +42,7 @@ class ipsCore_database {
 						if ( !is_array( $value ) ) {
 							$type   = ( isset( $param[2] ) ) ? $param[2] : PDO::PARAM_STR;
 							if ( !$query->bindValue( $name, $value, $type ) ) {
-								$error = 'Failed to bind parameter: ' . $name . ' ' . $value . ' ' . $type . ' ' . $length . ' to query.';
+								$error = 'Failed to bind parameter: ' . $name . ' ' . $value . ' ' . $type . ' to query.';
 								ipsCore::add_error( $error, true );
 							}
 						} else {
@@ -161,7 +161,7 @@ class ipsCore_database {
 				$first = true;
 				foreach ( $where as $where_key => $where_value ) {
 				    $sql .= ( !$first ? ' AND ' : ' ' );
-					$sql .= $where_key . ' = :' . $where_key;
+					$sql .= '`' . $where_key . '` = :' . $where_key;
 					$params[]  = [ ':' . $where_key, $where_value ];
                     $first = false;
 				}
@@ -187,8 +187,31 @@ class ipsCore_database {
 		} return false;
 	}
 
-	public function update( $sql ) {
+	public function update( $table, $fields, $where = false ) {
+	    if ( $where ) {
+            $sql = 'UPDATE ' . DB_PREFIX . $table . ' SET ';
+            $params = [];
 
+            $first = true;
+            foreach ($fields as $field_key => $field) {
+                if (!$first) {
+                    $sql .= ' ,';
+                } else {
+                    $first = false;
+                }
+
+                $sql .= '`' . $field_key . '` = :' . $field;
+                $params[] = [':' . $field_key, $field];
+            }
+
+            if ($this->query($sql, $params)) {
+                return true;
+            }
+            ipsCore::add_error( 'Failed to update ' . $table . '.'  );
+            return false;
+        }
+        ipsCore::add_error( 'Refused to update ' . $table . ' due to no WHERE clause.'  );
+	    return false;
 	}
 
 	public function delete( $sql ) {

@@ -8,6 +8,10 @@ class ips_view {
 
 	// Construct
 	public function __construct( $template, $show_in_layout ) {
+	    if ( !$this->view_exists( ipsCore::get_view_route( $template ) ) ) {
+            ipsCore::add_error( 'View "' . $template . '" could not be found' );
+        }
+
 		$this->template = $template;
 		$this->show_in_layout = $show_in_layout;
 	}
