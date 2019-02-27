@@ -49,16 +49,17 @@ class ipsCore_model {
 		}
 	}
 
-	public function create_table( $id = 'id' ) {
+	public function create_table( $id = 'id', $table ) {
+	    $table = DB_PREFIX . $table;
 	    $fields = [
             $id => [ 'type' => 'int', 'length' => 11, 'extra' => [ 'NOT NULL', 'AUTO INCREMENT', 'PRIMARY KEY' ] ],
+            'created' => [ 'slug' => 'varchar', 'length' => 255 ],
+            'modified' => [ 'slug' => 'varchar', 'length' => 255 ],
             'live' => [ 'int' => 'varchar', 'length' => 11 ],
             'removed' => [ 'int' => 'varchar', 'length' => 11 ],
-            'created' => [ 'type' => 'varchar', 'length' => 255 ],
-            'modified' => [ 'type' => 'varchar', 'length' => 255 ],
         ];
 
-		if ( ipsCore::$database->create_table( $this->table, $fields ) ) {
+		if ( ipsCore::$database->create_table( $table, $fields ) ) {
 			return true;
 		} return false;
 	}
