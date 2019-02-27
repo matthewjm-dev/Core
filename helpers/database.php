@@ -181,28 +181,59 @@ class ipsCore_database {
 		return false;
 	}
 
-	public function insert( $sql, $params ) {
+	public function insert_custom( $sql, $params ) {
+		if ( $this->query( $sql, $params ) ) {
+			return $this->connection->lastInsertId();
+		} return false;
+	}
+
+	public function insert( $table, $fields ) {
+		$sql = 'INSERT INTO ' . $table . ' SET ';
+		$params = [];
+		$first = true;
+
+		foreach ($fields as $field_key => $field) {
+			if (!$first) {
+				$sql .= ', ';
+			} else {
+				$first = false;
+			}
+
+			$sql .= '`' . $field_key . '` = :' . $field_key;
+			$params[] = [':' . $field_key, $field];
+		}
+
 		if ( $this->query( $sql, $params ) ) {
 			return $this->connection->lastInsertId();
 		} return false;
 	}
 
 	public function update( $table, $fields, $where = false ) {
-	    if ( $where ) {
-            $sql = 'UPDATE ' . DB_PREFIX . $table . ' SET ';
+	    if ( $where && is_array( $where ) ) {
+            $sql = 'UPDATE ' . $table . ' SET ';
             $params = [];
-
             $first = true;
+
             foreach ($fields as $field_key => $field) {
                 if (!$first) {
-                    $sql .= ' ,';
+                    $sql .= ', ';
                 } else {
                     $first = false;
                 }
 
-                $sql .= '`' . $field_key . '` = :' . $field;
+                $sql .= '`' . $field_key . '` = :' . $field_key;
                 $params[] = [':' . $field_key, $field];
             }
+
+			$sql .= ' WHERE';
+			$first = true;
+
+			foreach ( $where as $where_key => $where_value ) {
+				$sql .= ( !$first ? ' AND ' : ' ' );
+				$sql .= '`' . $where_key . '` = :' . $where_key;
+				$params[]  = [ ':' . $where_key, $where_value ];
+				$first = false;
+			}
 
             if ($this->query($sql, $params)) {
                 return true;
@@ -217,81 +248,5 @@ class ipsCore_database {
 	public function delete( $sql ) {
 
 	}
-
-	/*public function get_field($field) {
-		if (ips_core_is_valid_field_name($field)) {
-			$sql = 'SELECT * FROM ' . DB_PREFIX . 'fields WHERE tag = :tag';
-			$params = array(array(':tag', $field, PDO::PARAM_STR, 255));
-			$result = $this->query($sql, $params, true);
-			return $result;
-		}
-		return false;
-	}
-
-	public function add_field($field) {
-		$cur_time = time();
-		$sql = 'INSERT INTO ' . DB_PREFIX . 'fields (tag, type, content, parent, date_created, date_modified)
-				VALUES (:tag, :type, :content, :parent, :date_created, :date_modified)';
-		$params = array(
-			array(':tag', $field, PDO::PARAM_STR),
-			array(':type', 0, PDO::PARAM_INT),
-			array(':content', '', PDO::PARAM_STR),
-			array(':parent', '', PDO::PARAM_STR),
-			array(':date_created', $cur_time, PDO::PARAM_STR),
-			array(':date_modified', $cur_time, PDO::PARAM_STR)
-		);
-		$result = $this->query($sql, $params);
-
-		if ($result) { return $result; }
-		return false;
-	}
-
-	public function field_exists($field) {
-		$sql = 'SELECT id FROM ' . DB_PREFIX . 'fields WHERE tag = :tag';
-		$params = array(array(':tag', $field, PDO::PARAM_STR, 255));
-		$result = $this->query($sql, $params, true);
-
-		if ($result) { return true; }
-		return false;
-	}
-
-	public function get_session($session_id) {
-		$sql = 'SELECT * FROM ' . DB_PREFIX . 'sessions WHERE id = :id';
-		$params = array(array(':id', $session_id, PDO::PARAM_INT, 11));
-		$result = $this->query($sql, $params, true);
-
-		if ($result) { return $result; }
-		return false;
-	}
-
-	public function create_session($auth, $user_id, $time) {
-		$sql = 'INSERT INTO ' . DB_PREFIX . 'sessions (auth, user_id, date_created)
-				VALUES (:auth, :user_id, :date_created)';
-		$params = array(
-			array(':auth', $auth, PDO::PARAM_STR),
-			array(':user_id', $user_id, PDO::PARAM_INT),
-			array(':date_created', $time, PDO::PARAM_STR),
-		);
-		$result = $this->query($sql, $params);
-
-		if ($result) { return $result; }
-		return false;
-	}
-
-	public function get_route_path($route) {
-		$or = ""; $i = 0;
-		$params = array();
-		foreach ($route as $part) {
-			if ($i != 0) { $or .= " OR "; }
-			$or .= "slug = :route" . $i;
-			$params[] = array(':route' . $i, $part, PDO::PARAM_STR, 255);
-			$i++;
-		}
-		$sql = 'SELECT slug, target FROM ' . DB_PREFIX . 'routes WHERE ' . $or;
-		$result = $this->query($sql, $params, true);
-
-		if ($result) { return $result; }
-		return false;
-	}*/
 
 }

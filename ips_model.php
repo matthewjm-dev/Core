@@ -88,12 +88,14 @@ class ipsCore_model {
 		$model = get_class( $this );
 		$objects = [];
 
-		foreach ( $items as $item ) {
-			$object = new $model( $this->name, $this->table );
-			foreach ( $item as $item_data_key => $item_data ) {
-				$object->{ $item_data_key } = $item_data;
+		if ( !empty( $items ) ) {
+			foreach ( $items as $item ) {
+				$object = new $model( $this->name, $this->table );
+				foreach ( $item as $item_data_key => $item_data ) {
+					$object->{ $item_data_key } = $item_data;
+				}
+				$objects[] = $object;
 			}
-			$objects[] = $object;
 		}
 
 		if ( !empty( $objects ) ) {
@@ -145,6 +147,35 @@ class ipsCore_model {
 
 	public function save() {
 
+		$fields = [];
+		$where = [];
+		$first = true;
+		$insert = false;
+
+		foreach ( $this->fields as $field_key => $field ) {
+			if ( $first ) {
+				$first = false;
+				if ( $this->{ $field_key } !== false ) {
+					$where[ $field_key ] = $this->{ $field_key };
+				} else {
+					$insert = true;
+				}
+			} else {
+				$fields[ $field_key ] = $this->{ $field_key };
+			}
+		}
+
+		if ( !empty( $fields ) && ( $insert || !empty( $where ) ) ) {
+			if ( $insert ) {
+				if ( ipsCore::$database->insert( $this->table, $fields ) ) {
+					return true;
+				}
+			} else {
+				if ( ipsCore::$database->update( $this->table, $fields, $where ) ) {
+					return true;
+				}
+			}
+		} return false;
 	}
 
 }
