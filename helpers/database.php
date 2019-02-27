@@ -95,21 +95,19 @@ class ipsCore_database {
 			$has_primary = false;
 			$sql = 'CREATE TABLE ' . $table . ' (';
 
-			foreach ( $fields as $field ) {
-				if ( isset( $field[ 'name' ] ) ) {
-					$sql .= $field[ 'name' ] . ' ';
-					$sql .= ( isset( $field[ 'type' ] ) ? $field[ 'type' ] : 'text' );
-					$sql .= ( isset( $field[ 'length' ] ) ? '(' . $field[ 'length' ] . ')' : '' );
+			foreach ( $fields as $field_key => $field ) {
+                $sql .= $field_key . ' ';
+                $sql .= ( isset( $field[ 'type' ] ) ? $field[ 'type' ] : 'text' );
+                $sql .= ( isset( $field[ 'length' ] ) ? '(' . $field[ 'length' ] . ')' : '' );
 
-					if ( $has_primary === false ) {
-						if ( $key_item = array_search( $primary_key_tag, $field[ 'extras' ] ) ) {
-							unshift( $field[ 'extras' ][ $key_item ] );
-							$has_primary = $field[ 'name' ];
-						}
-					}
+                if ( $has_primary === false ) {
+                    if ( $key_item = array_search( $primary_key_tag, $field[ 'extras' ] ) ) {
+                        unshift( $field[ 'extras' ][ $key_item ] );
+                        $has_primary = $field_key;
+                    }
+                }
 
-					$sql .= ( isset( $field[ 'extras' ] ) ? ' ' . implode( ' ', $field[ 'extras' ] ) : '' ) . ', ';
-				}
+                $sql .= ( isset( $field[ 'extras' ] ) ? ' ' . implode( ' ', $field[ 'extras' ] ) : '' ) . ', ';
 			}
 
 			if ( $has_primary !== false ) {
