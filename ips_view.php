@@ -119,6 +119,12 @@ class ips_json {
 			$data = [ 'html' => ob_get_clean(), 'json' => $json ];
 		} else {
 			$data = ipsCore::$data['json'];
+
+			if ( isset( $data[ 'errors' ] ) ) {
+			    foreach ( ipsCore::$errors as $error ){
+                    $data[ 'errors' ][] = $error;
+                }
+            }
 		}
 
 		$this->content = json_encode( $data );

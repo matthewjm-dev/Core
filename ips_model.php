@@ -52,11 +52,11 @@ class ipsCore_model {
 	public function create_table( $id = 'id', $table ) {
 	    $table = DB_PREFIX . $table;
 	    $fields = [
-            $id => [ 'type' => 'int', 'length' => 11, 'extra' => [ 'NOT NULL', 'AUTO INCREMENT', 'PRIMARY KEY' ] ],
-            'created' => [ 'slug' => 'varchar', 'length' => 255 ],
-            'modified' => [ 'slug' => 'varchar', 'length' => 255 ],
-            'live' => [ 'int' => 'varchar', 'length' => 11 ],
-            'removed' => [ 'int' => 'varchar', 'length' => 11 ],
+            $id => [ 'type' => 'int', 'length' => 11, 'extra' => [ 'NOT NULL', 'AUTO_INCREMENT', 'PRIMARY KEY' ] ],
+            'created' => [ 'type' => 'varchar', 'length' => 255 ],
+            'modified' => [ 'type' => 'varchar', 'length' => 255 ],
+            'live' => [ 'type' => 'int', 'length' => 11 ],
+            'removed' => [ 'type' => 'int', 'length' => 11 ],
         ];
 
 		if ( ipsCore::$database->create_table( $table, $fields ) ) {
@@ -68,11 +68,11 @@ class ipsCore_model {
 
 	}
 
-	public function add_field( $name, $type = 'text', $length = false, $default = false, $extra = false ) {
+	public function create_column( $name, $type = 'text', $length = false, $default = false, $extra = false ) {
 	    // To Do: Check schema if column already exists
 
-	    if ( ipsCore::$database->create_column( $this->table, $name, $type, $length, $default, $extra ) ) {
-	        return true;
+        if (ipsCore::$database->create_column($this->table, $name, $type, $length, $default, $extra)) {
+            return true;
         } return false;
     }
 

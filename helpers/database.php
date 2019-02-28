@@ -93,31 +93,36 @@ class ipsCore_database {
 		if ( !$this->does_table_exist( $table ) ) {
 			$primary_key_tag = 'PRIMARY KEY';
 			$has_primary = false;
+			$first = true;
 			$sql = 'CREATE TABLE ' . $table . ' (';
 
 			foreach ( $fields as $field_key => $field ) {
+			    if ( !$first ) { $sql .= ', '; } else { $first = false; }
                 $sql .= $field_key . ' ';
                 $sql .= ( isset( $field[ 'type' ] ) ? $field[ 'type' ] : 'text' );
                 $sql .= ( isset( $field[ 'length' ] ) ? '(' . $field[ 'length' ] . ')' : '' );
 
-                if ( $has_primary === false ) {
-                    if ( $key_item = array_search( $primary_key_tag, $field[ 'extras' ] ) ) {
-                        unshift( $field[ 'extras' ][ $key_item ] );
-                        $has_primary = $field_key;
-                    }
-                }
+                //if ( $has_primary === false ) {
+                //    if ( $key_item = array_search( $primary_key_tag, $field[ 'extra' ] ) ) {
+                //        unset( $field[ 'extra' ][ $key_item ] );
+                //        $has_primary = $field_key;
+                //    }
+                //}
 
-                $sql .= ( isset( $field[ 'extras' ] ) ? ' ' . implode( ' ', $field[ 'extras' ] ) : '' ) . ', ';
+                $sql .= ( isset( $field[ 'extra' ] ) ? ' ' . implode( ' ', $field[ 'extra' ] ) : '' );
 			}
 
-			if ( $has_primary !== false ) {
-				$sql .= $primary_key_tag . '(' . $has_primary . ')';
-			}
+			//if ( $has_primary !== false ) {
+			//	$sql .= ', ' . $primary_key_tag . '(' . $has_primary . ')';
+			//}
 
 			$sql .= ');';
 
-			$this->query( $sql );
-			return true;
+			if ( $this->query( $sql ) ) {
+                return true;
+            }
+            ipsCore::add_error( 'Failed to create table: ' . $table . '.' );
+            return false;
 		}
         ipsCore::add_error( 'The table ' . $table . ' allready exists.' );
         return false;

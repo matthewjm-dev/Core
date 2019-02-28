@@ -112,8 +112,6 @@ class ipsCore {
             foreach ( self::$errors as $error ) {
                 echo '<p style="border:1px solid #000;padding:1px 4px;margin:2px 0;">' . $error . '</p>';
             }
-        } else {
-            return self::$errors;
         }
     }
 

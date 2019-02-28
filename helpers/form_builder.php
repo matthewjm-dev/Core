@@ -162,7 +162,7 @@ class ipsCore_form_builder {
 					if ( $field['options'] ) {
 						$html .= '<select ' . $field_id . $field_classes . $field_name . '>';
 						foreach ( $field['options'] as $option ) {
-							$option_selected = ( $option['selected'] ) ? 'selected' : '';
+							$option_selected = ( isset( $option['selected'] ) ) ? 'selected' : '';
 							$option_disabled = ( isset( $option['disabled'] ) && $option['disabled'] === true ) ? ' disabled' : '';
 							$html .= '<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>';
 						}
