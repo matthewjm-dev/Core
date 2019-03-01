@@ -98,23 +98,11 @@ class ipsCore_database {
 
 			foreach ( $fields as $field_key => $field ) {
 			    if ( !$first ) { $sql .= ', '; } else { $first = false; }
-                $sql .= $field_key . ' ';
+                $sql .= '`' . $field_key . '` ';
                 $sql .= ( isset( $field[ 'type' ] ) ? $field[ 'type' ] : 'text' );
                 $sql .= ( isset( $field[ 'length' ] ) ? '(' . $field[ 'length' ] . ')' : '' );
-
-                //if ( $has_primary === false ) {
-                //    if ( $key_item = array_search( $primary_key_tag, $field[ 'extra' ] ) ) {
-                //        unset( $field[ 'extra' ][ $key_item ] );
-                //        $has_primary = $field_key;
-                //    }
-                //}
-
                 $sql .= ( isset( $field[ 'extra' ] ) ? ' ' . implode( ' ', $field[ 'extra' ] ) : '' );
 			}
-
-			//if ( $has_primary !== false ) {
-			//	$sql .= ', ' . $primary_key_tag . '(' . $has_primary . ')';
-			//}
 
 			$sql .= ');';
 
@@ -133,7 +121,7 @@ class ipsCore_database {
 	}
 
 	public function create_column( $table, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
-	    $sql = 'ALTER TABLE ' . $table . ' ADD ' . $name . ' ' . strtoupper( $type );
+	    $sql = 'ALTER TABLE ' . $table . ' ADD `' . $name . '` ' . strtoupper( $type );
 
         $sql .= ( $length ? '(' . $length . ')' : '' );
         $sql .= ( $extra ? ' ' . $extra : '' );

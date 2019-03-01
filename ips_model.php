@@ -77,7 +77,7 @@ class ipsCore_model {
     }
 
 	public function get_all_data( $where = false ) {
-		$items = ipsCore::$database->select( $this->table, '*', $where );
+	    $items = ipsCore::$database->select( $this->table, '*', $where );
 
 		if ( !empty( $items ) ) {
 			return $items;
