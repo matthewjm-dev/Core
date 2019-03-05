@@ -134,6 +134,20 @@ class ipsCore_database {
         return false;
     }
 
+    public function modify_column( $table, $old_name, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
+        $sql = 'ALTER TABLE ' . $table . ' CHANGE `' . $old_name . '` `' . $name . '` ' . strtoupper( $type );
+
+        $sql .= ( $length ? '(' . $length . ')' : '' );
+        $sql .= ( $extra ? ' ' . $extra : '' );
+        $sql .= ( $default ? ' DEFAULT ' . ( substr( $default, -2 ) == '()' ? $default : '"' . $default . '"' ) : '' );
+
+        if ( $this->query( $sql ) ) {
+            return true;
+        }
+        ipsCore::add_error( 'The column ' . $name . ' could not be modified in ' . $table . '.' );
+        return false;
+    }
+
 	public function select( $table, $fields = '*', $where = false, $limit = false, $join = false, $group = false ) {
 		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $table;
 		$params = [];

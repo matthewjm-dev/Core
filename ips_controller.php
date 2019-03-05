@@ -34,6 +34,11 @@ class ipsCore_controller {
 	public function load_model( $model, $name = false, $table = ' ' ) {
 		if ( !$name ) { $name = $model; }
 		if ( $table == ' ' ) { $table = $model; }
+		if ( $table !== false ) {
+            if (!strpos($table, DB_PREFIX)) {
+                $table = DB_PREFIX . $table;
+            }
+        }
 		$name = str_replace( '/', '_', $name );
 		$model_name  = str_replace( '/', '_', $model ) . '_model';
 

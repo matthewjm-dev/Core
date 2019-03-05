@@ -76,6 +76,14 @@ class ipsCore_model {
         } return false;
     }
 
+    public function modify_column( $old_name, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
+        // To Do: Check schema if column already exists
+
+        if (ipsCore::$database->modify_column($this->table, $old_name, $name, $type, $length, $default, $extra)) {
+            return true;
+        } return false;
+    }
+
 	public function get_all_data( $where = false ) {
 	    $items = ipsCore::$database->select( $this->table, '*', $where );
 
@@ -159,7 +167,7 @@ class ipsCore_model {
 				if ( $this->{ $field_key } !== false ) {
 					$where[ $field_key ] = $this->{ $field_key };
 				} else {
-					$insert = true;
+					$insert = $field_key;
 				}
 			} else {
 				$fields[ $field_key ] = $this->{ $field_key };
@@ -167,8 +175,9 @@ class ipsCore_model {
 		}
 
 		if ( !empty( $fields ) && ( $insert || !empty( $where ) ) ) {
-			if ( $insert ) {
-				if ( ipsCore::$database->insert( $this->table, $fields ) ) {
+			if ( $insert !== false ) {
+				if ( $id = ipsCore::$database->insert( $this->table, $fields ) ) {
+                    $this->{ $insert } = $id;
 					return true;
 				}
 			} else {

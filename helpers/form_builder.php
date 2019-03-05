@@ -25,8 +25,40 @@ class ipsCore_form_builder {
 		$this->name = $name;
 	}
 
+	// Field Types
+    public static function get_field_types( $type = false )
+    {
+        $fields = [
+            'tinyint' => ['title' => 'Small Number', 'type' => 'tinyint', 'length' => '4'],
+            'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
+            'bigint' => ['title' => 'Big Number', 'type' => 'bigint', 'length' => '20'],
+            'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '4,2'],
+            'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
+            'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
+            'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
+            'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
+            'select' => ['title' => 'Dropdown', 'type' => 'text', 'length' => false],
+            'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false],
+            'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false],
+            'linkselect' => ['title' => 'Link Dropdown', 'type' => 'int', 'length' => '11'],
+            'linkradio' => ['title' => 'Link Radios', 'type' => 'int', 'length' => '11'],
+            'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'int', 'length' => '11'],
+            'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
+            'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
+        ];
+
+        if ( $type ) {
+            if ( isset( $fields[ $type ] ) ) {
+                $field = $fields[ $type ];
+                $field[ 'key' ] = $type;
+                return $field;
+            } return false;
+        }
+        return $fields;
+    }
+
 	// Methods
-	private function add_field( $name, $label = NULL, $type, $value = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
+	public function add_field( $name, $label = NULL, $type, $value = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
 		$this->fields[ $name ] = [
 			'name'        => $name,
 			'label'       => $label,
@@ -63,13 +95,33 @@ class ipsCore_form_builder {
 		$this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes );
 	}
 
-	public function add_number( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+    public function add_tinyint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'number', $value, [], $placeholder );
+    }
+
+	public function add_int( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
 		$this->add_field( $name, $label, 'number', $value, [], $placeholder );
 	}
+
+    public function add_bigint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'number', $value, [], $placeholder );
+    }
+
+    public function add_price( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'text', $value, [], $placeholder, 'price' );
+    }
 
 	public function add_password( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
 		$this->add_field( $name, $label, 'password', $value, [], $placeholder );
 	}
+
+    public function add_textarea( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder );
+    }
+
+    public function add_editor( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, 'editor' );
+    }
 
 	public function add_select( $name, $label = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
 		if ( count( $options ) > 1 ) {
@@ -87,22 +139,37 @@ class ipsCore_form_builder {
 		}
 	}
 
-
 	public function add_check( $name, $label = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
 		$this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder );
 	}
 
-	public function add_textarea( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-		$this->add_field( $name, $label, 'textarea', $value, [], $placeholder );
-	}
+    public function add_linkselect( $name, $label = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
+        if ( count( $options ) > 1 ) {
+            $this->add_field( $name, $label, 'select', NULL, $options, $placeholder );
+        } else {
+            ipsCore::add_error( 'select input Options requires an array' );
+        }
+    }
 
-	public function add_editor( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-		$this->add_field( $name, $label, 'textarea', $value, [], $placeholder, 'editor' );
-	}
+    public function add_linkradio( $name, $label = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
+        if ( count( $options ) > 1 ) {
+            $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder );
+        } else {
+            ipsCore::add_error( 'radio input requires 1 of more options' );
+        }
+    }
+
+    public function add_linkcheck( $name, $label = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
+        $this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder );
+    }
 
 	public function add_datepicker() {
 
 	}
+
+    public function add_colourpicker() {
+
+    }
 
 	public function add_hidden( $name, $value ) {
 		$this->add_field( $name, NULL, 'hidden', $value, [], NULL );
@@ -158,6 +225,7 @@ class ipsCore_form_builder {
 					$html .= '<input type="password" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
 				break;
 				case 'select':
+				case 'linkselect':
 					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
 					if ( $field['options'] ) {
 						$html .= '<select ' . $field_id . $field_classes . $field_name . '>';
@@ -173,6 +241,7 @@ class ipsCore_form_builder {
 					$html .= '</fieldset>';
 				break;
 				case 'radio':
+				case 'linkradio':
 					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
 					foreach ( $field['options'] as $option ) {
 						$option_id = ( $first ) ? '' . $field_id . '' : '';
@@ -182,7 +251,8 @@ class ipsCore_form_builder {
 					}
 					$html .= '</fieldset>';
 				break;
-				case 'checkbox':
+				case 'check':
+				case 'linkcheck':
 					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
 					foreach ( $field['options'] as $option ) {
 						$option_id = ( $first ) ? '' . $field_id . '' : '';
@@ -203,6 +273,9 @@ class ipsCore_form_builder {
 				case 'datepicker':
 
 				break;
+                case 'colourpicker':
+
+                    break;
 				case 'hidden':
 					$html .= '<input type="hidden" ' . $field_id . $field_name . $field_value . ' />';
 				break;
@@ -210,11 +283,13 @@ class ipsCore_form_builder {
 					//$html .= '<fieldset id="field-' . $field['name'] . '"><input type="submit" ' . $field_id . $field_classes . $field_name . $field_value . ' /></fieldset>';
 					$html .= '<fieldset id="field-' . $field['name'] . '"><button ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</button></fieldset>';
 				break;
-				case 'number':
-				default:
+				case 'tinyint':
+				case 'int':
+				case 'bigint':
 					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
 					$html .= '<input type="number" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
 				break;
+				case 'price':
 				case 'text':
 				default:
 					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
