@@ -3,8 +3,12 @@
 class ipsCore_functions {
 
 	public function generate_slug( $name ) {
-		return strtolower( str_replace( ' ', '-', $name ) );
+        return strtolower( str_replace( ' ', '-', preg_replace('/[^A-Za-z0-9\-]/', '', $name) ) );
 	}
+
+    public function generate_dbslug( $name ) {
+        return strtolower( str_replace( ' ', '_', preg_replace('/[^A-Za-z0-9\-]/', '', $name) ) );
+    }
 
 	public function redirect( $url ) {
 		$path = ipsCore::$site_base . $url;

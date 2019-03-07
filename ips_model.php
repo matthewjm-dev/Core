@@ -6,14 +6,18 @@ class ipsCore_model {
 	protected $name;
 	protected $table;
 	protected $fields;
+	protected $pk;
 
 	// Getters
 	public function get_name() { return $this->name; }
 	public function get_table() { return $this->table; }
+	public function get_pk() { return $this->pk; }
+	public function get_id() { return $this->{ $this->get_pk() }; }
 
 	// Setters
 	public function set_name( $name ) { $this->name = $name; }
 	public function set_table( $table ) { $this->table = $table; }
+    public function set_pk( $pk ) { $this->pk = $pk; }
 
 	// Construct
 	public function __construct( $model, $table = ' ' ) {
@@ -45,11 +49,15 @@ class ipsCore_model {
 
 				$this->$name = false;
 				$this->fields[$name] = [ 'type' => $type ];
+
+				if ( $field[ 'Key' ] == 'PRI' ) {
+				    $this->set_pk( $field[ 'Field' ] );
+                }
 			}
 		}
 	}
 
-	public function create_table( $id = 'id', $table ) {
+	public function create_table( $table, $id = 'id' ) {
 	    $table = DB_PREFIX . $table;
 	    $fields = [
             $id => [ 'type' => 'int', 'length' => 11, 'extra' => [ 'NOT NULL', 'AUTO_INCREMENT', 'PRIMARY KEY' ] ],
@@ -128,6 +136,7 @@ class ipsCore_model {
             } else {
                 $field = 'id';
             }
+            $this->set_pk( $field );
         }
 
 	    $where = [ $field => $value ];
@@ -140,10 +149,6 @@ class ipsCore_model {
             }
             return true;
         } return false;
-	}
-
-	public function add( $to_add ) {
-
 	}
 
 	public function modify() {
