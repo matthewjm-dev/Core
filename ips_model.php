@@ -6,18 +6,18 @@ class ipsCore_model {
 	protected $name;
 	protected $table;
 	protected $fields;
-	protected $pk;
+	protected $pkey;
 
 	// Getters
 	public function get_name() { return $this->name; }
 	public function get_table() { return $this->table; }
-	public function get_pk() { return $this->pk; }
-	public function get_id() { return $this->{ $this->get_pk() }; }
+	public function get_pkey() { return $this->pk; }
+	public function get_id() { return $this->{ $this->get_pkey() }; }
 
 	// Setters
 	public function set_name( $name ) { $this->name = $name; }
 	public function set_table( $table ) { $this->table = $table; }
-    public function set_pk( $pk ) { $this->pk = $pk; }
+    public function set_pkey( $pkey ) { $this->pk = $pkey; }
 
 	// Construct
 	public function __construct( $model, $table = ' ' ) {
@@ -51,7 +51,7 @@ class ipsCore_model {
 				$this->fields[$name] = [ 'type' => $type ];
 
 				if ( $field[ 'Key' ] == 'PRI' ) {
-				    $this->set_pk( $field[ 'Field' ] );
+				    $this->set_pkey( $field[ 'Field' ] );
                 }
 			}
 		}
@@ -128,18 +128,10 @@ class ipsCore_model {
         } return false;
     }
 
-	public function retrieve( $field, $value = false ) {
-	    if ( $value === false ) {
-	        $value = $field;
-	        if ( isset( $this->fields ) ) {
-                $field = key( $this->fields );
-            } else {
-                $field = 'id';
-            }
-            $this->set_pk( $field );
+	public function retrieve( $where ) {
+	    if ( !is_array( $where ) ) {
+            $where = [ $this->get_pkey() => $where ];
         }
-
-	    $where = [ $field => $value ];
 
         $item = ipsCore::$database->select( $this->table, '*', $where )[0];
 
