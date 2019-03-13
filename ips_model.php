@@ -11,13 +11,13 @@ class ipsCore_model {
 	// Getters
 	public function get_name() { return $this->name; }
 	public function get_table() { return $this->table; }
-	public function get_pkey() { return $this->pk; }
+	public function get_pkey() { return $this->pkey; }
 	public function get_id() { return $this->{ $this->get_pkey() }; }
 
 	// Setters
 	public function set_name( $name ) { $this->name = $name; }
 	public function set_table( $table ) { $this->table = $table; }
-    public function set_pkey( $pkey ) { $this->pk = $pkey; }
+    public function set_pkey( $pkey ) { $this->pkey = $pkey; }
 
 	// Construct
 	public function __construct( $model, $table = ' ' ) {

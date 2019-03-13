@@ -58,15 +58,16 @@ class ipsCore_form_builder {
     }
 
 	// Methods
-	public function add_field( $name, $label = NULL, $type, $value = NULL, array $options = [], $placeholder = NULL, $classes = NULL ) {
+	public function add_field( $name, $label = NULL, $type, $value = NULL, array $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 		$this->fields[ $name ] = [
-			'name'        => $name,
-			'label'       => $label,
-			'type'        => $type,
-			'value'       => $value,
-			'options'     => $options,
-			'placeholder' => $placeholder,
-			'classes'     => $classes,
+			'name'             => $name,
+			'label'            => $label,
+			'type'             => $type,
+			'value'            => $value,
+			'options'          => $options,
+			'placeholder'      => $placeholder,
+			'classes'          => $classes,
+			'fieldset_classes' => $fieldset_classes,
 		];
 	}
 
@@ -91,94 +92,94 @@ class ipsCore_form_builder {
 		];
 	}
 
-	public function add_text( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-		$this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes );
+	public function add_text( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+		$this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
 
-    public function add_tinyint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-        $this->add_field( $name, $label, 'number', $value, [], $placeholder );
+    public function add_tinyint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+        $this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
     }
 
-	public function add_int( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-		$this->add_field( $name, $label, 'number', $value, [], $placeholder );
+	public function add_int( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+		$this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
 
-    public function add_bigint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-        $this->add_field( $name, $label, 'number', $value, [], $placeholder );
+    public function add_bigint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+        $this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
     }
 
-    public function add_price( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-        $this->add_field( $name, $label, 'text', $value, [], $placeholder, 'price' );
+    public function add_price( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+        $this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes . ' price', $fieldset_classes );
     }
 
-	public function add_password( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-		$this->add_field( $name, $label, 'password', $value, [], $placeholder );
+	public function add_password( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+		$this->add_field( $name, $label, 'password', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
 
-    public function add_textarea( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder );
+    public function add_textarea( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, $classes, $fieldset_classes );
     }
 
-    public function add_editor( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL ) {
-        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, 'editor' );
+    public function add_editor( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
+        $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, $classes . ' editor', $fieldset_classes );
     }
 
-	public function add_select( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+	public function add_select( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 	    if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
 		if ( count( $options ) > 1 ) {
-			$this->add_field( $name, $label, 'select', NULL, $options, $placeholder );
+			$this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
 		} else {
 			ipsCore::add_error( 'select input Options requires an array' );
 		}
 	}
 
-	public function add_radio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+	public function add_radio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
 		if ( count( $options ) > 1 ) {
-			$this->add_field( $name, $label, 'radio', NULL, $options, $placeholder );
+			$this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
 		} else {
 			ipsCore::add_error( 'radio input requires 1 of more options' );
 		}
 	}
 
-	public function add_check( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+	public function add_check( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-		$this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder );
+		$this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder, $classes, $fieldset_classes );
 	}
 
-    public function add_linkselect( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+    public function add_linkselect( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
         if ( count( $options ) > 1 ) {
-            $this->add_field( $name, $label, 'select', NULL, $options, $placeholder );
+            $this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
         } else {
             ipsCore::add_error( 'select input Options requires an array' );
         }
     }
 
-    public function add_linkradio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+    public function add_linkradio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
         if ( count( $options ) > 1 ) {
-            $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder );
+            $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
         } else {
             ipsCore::add_error( 'radio input requires 1 of more options' );
         }
     }
 
-    public function add_linkcheck( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL ) {
+    public function add_linkcheck( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-        $this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder );
+        $this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder, $classes, $fieldset_classes );
     }
 
 	public function add_datepicker() {
@@ -217,6 +218,11 @@ class ipsCore_form_builder {
 				$field_classes = ' class="' . $field['classes'] . '"';
 			}
 
+			$fieldset_classes = '';
+			if ( isset( $field['fieldset_classes'] ) ) {
+				$fieldset_classes = ' class="' . $field['fieldset_classes'] . '"';
+			}
+
 			$field_label = '';
 			if ( isset( $field['label'] ) ) {
 				$field_label = '<label for="' . $field['name'] . '">' . $field['label'] . '</label>';
@@ -239,14 +245,14 @@ class ipsCore_form_builder {
 					$html .= '</div>';
 				break;
 				case 'password':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
-					$html .= '<input type="password" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
+					$html .= '<input type="password" ' . $field_id . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
 				break;
 				case 'select':
 				case 'linkselect':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					if ( $field['options'] ) {
-						$html .= '<select ' . $field_id . $field_classes . $field_name . '>';
+						$html .= '<select ' . $field_id . $field_name . '>';
 						foreach ( $field['options'] as $option ) {
 							$option_selected = ( isset( $option['selected'] ) && $option['selected'] === true ) ? 'selected' : '';
 							$option_disabled = ( isset( $option['disabled'] ) && $option['disabled'] === true ) ? ' disabled' : '';
@@ -260,7 +266,7 @@ class ipsCore_form_builder {
 				break;
 				case 'radio':
 				case 'linkradio':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					foreach ( $field['options'] as $option ) {
 						$option_id = ( $first ) ? '' . $field_id . '' : '';
 						$option_selected = ( $option['value'] ) ? 'checked' : '';
@@ -271,7 +277,7 @@ class ipsCore_form_builder {
 				break;
 				case 'check':
 				case 'linkcheck':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					foreach ( $field['options'] as $option ) {
 						$option_id = ( $first ) ? '' . $field_id . '' : '';
 						$option_selected = ( isset( $option['selected'] ) && $option['selected'] == true ) ? 'checked' : '';
@@ -281,11 +287,11 @@ class ipsCore_form_builder {
 					$html .= '</fieldset>';
 				break;
 				case 'textarea':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					$html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
 				break;
 				case 'editor':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					$html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
 				break;
 				case 'datepicker':
@@ -298,19 +304,19 @@ class ipsCore_form_builder {
 					$html .= '<input type="hidden" ' . $field_id . $field_name . $field_value . ' />';
 				break;
 				case 'submit':
-					//$html .= '<fieldset id="field-' . $field['name'] . '"><input type="submit" ' . $field_id . $field_classes . $field_name . $field_value . ' /></fieldset>';
+					//$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '><input type="submit" ' . $field_id . $field_classes . $field_name . $field_value . ' /></fieldset>';
 					$html .= '<fieldset id="field-' . $field['name'] . '"><button ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</button></fieldset>';
 				break;
 				case 'tinyint':
 				case 'int':
 				case 'bigint':
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					$html .= '<input type="number" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
 				break;
 				case 'price':
 				case 'text':
 				default:
-					$html .= '<fieldset id="field-' . $field['name'] . '">' . $field_label;
+					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
 					$html .= '<input type="text" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
 				break;
 			}
