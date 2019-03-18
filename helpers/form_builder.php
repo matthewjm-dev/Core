@@ -128,22 +128,22 @@ class ipsCore_form_builder {
 	    if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-		if ( count( $options ) > 1 ) {
+		//if ( count( $options ) > 1 ) {
 			$this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
-		} else {
-			ipsCore::add_error( 'select input Options requires an array' );
-		}
+		//} else {
+		//	ipsCore::add_error( 'select input Options requires an array' );
+		//}
 	}
 
 	public function add_radio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-		if ( count( $options ) > 1 ) {
+		//if ( count( $options ) > 1 ) {
 			$this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
-		} else {
-			ipsCore::add_error( 'radio input requires 1 of more options' );
-		}
+		//} else {
+		//	ipsCore::add_error( 'radio input requires 1 of more options' );
+		//}
 	}
 
 	public function add_check( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
@@ -157,22 +157,22 @@ class ipsCore_form_builder {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-        if ( count( $options ) > 1 ) {
+        //if ( count( $options ) > 1 ) {
             $this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
-        } else {
-            ipsCore::add_error( 'select input Options requires an array' );
-        }
+        //} else {
+        //    ipsCore::add_error( 'select input Options requires an array' );
+        //}
     }
 
     public function add_linkradio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-        if ( count( $options ) > 1 ) {
+        //if ( count( $options ) > 1 ) {
             $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
-        } else {
-            ipsCore::add_error( 'radio input requires 1 of more options' );
-        }
+        //} else {
+        //    ipsCore::add_error( 'radio input requires 1 of more options' );
+        //}
     }
 
     public function add_linkcheck( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
@@ -198,11 +198,17 @@ class ipsCore_form_builder {
 		$this->add_field( $name, NULL, 'submit', $value, [], NULL );
 	}
 
-	public function render() {
-		$html = '<form id="' . $this->get_name() . '"
-					class="' . implode( ' ', $this->get_classes() ) . '"
+    public function render_fields() {
+        return $this->render( true );
+    }
+
+	public function render( $fields_only = false ) {
+        if ( !$fields_only ) {
+            $html = '<form id="' . $this->get_name() . '"
+					class="' . implode(' ', $this->get_classes()) . '"
 					action="' . $this->get_action() . '"
 					method="' . $this->get_method() . '">';
+        }
 
 		foreach ( $this->get_fields() as $field ) {
 			$value = '';
@@ -251,12 +257,17 @@ class ipsCore_form_builder {
 				case 'select':
 				case 'linkselect':
 					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
-					if ( $field['options'] ) {
-						$html .= '<select ' . $field_id . $field_name . '>';
-						foreach ( $field['options'] as $option ) {
-							$option_selected = ( isset( $option['selected'] ) && $option['selected'] === true ) ? 'selected' : '';
-							$option_disabled = ( isset( $option['disabled'] ) && $option['disabled'] === true ) ? ' disabled' : '';
-							$html .= '<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>';
+                    if ( $field['options'] || $field['placeholder']) {
+                        $html .= '<select ' . $field_id . $field_classes . $field_name . '>';
+                        if ( $field['placeholder'] ) {
+                            $html .= '<option selected disabled="disabled">' . $field['placeholder'] . '</option>';
+                        }
+                        if ( $field['options'] ) {
+                            foreach ( $field['options'] as $option ) {
+                                $option_selected = ( isset( $option['selected'] ) && $option['selected'] === true ) ? 'selected' : '';
+                                $option_disabled = ( isset( $option['disabled'] ) && $option['disabled'] === true ) ? ' disabled' : '';
+                                $html .= '<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>';
+                            }
 						}
 						$html .= '</select>';
 					} else {
@@ -267,22 +278,26 @@ class ipsCore_form_builder {
 				case 'radio':
 				case 'linkradio':
 					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
-					foreach ( $field['options'] as $option ) {
-						$option_id = ( $first ) ? '' . $field_id . '' : '';
-						$option_selected = ( $option['value'] ) ? 'checked' : '';
-						$html .= '<label class="radiofield"><input' . $field_classes . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>';
-						$first = false;
-					}
+                    if ( $field['options'] ) {
+                        foreach ( $field['options'] as $option ) {
+                            $option_id = ( $first ) ? '' . $field_id . '' : '';
+                            $option_selected = ( $option['value'] ) ? 'checked' : '';
+                            $html .= '<label class="radiofield"><input' . $field_classes . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>';
+                            $first = false;
+                        }
+                    }
 					$html .= '</fieldset>';
 				break;
 				case 'check':
 				case 'linkcheck':
 					$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label;
-					foreach ( $field['options'] as $option ) {
-						$option_id = ( $first ) ? '' . $field_id . '' : '';
-						$option_selected = ( isset( $option['selected'] ) && $option['selected'] == true ) ? 'checked' : '';
-						$html .= '<label class="checkfield"><input' . $field_classes . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>';
-						$first = false;
+                    if ( $field['options']) {
+                        foreach ( $field['options'] as $option ) {
+                            $option_id = ( $first ) ? '' . $field_id . '' : '';
+                            $option_selected = ( isset( $option['selected'] ) && $option['selected'] == true ) ? 'checked' : '';
+                            $html .= '<label class="checkfield"><input' . $field_classes . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>';
+                            $first = false;
+                        }
 					}
 					$html .= '</fieldset>';
 				break;
@@ -321,7 +336,9 @@ class ipsCore_form_builder {
 				break;
 			}
 		}
-		$html .= '</form>';
+        if ( !$fields_only ) {
+            $html .= '</form>';
+        }
 
 		return $html;
 	}
