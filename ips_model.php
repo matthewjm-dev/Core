@@ -87,8 +87,10 @@ class ipsCore_model {
     public function modify_column( $old_name, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
         // To Do: Check schema if column already exists
 
-        if (ipsCore::$database->modify_column($this->table, $old_name, $name, $type, $length, $default, $extra)) {
-            return true;
+        if ( $this->table && $old_name ) {
+            if (ipsCore::$database->modify_column($this->table, $old_name, $name, $type, $length, $default, $extra)) {
+                return true;
+            }
         } return false;
     }
 
