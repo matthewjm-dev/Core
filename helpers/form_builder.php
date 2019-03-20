@@ -95,56 +95,78 @@ class ipsCore_form_builder {
 	public function add_text( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 		$this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
+	public function validate_text() {
+
+    }
 
     public function add_tinyint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         $this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
+    }
+    public function validate_tinyint() {
+
     }
 
 	public function add_int( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 		$this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
+    public function validate_int() {
+
+    }
 
     public function add_bigint( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         $this->add_field( $name, $label, 'number', $value, [], $placeholder, $classes, $fieldset_classes );
+    }
+    public function validate_bigint() {
+
     }
 
     public function add_price( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         $this->add_field( $name, $label, 'text', $value, [], $placeholder, $classes . ' price', $fieldset_classes );
     }
+    public function validate_price() {
+
+    }
 
 	public function add_password( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 		$this->add_field( $name, $label, 'password', $value, [], $placeholder, $classes, $fieldset_classes );
 	}
+    public function validate_password() {
+
+    }
 
     public function add_textarea( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, $classes, $fieldset_classes );
     }
+    public function validate_textarea() {
+
+    }
 
     public function add_editor( $name, $label = NULL, $value = NULL, $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         $this->add_field( $name, $label, 'textarea', $value, [], $placeholder, $classes . ' editor', $fieldset_classes );
+    }
+    public function validate_editor() {
+
     }
 
 	public function add_select( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
 	    if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-		//if ( count( $options ) > 1 ) {
-			$this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
-		//} else {
-		//	ipsCore::add_error( 'select input Options requires an array' );
-		//}
+        $this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
 	}
+    public function validate_select() {
+
+    }
 
 	public function add_radio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-		//if ( count( $options ) > 1 ) {
-			$this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
-		//} else {
-		//	ipsCore::add_error( 'radio input requires 1 of more options' );
-		//}
+        $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
 	}
+    public function validate_radio() {
+
+    }
 
 	public function add_check( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
@@ -152,27 +174,28 @@ class ipsCore_form_builder {
         }
 		$this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder, $classes, $fieldset_classes );
 	}
+    public function validate_check() {
+
+    }
 
     public function add_linkselect( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-        //if ( count( $options ) > 1 ) {
-            $this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
-        //} else {
-        //    ipsCore::add_error( 'select input Options requires an array' );
-        //}
+        $this->add_field( $name, $label, 'select', NULL, $options, $placeholder, $classes, $fieldset_classes );
+    }
+    public function validate_linkselect() {
+
     }
 
     public function add_linkradio( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
         if ( !is_array( $options ) ) {
             $options = [ $options ];
         }
-        //if ( count( $options ) > 1 ) {
-            $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
-        //} else {
-        //    ipsCore::add_error( 'radio input requires 1 of more options' );
-        //}
+        $this->add_field( $name, $label, 'radio', NULL, $options, $placeholder, $classes, $fieldset_classes );
+    }
+    public function validate_linkradio() {
+
     }
 
     public function add_linkcheck( $name, $label = NULL, $options = [], $placeholder = NULL, $classes = NULL, $fieldset_classes = NULL ) {
@@ -181,18 +204,30 @@ class ipsCore_form_builder {
         }
         $this->add_field( $name, $label, 'checkbox', NULL, $options, $placeholder, $classes, $fieldset_classes );
     }
+    public function validate_linkcheck() {
+
+    }
 
 	public function add_datepicker() {
 
 	}
+    public function validate_datepicker() {
+
+    }
 
     public function add_colourpicker() {
+
+    }
+    public function validate_colourpicker() {
 
     }
 
 	public function add_hidden( $name, $value ) {
 		$this->add_field( $name, NULL, 'hidden', $value, [], NULL );
 	}
+    public function validate_hidden() {
+
+    }
 
 	public function add_submit( $name, $value ) {
 		$this->add_field( $name, NULL, 'submit', $value, [], NULL );

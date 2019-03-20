@@ -116,6 +116,20 @@ class ipsCore_database {
         return false;
 	}
 
+	public function modify_table( $table, $new_name ) {
+        if ( !$this->does_table_exist( $new_name ) ) {
+            $sql = 'RENAME TABLE ' . $table . ' TO `' . $new_name . '`';
+
+            if ( $this->query( $sql ) ) {
+                return true;
+            }
+            ipsCore::add_error( 'Failed to rename table: "' . $table . '" to "' . $new_name . '".' );
+            return false;
+        }
+        ipsCore::add_error( 'The table "' . $new_name . '" already exists.' );
+        return false;
+    }
+
 	public function remove_table( $table ) {
 
 	}
@@ -130,7 +144,7 @@ class ipsCore_database {
 	    if ( $this->query( $sql ) ) {
 	        return true;
         }
-        ipsCore::add_error( 'The column ' . $name . ' could not be created in ' . $table . '.' );
+        ipsCore::add_error( 'The column "' . $name . '" could not be created in "' . $table . '".' );
         return false;
     }
 
@@ -144,7 +158,7 @@ class ipsCore_database {
         if ( $this->query( $sql ) ) {
             return true;
         }
-        ipsCore::add_error( 'The column ' . $name . ' could not be modified in ' . $table . '.' );
+        ipsCore::add_error( 'The column "' . $name . '" could not be modified in "' . $table . '".' );
         return false;
     }
 
@@ -243,10 +257,10 @@ class ipsCore_database {
             if ($this->query($sql, $params)) {
                 return true;
             }
-            ipsCore::add_error( 'Failed to update ' . $table . '.'  );
+            ipsCore::add_error( 'Failed to update "' . $table . '".'  );
             return false;
         }
-        ipsCore::add_error( 'Refused to update ' . $table . ' due to no WHERE clause.'  );
+        ipsCore::add_error( 'Refused to update "' . $table . '" due to no WHERE clause.'  );
 	    return false;
 	}
 

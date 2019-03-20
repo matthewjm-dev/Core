@@ -7,7 +7,7 @@ class ipsCore_functions {
 	}
 
     public function generate_dbslug( $name ) {
-        return strtolower( str_replace( ' ', '_', preg_replace('/[^A-Za-z0-9\-]/', '', $name) ) );
+        return strtolower( str_replace( ' ', '_', preg_replace('/[^A-Za-z0-9\_]/', '', $name) ) );
     }
 
 	public function redirect( $url ) {
