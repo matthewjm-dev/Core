@@ -198,7 +198,15 @@ class ipsCore_model
         $item = ipsCore::$database->select($this->table, '*', $where, 1);
 
         if (!empty($item)) {
-            return $item[0];
+            $item = $item[0];
+            $model = get_class($this);
+
+            $object = new $model($this->name, $this->table);
+            foreach ($item as $item_data_key => $item_data) {
+                $object->{$item_data_key} = $item_data;
+            }
+
+            return $object;
         }
         return false;
     }
