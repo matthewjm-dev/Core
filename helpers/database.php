@@ -152,7 +152,7 @@ class ipsCore_database {
         $sql = 'ALTER TABLE ' . $table . ' CHANGE `' . $old_name . '` `' . $name . '` ' . strtoupper( $type );
 
         $sql .= ( $length ? '(' . $length . ')' : '' );
-        $sql .= ( $extra ? ' ' . $extra : '' );
+        $sql .= ( $extra ? ' ' . (is_array( $extra ) ? explode(' ', $extra) : $extra ) : '' );
         $sql .= ( $default ? ' DEFAULT ' . ( substr( $default, -2 ) == '()' ? $default : '"' . $default . '"' ) : '' );
 
         if ( $this->query( $sql ) ) {

@@ -37,7 +37,7 @@ class ipsCore_form_builder
 
     public function get_field_value($field)
     {
-        return $this->fields[$field]['value'];
+        return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
     }
 
     // Setters
@@ -99,7 +99,7 @@ class ipsCore_form_builder
     }
 
     // Methods
-    public function add_field_a($name = false, $label = false, $type = false, array $options)
+    public function add_field($name = false, $label = false, $type = false, array $options)
     {
         $errors = [];
 
@@ -132,22 +132,6 @@ class ipsCore_form_builder
         }
     }
 
-    public function add_field($name, $label = NULL, $type, $value = NULL, array $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->fields[$name] = [
-            'name' => $name,
-            'label' => $label,
-            'type' => $type,
-            'value' => $value,
-            'options' => $options,
-            'required' => $required,
-            'placeholder' => $placeholder,
-            'comment' => $comment,
-            'classes' => $classes,
-            'fieldset_classes' => $fieldset_classes,
-        ];
-    }
-
     public function start_section_repeater($name)
     {
         $this->fields['section_start_' . $name] = [
@@ -173,14 +157,9 @@ class ipsCore_form_builder
     }
 
     /* Text Box */
-    public function add_text_a($name, $label, array $options = [])
+    public function add_text($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'text', $options);
-    }
-
-    public function add_text($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'text', $value, [], $required, $placeholder, $comment, $classes, $fieldset_classes);
+        $this->add_field($name, $label, 'text', $options);
     }
 
     public function validate_text($value)
@@ -197,14 +176,9 @@ class ipsCore_form_builder
     }
 
     /* Int */
-    public function add_int_a($name, $label, array $options = [])
+    public function add_int($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'number', $options);
-    }
-
-    public function add_int($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'number', $value, [], $required, $placeholder, $comment, $classes, $fieldset_classes);
+        $this->add_field($name, $label, 'number', $options);
     }
 
     public function validate_int($value)
@@ -216,15 +190,10 @@ class ipsCore_form_builder
     }
 
     /* Price */
-    public function add_price_a($name, $label, array $options = [])
+    public function add_price($name, $label, array $options = [])
     {
         $options['classes'] = $options['classes'] . ' text';
-        $this->add_field_a($name, $label, 'text', $options);
-    }
-
-    public function add_price($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'text', $value, [], $required, $placeholder, $comment, $classes . ' price', $fieldset_classes);
+        $this->add_field($name, $label, 'text', $options);
     }
 
     public function validate_price()
@@ -233,14 +202,9 @@ class ipsCore_form_builder
     }
 
     /* Password */
-    public function add_password_a($name, $label, array $options = [])
+    public function add_password($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'password', $options);
-    }
-
-    public function add_password($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'password', $value, [], $required, $placeholder, $comment, $classes, $fieldset_classes);
+        $this->add_field($name, $label, 'password', $options);
     }
 
     public function validate_password()
@@ -249,14 +213,9 @@ class ipsCore_form_builder
     }
 
     /* Textarea */
-    public function add_textarea_a($name, $label, array $options = [])
+    public function add_textarea($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'textarea', $options);
-    }
-
-    public function add_textarea($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'textarea', $value, [], $required, $placeholder, $comment, $classes, $fieldset_classes);
+        $this->add_field($name, $label, 'textarea', $options);
     }
 
     public function validate_textarea()
@@ -265,15 +224,10 @@ class ipsCore_form_builder
     }
 
     /* WYSIWYG Editor */
-    public function add_editor_a($name, $label, array $options = [])
+    public function add_editor($name, $label, array $options = [])
     {
         $options['classes'] = $options['classes'] . ' editor';
-        $this->add_field_a($name, $label, 'textarea', $options);
-    }
-
-    public function add_editor($name, $label = NULL, $value = NULL, $required = false, $placeholder = NULL, $classes = NULL, $comment = NULL, $fieldset_classes = NULL)
-    {
-        $this->add_field($name, $label, 'textarea', $value, [], $required, $placeholder, $comment, $classes . ' editor', $fieldset_classes);
+        $this->add_field($name, $label, 'textarea', $options);
     }
 
     public function validate_editor()
@@ -282,24 +236,16 @@ class ipsCore_form_builder
     }
 
     /* Select Dropdown */
-    public function add_select_a($name, $label, array $options = [])
+    public function add_select($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'select', $options);
+            $this->add_field($name, $label, 'select', $options);
         } else {
             ipsCore::add_error('Options are required for a select dropdown');
         }
-    }
-
-    public function add_select($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'select', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_select()
@@ -308,24 +254,16 @@ class ipsCore_form_builder
     }
 
     /* Radio Buttons */
-    public function add_radio_a($name, $label, array $options = [])
+    public function add_radio($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'radio', $options);
+            $this->add_field($name, $label, 'radio', $options);
         } else {
             ipsCore::add_error('Options are required for radio buttons');
         }
-    }
-
-    public function add_radio($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'radio', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_radio()
@@ -334,24 +272,16 @@ class ipsCore_form_builder
     }
 
     /* Check Boxes */
-    public function add_check_a($name, $label, array $options = [])
+    public function add_check($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'checkbox', $options);
+            $this->add_field($name, $label, 'checkbox', $options);
         } else {
             ipsCore::add_error('Options are required for radio buttons');
         }
-    }
-
-    public function add_check($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'checkbox', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_check()
@@ -360,24 +290,16 @@ class ipsCore_form_builder
     }
 
     /* Select Dropdown ( LINK field ) */
-    public function add_linkselect_a($name, $label, array $options = [])
+    public function add_linkselect($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'select', $options);
+            $this->add_field($name, $label, 'select', $options);
         } else {
             ipsCore::add_error('Options are required for radio buttons');
         }
-    }
-
-    public function add_linkselect($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'select', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_linkselect()
@@ -386,24 +308,16 @@ class ipsCore_form_builder
     }
 
     /* Radio Buttons ( LINK field ) */
-    public function add_linkradio_a($name, $label, array $options = [])
+    public function add_linkradio($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'radio', $options);
+            $this->add_field($name, $label, 'radio', $options);
         } else {
             ipsCore::add_error('Options are required for radio buttons');
         }
-    }
-
-    public function add_linkradio($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'radio', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_linkradio()
@@ -412,24 +326,16 @@ class ipsCore_form_builder
     }
 
     /* Check Boxes ( LINK field ) */
-    public function add_linkcheck_a($name, $label, array $options = [])
+    public function add_linkcheck($name, $label, array $options = [])
     {
         if ( isset( $options['options'] ) ) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
-            $this->add_field_a($name, $label, 'checkbox', $options);
+            $this->add_field($name, $label, 'checkbox', $options);
         } else {
             ipsCore::add_error('Options are required for radio buttons');
         }
-    }
-
-    public function add_linkcheck($name, $label = NULL, $options = [], $required = false, $placeholder = NULL, $comment = NULL, $classes = NULL, $fieldset_classes = NULL)
-    {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        $this->add_field($name, $label, 'checkbox', NULL, $options, $required, $placeholder, $comment, $classes, $fieldset_classes);
     }
 
     public function validate_linkcheck()
@@ -438,12 +344,7 @@ class ipsCore_form_builder
     }
 
     /* Date Picker */
-    public function add_datepicker_a($name, $label, array $options = [])
-    {
-
-    }
-
-    public function add_datepicker()
+    public function add_datepicker($name, $label, array $options = [])
     {
 
     }
@@ -454,12 +355,7 @@ class ipsCore_form_builder
     }
 
     /* Colour Picker */
-    public function add_colourpicker_a($name, $label, array $options = [])
-    {
-
-    }
-
-    public function add_colourpicker()
+    public function add_colourpicker($name, $label, array $options = [])
     {
 
     }
@@ -470,14 +366,9 @@ class ipsCore_form_builder
     }
 
     /* Hidden */
-    public function add_hidden_a($name, $label, array $options = [])
+    public function add_hidden($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'hidden', $options);
-    }
-
-    public function add_hidden($name, $value)
-    {
-        $this->add_field($name, NULL, 'hidden', $value, [], NULL);
+        $this->add_field($name, $label, 'hidden', $options);
     }
 
     public function validate_hidden()
@@ -486,14 +377,9 @@ class ipsCore_form_builder
     }
 
     /* Submit */
-    public function add_submit_a($name, $label, array $options = [])
+    public function add_submit($name, $label, array $options = [])
     {
-        $this->add_field_a($name, $label, 'submit', $options);
-    }
-
-    public function add_submit($name, $value, $comment = NULL)
-    {
-        $this->add_field($name, NULL, 'submit', $value, [], NULL, $comment);
+        $this->add_field($name, $label, 'submit', $options);
     }
 
     public function render_fields()
@@ -639,7 +525,7 @@ class ipsCore_form_builder
                     break;
                 case 'submit':
                     //$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '><input type="submit" ' . $field_id . $field_classes . $field_name . $field_value . ' /></fieldset>';
-                    $html .= '<fieldset id="field-' . $field['name'] . '">' . $field_comment . '<button ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</button></fieldset>';
+                    $html .= '<fieldset id="field-' . $field['name'] . '">' . $field_comment . '<button ' . $field_id . $field_classes . $field_name . '>' . $field['label'] . '</button></fieldset>';
                     break;
                 case 'int':
                     $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
