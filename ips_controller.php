@@ -32,22 +32,28 @@ class ipsCore_controller {
 	}
 
 	public function load_model( $model, $name = false, $table = ' ' ) {
-		if ( !$name ) { $name = $model; }
-		if ( $table == ' ' ) { $table = $model; }
-		if ( $table !== false ) {
+		if ( $model = $this->get_model( $model, $name, $table ) ) {
+            $this->{$name} = $model;
+        }
+	}
+
+    public function get_model( $model, $name = false, $table = ' ' ) {
+        if ( !$name ) { $name = $model; }
+        if ( $table == ' ' ) { $table = $model; }
+        if ( $table !== false ) {
             if (!strpos($table, DB_PREFIX)) {
                 $table = DB_PREFIX . $table;
             }
         }
-		$name = str_replace( '/', '_', $name );
-		$model_name  = str_replace( '/', '_', $model ) . '_model';
+        $name = str_replace( '/', '_', $name );
+        $model_name  = str_replace( '/', '_', $model ) . '_model';
 
-		if ( class_exists( $model_name ) ) {
-			$this->{ $name } = new $model_name( $name, $table );
-		} else {
-			ipsCore::add_error( 'Requested Model Class "' . $model_name . '" Does Not Exist', true );
-		}
-	}
+        if ( class_exists( $model_name ) ) {
+            return new $model_name( $name, $table );
+        } else {
+            ipsCore::add_error( 'Requested Model Class "' . $model_name . '" Does Not Exist', true );
+        }
+    }
 
 	public function build_view( $build = 'html', $show_in_layout = true ) {
 
