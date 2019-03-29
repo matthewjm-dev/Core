@@ -195,6 +195,10 @@ class ipsCore_model
 
     public function get($where)
     {
+        if (!is_array($where)) {
+            $where = [$this->get_pkey() => $where];
+        }
+
         $item = ipsCore::$database->select($this->table, '*', $where, 1);
 
         if (!empty($item)) {

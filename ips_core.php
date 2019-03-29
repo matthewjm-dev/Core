@@ -59,6 +59,7 @@ class ipsCore {
         }
 
         self::set_environment();
+        self::set_timezone();
     }
 
     public static function setup() {
@@ -250,6 +251,13 @@ class ipsCore {
             self::$output->display();
         } else {
             self::add_error( 'No output type set.' );
+        }
+    }
+
+    public static function set_timezone() {
+        if( ! ini_get('date.timezone') )
+        {
+            date_default_timezone_set('GMT');
         }
     }
 
