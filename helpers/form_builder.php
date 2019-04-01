@@ -37,7 +37,14 @@ class ipsCore_form_builder
 
     public function get_field_value($field)
     {
-        return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
+        //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
+        if ( isset($this->fields[$field]['value'] ) ) {
+            return $this->fields[$field]['value'];
+        } elseif (isset($this->fields[$field]['default'])) {
+            return $this->fields[$field]['default'];
+        } else {
+            return NULL;
+        }
     }
 
     // Setters
@@ -80,9 +87,9 @@ class ipsCore_form_builder
             'select' => ['title' => 'Dropdown', 'type' => 'text', 'length' => false, 'link' => false],
             'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
             'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
-            'linkselect' => ['title' => 'Link Dropdown', 'type' => 'int', 'length' => '11', 'link' => true],
-            'linkradio' => ['title' => 'Link Radios', 'type' => 'int', 'length' => '11', 'link' => true],
-            'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'int', 'length' => '11', 'link' => true],
+            'linkselect' => ['title' => 'Link Dropdown', 'type' => 'varchar', 'length' => '255', 'link' => true],
+            'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
+            'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
             'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
             'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
         ];
@@ -552,6 +559,9 @@ class ipsCore_form_builder
             if (ipsCore_form_builder::get_field_types($field['type'])) {
                 if (is_object($fields)) {
                     if (isset($fields->$field_key)) {
+                        if ( is_array( $fields->$field_key ) ) {
+                            $fields->$field_key = implode(',', $fields->$field_key );
+                        }
                         $this->fields[$field_key]['value'] = $fields->$field_key;
                     } else {
                         if ( isset( $field['default'] ) && !empty($field->default)) {
@@ -560,6 +570,9 @@ class ipsCore_form_builder
                     }
                 } else {
                     if (isset($fields[$field_key])) {
+                        if ( is_array( $fields[$field_key] ) ) {
+                            $fields[$field_key] = implode(',', $fields[$field_key] );
+                        }
                         $this->fields[$field_key]['value'] = $fields[$field_key];
                     } else {
                         if ( isset( $field['default'] ) && !empty($field['default'])) {
