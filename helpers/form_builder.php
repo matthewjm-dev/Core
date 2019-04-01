@@ -163,22 +163,23 @@ class ipsCore_form_builder
         ];
     }
 
+    public function add_html($name, $content)
+    {
+        $this->fields['html_' . $name] = [
+            'name' => $name,
+            'placeholder' => $content,
+            'type' => 'html',
+        ];
+    }
+
     /* Text Box */
     public function add_text($name, $label, array $options = [])
     {
         $this->add_field($name, $label, 'text', $options);
     }
 
-    public function validate_text($value)
+    public function validate_text( $field )
     {
-        return false;
-    }
-
-    public function validate_tinyint($value)
-    {
-        if (!is_int($value)) {
-            return 'Field is not an integer';
-        }
         return false;
     }
 
@@ -188,9 +189,9 @@ class ipsCore_form_builder
         $this->add_field($name, $label, 'number', $options);
     }
 
-    public function validate_int($value)
+    public function validate_int($field)
     {
-        if (!is_int($value)) {
+        if (!is_int($this->fields[ $field ][ 'value' ])) {
             return 'Field is not an integer';
         }
         return false;
@@ -255,8 +256,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_select()
+    public function validate_select( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -273,8 +275,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_radio()
+    public function validate_radio( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -291,8 +294,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_check()
+    public function validate_check( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -309,8 +313,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkselect()
+    public function validate_linkselect( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -327,8 +332,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkradio()
+    public function validate_linkradio( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -345,8 +351,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkcheck()
+    public function validate_linkcheck( $field )
     {
+        $this->validate_field_options( $field );
         return false;
     }
 
@@ -394,6 +401,21 @@ class ipsCore_form_builder
         return $this->render(true);
     }
 
+    /* Re-useable validation */
+    private function validate_field_options( $field ) {
+        if ( $this->fields[ $field ][ 'value' ] && !empty($this->fields[ $field ][ 'value' ])) {
+            $values = explode(',', $this->fields[ $field ][ 'value' ] );
+            if ( $values && !empty( $values ) ) {
+                foreach ( $values as $value ) {
+                    $option_key = array_search($value, array_column($this->fields[ $field ][ 'options' ], 'value'));
+                    if ( $option_key === false ) {
+                        return 'Given value ' . $value . ' is not a valid option.';
+                    }
+                }
+            }
+        }
+    }
+
     public function render($fields_only = false)
     {
         if (!$fields_only) {
@@ -425,7 +447,11 @@ class ipsCore_form_builder
 
             $fieldset_classes = '';
             if (isset($field['fieldset_classes'])) {
-                $fieldset_classes = ' class="' . $field['fieldset_classes'] . '"';
+                if ( is_array($field['fieldset_classes']) ) {
+                    $fieldset_classes = implode( ' ', $field['fieldset_classes'] );
+                } else {
+                    $fieldset_classes = $field['fieldset_classes'];
+                }
             }
 
             $field_label = '';
@@ -462,13 +488,16 @@ class ipsCore_form_builder
                 case 'section_end':
                     $html .= '</div>';
                     break;
+                case 'html':
+                    $html .= $field['placeholder'];
+                    break;
                 case 'password':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<input type="password" ' . $field_id . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
                     break;
                 case 'select':
                 case 'linkselect':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="select ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     if ($field['options'] || $field['placeholder']) {
                         $html .= '<select ' . $field_id . $field_classes . $field_name . '>';
                         if ($field['placeholder']) {
@@ -489,7 +518,7 @@ class ipsCore_form_builder
                     break;
                 case 'radio':
                 case 'linkradio':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? '' . $field_id . '' : '';
@@ -502,7 +531,7 @@ class ipsCore_form_builder
                     break;
                 case 'check':
                 case 'linkcheck':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="check ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? '' . $field_id . '' : '';
@@ -514,11 +543,11 @@ class ipsCore_form_builder
                     $html .= '</fieldset>';
                     break;
                 case 'textarea':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
                     break;
                 case 'editor':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
                     break;
                 case 'datepicker':
@@ -553,8 +582,11 @@ class ipsCore_form_builder
         return $html;
     }
 
-    public function populate_form($fields)
+    public function populate_form($fields = false)
     {
+        if ( !$fields ) {
+            $fields = $_REQUEST;
+        }
         foreach ($this->get_fields() as $field_key => $field) {
             if (ipsCore_form_builder::get_field_types($field['type'])) {
                 if (is_object($fields)) {
@@ -601,7 +633,7 @@ class ipsCore_form_builder
                 if ( !$errored ) {
                     // Basic field validation
                     $validate_func = 'validate_' . $field['type'];
-                    $error = $this->{$validate_func}($field['value']);
+                    $error = $this->{$validate_func}($field['name']);
                     if ($error) {
                         $errors[$field['name']] = $error;
                         $errored = true;
