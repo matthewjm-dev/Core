@@ -38,7 +38,7 @@ class ipsCore_form_builder
     public function get_field_value($field)
     {
         //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
-        if ( isset($this->fields[$field]['value'] ) ) {
+        if (isset($this->fields[$field]['value'])) {
             return $this->fields[$field]['value'];
         } elseif (isset($this->fields[$field]['default'])) {
             return $this->fields[$field]['default'];
@@ -178,7 +178,7 @@ class ipsCore_form_builder
         $this->add_field($name, $label, 'text', $options);
     }
 
-    public function validate_text( $field )
+    public function validate_text($field)
     {
         return false;
     }
@@ -191,7 +191,7 @@ class ipsCore_form_builder
 
     public function validate_int($field)
     {
-        if (!is_int($this->fields[ $field ][ 'value' ])) {
+        if (!is_int($this->fields[$field]['value'])) {
             return 'Field is not an integer';
         }
         return false;
@@ -246,7 +246,7 @@ class ipsCore_form_builder
     /* Select Dropdown */
     public function add_select($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -256,16 +256,16 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_select( $field )
+    public function validate_select($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
     /* Radio Buttons */
     public function add_radio($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -275,16 +275,16 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_radio( $field )
+    public function validate_radio($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
     /* Check Boxes */
     public function add_check($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -294,16 +294,16 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_check( $field )
+    public function validate_check($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
     /* Select Dropdown ( LINK field ) */
     public function add_linkselect($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -313,16 +313,16 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkselect( $field )
+    public function validate_linkselect($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
     /* Radio Buttons ( LINK field ) */
     public function add_linkradio($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -332,16 +332,16 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkradio( $field )
+    public function validate_linkradio($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
     /* Check Boxes ( LINK field ) */
     public function add_linkcheck($name, $label, array $options = [])
     {
-        if ( isset( $options['options'] ) ) {
+        if (isset($options['options'])) {
             if (!is_array($options['options'])) {
                 $options['options'] = [$options['options']];
             }
@@ -351,9 +351,9 @@ class ipsCore_form_builder
         }
     }
 
-    public function validate_linkcheck( $field )
+    public function validate_linkcheck($field)
     {
-        $this->validate_field_options( $field );
+        $this->validate_field_options($field);
         return false;
     }
 
@@ -402,13 +402,14 @@ class ipsCore_form_builder
     }
 
     /* Re-useable validation */
-    private function validate_field_options( $field ) {
-        if ( $this->fields[ $field ][ 'value' ] && !empty($this->fields[ $field ][ 'value' ])) {
-            $values = explode(',', $this->fields[ $field ][ 'value' ] );
-            if ( $values && !empty( $values ) ) {
-                foreach ( $values as $value ) {
-                    $option_key = array_search($value, array_column($this->fields[ $field ][ 'options' ], 'value'));
-                    if ( $option_key === false ) {
+    private function validate_field_options($field)
+    {
+        if ($this->fields[$field]['value'] && !empty($this->fields[$field]['value'])) {
+            $values = explode(',', $this->fields[$field]['value']);
+            if ($values && !empty($values)) {
+                foreach ($values as $value) {
+                    $option_key = array_search($value, array_column($this->fields[$field]['options'], 'value'));
+                    if ($option_key === false) {
                         return 'Given value ' . $value . ' is not a valid option.';
                     }
                 }
@@ -447,8 +448,8 @@ class ipsCore_form_builder
 
             $fieldset_classes = '';
             if (isset($field['fieldset_classes'])) {
-                if ( is_array($field['fieldset_classes']) ) {
-                    $fieldset_classes = implode( ' ', $field['fieldset_classes'] );
+                if (is_array($field['fieldset_classes'])) {
+                    $fieldset_classes = implode(' ', $field['fieldset_classes']);
                 } else {
                     $fieldset_classes = $field['fieldset_classes'];
                 }
@@ -467,7 +468,7 @@ class ipsCore_form_builder
             $field_value = '';
             if (isset($field['value'])) {
                 $field_value = ' value="' . $field['value'] . '"';
-            } elseif ($field_default !== false ) {
+            } elseif ($field_default !== false) {
                 $field['value'] = $field['default'];
                 $field_value = ' value="' . $field_default . '"';
             }
@@ -584,34 +585,41 @@ class ipsCore_form_builder
 
     public function populate_form($fields = false)
     {
-        if ( !$fields ) {
-            $fields = $_REQUEST;
+        if (!$fields) {
+            $fields = ( isset( $_REQUEST ) ? $_REQUEST : [] );
         }
         foreach ($this->get_fields() as $field_key => $field) {
-            if (ipsCore_form_builder::get_field_types($field['type'])) {
+            if ($field_type = ipsCore_form_builder::get_field_types($field['type'])) {
+                $value = false;
                 if (is_object($fields)) {
                     if (isset($fields->$field_key)) {
-                        if ( is_array( $fields->$field_key ) ) {
-                            $fields->$field_key = implode(',', $fields->$field_key );
-                        }
-                        $this->fields[$field_key]['value'] = $fields->$field_key;
-                    } else {
-                        if ( isset( $field['default'] ) && !empty($field->default)) {
-                            $this->fields[$field_key]['value'] = $field['default'];
-                        }
+                        $value = $fields->$field_key;
+                    } else if (isset($field->default) && !empty($field->default)) {
+                        $value = $field->default;
                     }
                 } else {
                     if (isset($fields[$field_key])) {
-                        if ( is_array( $fields[$field_key] ) ) {
-                            $fields[$field_key] = implode(',', $fields[$field_key] );
-                        }
-                        $this->fields[$field_key]['value'] = $fields[$field_key];
-                    } else {
-                        if ( isset( $field['default'] ) && !empty($field['default'])) {
-                            $this->fields[$field_key]['value'] = $field['default'];
+                        $value = $fields[$field_key];
+                    } else if (isset($field['default']) && !empty($field['default'])) {
+                        $value = $field['default'];
+                    }
+                }
+
+                if ( isset($field_type['link'])) {
+                    if (is_array($value)) {
+                        $value = implode(',', $value);
+                    }
+
+                    $values = explode(',', $value);
+                    foreach( $values as $value_item ) {
+                        $option_key = array_search($value_item, array_column($this->fields[$field_key]['options'], 'value'));
+                        if ( $option_key !== false ) {
+                            $this->fields[$field_key]['options'][$option_key]['selected'] = true;
                         }
                     }
                 }
+
+                $this->fields[$field_key]['value'] = $value;
             }
         }
     }
@@ -623,14 +631,14 @@ class ipsCore_form_builder
                 $errored = false;
 
                 // Required validation
-                if ( $field['required'] == true ) {
-                    if ( !isset( $field['value']) || empty( $field['value'] ) || $field['value'] == '' || $field['value'] == ' ' ) {
+                if ($field['required'] == true) {
+                    if (!isset($field['value']) || empty($field['value']) || $field['value'] == '' || $field['value'] == ' ') {
                         $errors[$field['name']] = 'This is a required field';
                         $errored = true;
                     }
                 }
 
-                if ( !$errored ) {
+                if (!$errored) {
                     // Basic field validation
                     $validate_func = 'validate_' . $field['type'];
                     $error = $this->{$validate_func}($field['name']);
