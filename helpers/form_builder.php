@@ -75,7 +75,7 @@ class ipsCore_form_builder
     }
 
     // Field Types
-    public static function get_field_types($type = false)
+    public static function get_field_types($type = false, $nolinks = false)
     {
         $fields = [
             'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
@@ -101,6 +101,13 @@ class ipsCore_form_builder
                 return $field;
             }
             return false;
+        }
+        if ( $nolinks ) {
+            foreach( $fields as $field_key => $field ) {
+                if ( isset( $field[ 'link' ] ) && $field[ 'link' ] ) {
+                    unset( $fields[ $field_key ] );
+                }
+            }
         }
         return $fields;
     }
