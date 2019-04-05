@@ -6,6 +6,7 @@ class ipsCore {
     public static $uri;
     public static $uri_parts;
     public static $uri_get;
+    public static $uri_current;
     public static $environment;
 
     public static $path_base;

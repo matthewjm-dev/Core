@@ -65,7 +65,8 @@ class ipsCore_model
     }
 
     // Methods
-    public function add_prefix( $text ) {
+    public function add_prefix($text)
+    {
         return (substr($text, 0, strlen(DB_PREFIX)) === DB_PREFIX ? $text : DB_PREFIX . $text);
     }
 
@@ -97,7 +98,7 @@ class ipsCore_model
 
     public function create_table($table, $id = 'id')
     {
-        $table = $this->add_prefix( $table );
+        $table = $this->add_prefix($table);
         $fields = [
             $id => $this->get_pkey_args(),
             'created' => ['type' => 'varchar', 'length' => 255],
@@ -114,8 +115,8 @@ class ipsCore_model
 
     public function modify_table($table, $new_name)
     {
-        $table = $this->add_prefix( $table );
-        $new_name = $this->add_prefix( $new_name );
+        $table = $this->add_prefix($table);
+        $new_name = $this->add_prefix($new_name);
 
         if (ipsCore::$database->modify_table($table, $new_name)) {
             return true;
@@ -189,6 +190,17 @@ class ipsCore_model
 
         if (!empty($objects)) {
             return $objects;
+        }
+        return false;
+    }
+
+    public function count($where = false)
+    {
+        $count_str = 'COUNT(*)';
+        $count = ipsCore::$database->select($this->table, $count_str, $where);
+
+        if (!empty( $count ) ) {
+            return $count[0][$count_str];
         }
         return false;
     }

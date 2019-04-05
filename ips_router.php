@@ -82,6 +82,7 @@ class ipsCore_router {
 
             if ( ipsCore::$app->get_uri() != '' ) {
                 $appless_uri = str_replace( '/' . ipsCore::$app->get_uri(), '', ipsCore::$uri );
+                ipsCore::$uri_current .= '/' . ipsCore::$app->get_uri();
             } else {
                 $appless_uri = ipsCore::$uri;
             }
@@ -90,10 +91,12 @@ class ipsCore_router {
 			if ( !empty( $path_parts ) ) {
 				if ( isset( $path_parts[0] ) && $this->check_controller_exists( $path_parts[0] ) ) {
 					$controller = array_shift( $path_parts );
+                    ipsCore::$uri_current .= '/' . $controller;
 
 					if ( !empty( $path_parts ) ) {
                         if ( method_exists( $controller, $path_parts[0] ) ) {
                             $method = str_replace( '-', '_', array_shift( $path_parts ) );
+                            ipsCore::$uri_current .= '/' . $method;
                         } else {
                             $method = 'index';
                         }

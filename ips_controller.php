@@ -7,7 +7,7 @@ class ipsCore_controller {
 
 	public $models = [];
 
-	private $reserved_data_keys = array( 'stylesheets', 'scripts', 'page_title', 'breadcrumbs', 'flash_message' );
+	private $reserved_data_keys = array( 'stylesheets', 'scripts', 'page_title', /*'breadcrumbs', 'flash_message'*/ );
 
 	// GETTERS
 	public function get_name() { return $this->name; }
@@ -58,13 +58,6 @@ class ipsCore_controller {
 	public function build_view( $build = 'html', $show_in_layout = true ) {
 
 		if ( $build == 'html' ) {
-
-			if ( $flash = $this->get_flash() ) {
-				ipsCore::$data[ 'flash_message' ] = $flash;
-				$this->remove_flash();
-			} else {
-				ipsCore::$data[ 'flash_message' ] = false;
-			}
 			if ( !$this->get_view() ) {
 				$view_path = $this->get_name() . '/' . ipsCore::$router->get_route()->get_method();
 				$this->set_view( $view_path );
@@ -87,7 +80,7 @@ class ipsCore_controller {
 	}
 
 	public function get_data( $key ) {
-		if ( in_array( $key, ipsCore::$data[ $key ] ) ) {
+		if ( isset( ipsCore::$data[ $key ] ) ) {
 			return ipsCore::$data[ $key ];
 		} else {
 			ipsCore::add_error( 'Data key "' . $key . '" does not exist.' );
@@ -134,22 +127,12 @@ class ipsCore_controller {
 		}
 	}
 
-	public function set_breadcrumbs( array $breadcrumbs = [] ) {
-		ipsCore::$data[ 'breadcrumbs' ] = $breadcrumbs;
-	}
+	public function get_part( $name, $data = false ) {
+        $view = new ips_view( $name, false );
+        $this->add_data( $data );
+        $view->build();
 
-	public function get_flash() {
-		if ( ipsCore::$session->read( 'flash_message' ) ) {
-			return ipsCore::$session->read( 'flash_message' );
-		} return false;
-	}
-
-	public function add_flash( $content ) {
-		ipsCore::$session->write( 'flash_message', $content );
-	}
-
-	public function remove_flash() {
-		ipsCore::$session->write( 'flash_message', false );
-	}
+        return $view->display( true );
+    }
 
 }
