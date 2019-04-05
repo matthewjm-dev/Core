@@ -17,6 +17,7 @@ class ipsCore_route {
 
 	// Setters
 	public function set_method( $method ) { $this->method = $method; }
+	public function set_action( $action ) { $this->action = $action; }
 
 	// Construct
 	public function __construct( $controller, $method, $action = [] ) {
@@ -91,7 +92,11 @@ class ipsCore_router {
 					$controller = array_shift( $path_parts );
 
 					if ( !empty( $path_parts ) ) {
-						$method = str_replace( '-', '_', array_shift( $path_parts ) );
+                        if ( method_exists( $controller, $path_parts[0] ) ) {
+                            $method = str_replace( '-', '_', array_shift( $path_parts ) );
+                        } else {
+                            $method = 'index';
+                        }
 					}
 
 					if ( !empty( $path_parts ) ) {
@@ -140,6 +145,7 @@ class ipsCore_router {
 				ipsCore::$controller = new $controller_name( $controller );
 
 				if ( !method_exists( ipsCore::$controller, $route->get_method() ) ) {
+				    $route->set_action( $route->get_method() );
 					$route->set_method( 'index' );
 				}
 				if ( is_array( $route->get_action() ) ) {

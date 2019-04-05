@@ -190,7 +190,15 @@ class ipsCore_database {
 		}
 
 		if ( $limit !== false ) {
-			$sql .= ' LIMIT ' . $limit;
+		    if ( is_array( $limit ) ) {
+                //$sql .= ' LIMIT :limitoffset, :limitcount';
+                //$sql .= ' LIMIT :limitcount OFFSET :limitoffset';
+                $sql .= ' LIMIT ' . $limit[0] . ' OFFSET ' . $limit[1];
+                $params[]  = [ ':limitcount', $limit[0] ];
+                $params[]  = [ ':limitoffset', $limit[1] ];
+            } else {
+                $sql .= ' LIMIT ' . $limit;
+            }
 		}
 
 		if ( $data = $this->query( $sql, $params, true ) ) {

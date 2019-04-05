@@ -161,9 +161,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all_data($where = false)
+    public function get_all_data($where = false, $limit = false)
     {
-        $items = ipsCore::$database->select($this->table, '*', $where);
+        $items = ipsCore::$database->select($this->table, '*', $where, $limit);
 
         if (!empty($items)) {
             return $items;
@@ -171,9 +171,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all($where = false)
+    public function get_all($where = false, $limit = false)
     {
-        $items = $this->get_all_data($where);
+        $items = $this->get_all_data($where, $limit);
         $model = get_class($this);
         $objects = [];
 
