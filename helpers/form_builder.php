@@ -84,10 +84,10 @@ class ipsCore_form_builder
             'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
             'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
             'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
-            'select' => ['title' => 'Dropdown', 'type' => 'text', 'length' => false, 'link' => false],
+            'select' => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
             'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
             'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
-            'linkselect' => ['title' => 'Link Dropdown', 'type' => 'varchar', 'length' => '255', 'link' => true],
+            'linkselect' => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
             'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
             'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
             'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
@@ -511,7 +511,7 @@ class ipsCore_form_builder
                         if ($field['placeholder']) {
                             $html .= '<option selected disabled="disabled">' . $field['placeholder'] . '</option>';
                         }
-                        if ($field['options']) {
+                        if ($field['options'] && !empty($field['options'])) {
                             foreach ($field['options'] as $option) {
                                 $option_selected = ((isset($option['selected']) && $option['selected'] === true) || ($option['value'] == $field['value'])) ? 'selected' : '';
                                 $option_disabled = (isset($option['disabled']) && $option['disabled'] === true) ? ' disabled' : '';
@@ -656,6 +656,70 @@ class ipsCore_form_builder
                 }
             }
         }
+    }
+
+    public function get_field_type_options($current_type = false)
+    {
+        $select_options = [];
+        foreach (ipsCore_form_builder::get_field_types() as $field_type_key => $field_type) {
+            $field_type_option = ['text' => $field_type['title'], 'value' => $field_type_key];
+            if ($field_type_key == $current_type) {
+                $field_type_option['selected'] = true;
+            }
+            $select_options[] = $field_type_option;
+        }
+
+        return $select_options;
+    }
+
+    public function show_field_options_output($options)
+    {
+        $return = '';
+
+        if ( (@unserialize($options) !== false) ) {
+            $options = unserialize($options);
+
+            if (!empty($options)) {
+                foreach ($options as $option) {
+                    if (isset($option['value']) && isset($option['text'])) {
+                        $return .= $option['value'] . ' : ' . $option['text'] . "\r\n";
+                    } else {
+                        ipsCore::add_error('There was a problem reading option data');
+                    }
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public function show_field_options($options)
+    {
+        $return = '';
+
+        if ( (@unserialize($options) !== false) ) {
+            $return = unserialize($options);
+        }
+
+        return $return;
+    }
+
+    public function process_field_options($options)
+    {
+        $options = explode("\r\n", $options);
+        $return = [];
+
+        if (!empty($options)) {
+            foreach ($options as $option) {
+                $option = explode(' : ', $option);
+                $return[] = [
+                    'value' => $option[0],
+                    'text' => $option[1],
+                ];
+            }
+        }
+
+        return serialize($return);
     }
 
 }
