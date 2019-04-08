@@ -28,37 +28,42 @@ class ips_view {
 
 		ob_start();
 
-        if ( $this->show_in_layout ) {
-            ?><!DOCTYPE html>
-            <html dir="ltr" lang="en" class="no-js"><?php
-                $head_path = ipsCore::get_view_route( 'layout/head' );
-                include( $head_path );
-                ?><body>
-                <div id="header"><?php
-                    $header_path = ipsCore::get_view_route( 'layout/header' );
-                    if ( $this->view_exists( $header_path ) ) {
-                        include( $header_path );
-                    }
-                    $nav_path    = ipsCore::get_view_route( 'layout/nav' );
-                    if ( $this->view_exists( $nav_path ) ) {
-                        include( $nav_path );
-                    }
-                ?></div><?php
-        }
-
-        $view_path = ipsCore::get_view_route( $this->template );
-        if ( $this->view_exists( $view_path ) ) {
-            include( $view_path );
-        }
-
-        if ( $this->show_in_layout ) {
-            $footer_path = ipsCore::get_view_route( 'layout/footer' );
-            if ( $this->view_exists( $footer_path ) ) {
-                include( $footer_path );
+		if ( $this->show_in_layout !== true && $this->show_in_layout !== false ) {
+            $layout = ipsCore::get_layout_route( $this->show_in_layout );
+            include( $layout );
+        } else {
+            if ( $this->show_in_layout ) {
+                ?><!DOCTYPE html>
+                <html dir="ltr" lang="en" class="no-js"><?php
+                    $head_path = ipsCore::get_view_route( 'layout/head' );
+                    include( $head_path );
+                    ?><body>
+                    <div id="header"><?php
+                        $header_path = ipsCore::get_view_route( 'layout/header' );
+                        if ( $this->view_exists( $header_path ) ) {
+                            include( $header_path );
+                        }
+                        $nav_path    = ipsCore::get_view_route( 'layout/nav' );
+                        if ( $this->view_exists( $nav_path ) ) {
+                            include( $nav_path );
+                        }
+                    ?></div><?php
             }
 
-                ?></body>
-            </html><?php
+            $view_path = ipsCore::get_view_route( $this->template );
+            if ( $this->view_exists( $view_path ) ) {
+                include( $view_path );
+            }
+
+            if ( $this->show_in_layout ) {
+                $footer_path = ipsCore::get_view_route( 'layout/footer' );
+                if ( $this->view_exists( $footer_path ) ) {
+                    include( $footer_path );
+                }
+
+                    ?></body>
+                </html><?php
+            }
         }
 
 		$this->content = ob_get_clean();

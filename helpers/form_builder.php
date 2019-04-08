@@ -30,7 +30,7 @@ class ipsCore_form_builder
         return $this->classes;
     }
 
-    private function get_fields()
+    public function get_fields()
     {
         return $this->fields;
     }

@@ -194,17 +194,6 @@ class ipsCore_model
         return false;
     }
 
-    public function count($where = false)
-    {
-        $count_str = 'COUNT(*)';
-        $count = ipsCore::$database->select($this->table, $count_str, $where);
-
-        if (!empty( $count ) ) {
-            return $count[0][$count_str];
-        }
-        return false;
-    }
-
     public function get($where)
     {
         if (!is_array($where)) {
@@ -244,6 +233,17 @@ class ipsCore_model
         return false;
     }
 
+    public function count($where = false)
+    {
+        $count_str = 'COUNT(*)';
+        $count = ipsCore::$database->select($this->table, $count_str, $where);
+
+        if (!empty( $count ) ) {
+            return $count[0][$count_str];
+        }
+        return false;
+    }
+
     public function modify()
     {
 
@@ -256,7 +256,6 @@ class ipsCore_model
 
     public function save()
     {
-
         $fields = [];
         $where = [];
         $first = true;

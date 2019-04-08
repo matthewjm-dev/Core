@@ -94,7 +94,9 @@ class ipsCore_router {
                     ipsCore::$uri_current .= '/' . $controller;
 
 					if ( !empty( $path_parts ) ) {
-                        if ( method_exists( $controller, $path_parts[0] ) ) {
+                        require_once( ipsCore::get_controller_route( $controller ) );
+
+                        if ( method_exists( $controller . '_controller', $path_parts[0] ) ) {
                             $method = str_replace( '-', '_', array_shift( $path_parts ) );
                             ipsCore::$uri_current .= '/' . $method;
                         } else {

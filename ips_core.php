@@ -192,6 +192,10 @@ class ipsCore {
         return self::get_file_route( $view, 'views' );
     }
 
+    public static function get_layout_route( $layout ) {
+        return self::get_file_route( $layout, 'layouts' );
+    }
+
     public static function get_part_route( $part ) {
         return self::get_file_route( $part, 'parts' );
     }
