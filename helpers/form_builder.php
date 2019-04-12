@@ -81,6 +81,7 @@ class ipsCore_form_builder
             'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
             'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '4,2'],
             'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
+            'email' => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
             'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
             'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
             'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
@@ -214,6 +215,19 @@ class ipsCore_form_builder
     public function validate_price()
     {
 
+    }
+
+    /* Email Address */
+    public function add_email($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'email', $options);
+    }
+
+    public function validate_email( $field )
+    {
+        if ( filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
+            return true;
+        } return false;
     }
 
     /* Password */
