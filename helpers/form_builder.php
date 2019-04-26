@@ -199,6 +199,8 @@ class ipsCore_form_builder
 
     public function validate_int($field)
     {
+        $this->fields[$field]['value'] = (int)$this->fields[$field]['value'];
+
         if (!is_int($this->fields[$field]['value'])) {
             return 'Field is not an integer';
         }

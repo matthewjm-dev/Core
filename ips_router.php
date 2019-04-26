@@ -7,12 +7,12 @@ class ipsCore_route
     protected $canonical;
     protected $controller;
     protected $method;
-    protected $action;
+    protected $args;
 
     // Getters
     public function get_uri()
     {
-        return ipsCore::$uri;
+        return $this->uri;
     }
 
     public function get_canonical()
@@ -30,28 +30,33 @@ class ipsCore_route
         return $this->method;
     }
 
-    public function get_action()
+    public function get_args()
     {
-        return $this->action;
+        return $this->args;
     }
 
     // Setters
+    public function set_uri($uri)
+    {
+        $this->uri = $uri;
+    }
     public function set_method($method)
     {
         $this->method = $method;
     }
 
-    public function set_action($action)
+    public function set_args($args)
     {
-        $this->action = $action;
+        $this->args = $args;
     }
 
     // Construct
-    public function __construct($controller, $method, $action = [])
+    public function __construct($uri, $controller, $method, $args = [])
     {
+        $this->uri = $uri;
         $this->controller = $controller;
         $this->method = $method;
-        $this->action = $action;
+        $this->args = $args;
     }
 }
 
@@ -82,7 +87,7 @@ class ipsCore_router
         $found_route = FALSE;
         $controller = 'pages';
         $method = 'index';
-        $action = false;
+        $args = false;
 
         // create URI match variations
         /*if ( ipsCore::$app->get_uri() != '' ) {
@@ -90,21 +95,39 @@ class ipsCore_router
         } else {
             $appless_uri = ipsCore::$uri;
         }*/
+
+
         $uri_variations = [
             ipsCore::$uri,
             ipsCore::$uri . '/',
             rtrim(ipsCore::$uri, '/')
         ];
 
-        //die( var_dump( $this->routes ) );
-
         // check for matching routes
         foreach ($uri_variations as $uri) {
             if (isset($this->routes[$uri])) {
-                $this->route = $this->routes[$uri][0];
+                $this->route = $this->routes[$uri];
                 $this->route_canonical = $uri;
                 $found_route = TRUE;
-                continue;
+                break;
+            } else {
+                foreach ( $this->routes as $route ) {
+                    $route_parts = explode( '/', $route->get_uri() );
+                    $num_route_parts = count( $route_parts ) -1;
+                    foreach ($route_parts as $route_part_key => $route_part) {
+                        if ( isset( ipsCore::$uri_parts[$route_part_key]) && ( ipsCore::$uri_parts[$route_part_key] == $route_part || $route_part === '*' ) ) {
+                            if ( $route_part_key == $num_route_parts ) {
+                                $this->route = $route;
+                                $this->route_canonical = $uri;
+                                $found_route = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                    if ( $found_route ) {
+                        break;
+                    }
+                }
             }
         }
 
@@ -142,7 +165,7 @@ class ipsCore_router
                     }
 
                     if (!empty($path_parts)) {
-                        $action = $path_parts;
+                        $args = $path_parts;
                     }
                 } else {
                     $method = 'call_error404';
@@ -156,16 +179,17 @@ class ipsCore_router
                 ipsCore::$uri_current .= '/';
             }
 
-            $this->route = new ipsCore_route($controller, $method, $action);
+            $this->route = new ipsCore_route(ipsCore::$uri_current, $controller, $method, $args);
 
         }
 
         $this->dispatch($this->route);
     }
 
-    public function add_route($uri, ipsCore_route $route)
+    public function add_route($uri, $controller, $method, $args = [])
     {
-        $this->routes[$uri] = [$route];
+        $route = new ipsCore_route( $uri, $controller, $method, $args );
+        $this->routes[$uri] = $route;
     }
 
     public function check_controller_exists($controller)
@@ -197,10 +221,10 @@ class ipsCore_router
                     $route->set_action($route->get_method());
                     $route->set_method('index');
                 }
-                if (is_array($route->get_action())) {
-                    ipsCore::$controller->{$route->get_method()}(...$route->get_action());
+                if (is_array($route->get_args())) {
+                    ipsCore::$controller->{$route->get_method()}(...$route->get_args());
                 } else {
-                    ipsCore::$controller->{$route->get_method()}($route->get_action());
+                    ipsCore::$controller->{$route->get_method()}($route->get_args());
                 }
                 //} else { // rather than erroring and dieing now just selecting index method
                 //	ipsCore::add_error( 'Requested Method "' . $method . '" Does Not Exist' );
