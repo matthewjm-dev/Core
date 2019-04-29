@@ -655,7 +655,7 @@ class ipsCore_form_builder
 
                 // Required validation
                 if ($field['required'] == true) {
-                    if (!isset($field['value']) || empty($field['value']) || $field['value'] == '' || $field['value'] == ' ') {
+                    if (!isset($field['value']) || $field['value'] == '' || $field['value'] == ' ') {
                         $errors[$field['name']] = 'This is a required field';
                         $errored = true;
                     }

@@ -162,6 +162,16 @@ class ipsCore_model
         return false;
     }
 
+    public function remove_column($name)
+    {
+        if ($this->table && $name) {
+            if (ipsCore::$database->remove_column($this->table, $name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function get_all_data($where = false, $limit = false)
     {
         $items = ipsCore::$database->select($this->table, '*', $where, $limit);
@@ -249,9 +259,22 @@ class ipsCore_model
 
     }
 
-    public function remove()
+    public function remove( $where = false )
     {
+        if ( !$where ) {
+            if ( $this->{$this->get_pkey()} ) {
+                $where = [
+                    $this->get_pkey() => $this->{$this->get_pkey()},
+                ];
+            }
+        }
 
+        if ( $where ) {
+            if ( ipsCore::$database->delete( $this->table, $where ) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function save()

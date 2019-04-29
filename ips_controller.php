@@ -32,6 +32,7 @@ class ipsCore_controller {
 	}
 
 	public function load_model( $model, $name = false, $table = ' ' ) {
+        if ( !$name ) { $name = $model; }
 		if ( $model = $this->get_model( $model, $name, $table ) ) {
             $this->{$name} = $model;
         }

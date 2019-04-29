@@ -74,7 +74,7 @@ class ipsCore_database {
 	}
 
 	public function does_table_exist( $table ) {
-		$sql = 'SELECT 1 FROM ' . $table . ' LIMIT 1';
+		$sql = 'SELECT 1 FROM ' . $this->validate( $table ) . ' LIMIT 1';
 
 		if ( $this->query( $sql ) !== false ) {
 			return true;
@@ -82,7 +82,7 @@ class ipsCore_database {
 	}
 
 	public function get_table_schema( $table ) {
-		$sql = 'SHOW COLUMNS FROM ' . $table;
+		$sql = 'SHOW COLUMNS FROM ' . $this->validate( $table );
 
 		$schema = $this->query( $sql, [], true );
 
@@ -94,7 +94,7 @@ class ipsCore_database {
 			$primary_key_tag = 'PRIMARY KEY';
 			$has_primary = false;
 			$first = true;
-			$sql = 'CREATE TABLE ' . $table . ' (';
+			$sql = 'CREATE TABLE ' . $this->validate( $table ) . ' (';
 
 			foreach ( $fields as $field_key => $field ) {
 			    if ( !$first ) { $sql .= ', '; } else { $first = false; }
@@ -118,7 +118,7 @@ class ipsCore_database {
 
 	public function modify_table( $table, $new_name ) {
         if ( !$this->does_table_exist( $new_name ) ) {
-            $sql = 'RENAME TABLE ' . $table . ' TO `' . $new_name . '`';
+            $sql = 'RENAME TABLE ' . $this->validate( $table ) . ' TO `' . $this->validate( $new_name ) . '`';
 
             if ( $this->query( $sql ) ) {
                 return true;
@@ -135,7 +135,7 @@ class ipsCore_database {
 	}
 
 	public function create_column( $table, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
-	    $sql = 'ALTER TABLE ' . $table . ' ADD `' . $name . '` ' . strtoupper( $type );
+	    $sql = 'ALTER TABLE ' . $this->validate( $table ) . ' ADD `' . $this->validate( $name ) . '` ' . strtoupper( $type );
 
         $sql .= ( $length ? '(' . $length . ')' : '' );
         $sql .= ( $extra ? ' ' . $extra : '' );
@@ -149,7 +149,7 @@ class ipsCore_database {
     }
 
     public function modify_column( $table, $old_name, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
-        $sql = 'ALTER TABLE ' . $table . ' CHANGE `' . $old_name . '` `' . $name . '` ' . strtoupper( $type );
+        $sql = 'ALTER TABLE ' . $this->validate( $table ) . ' CHANGE `' . $this->validate( $old_name ) . '` `' . $this->validate( $name ) . '` ' . strtoupper( $type );
 
         $sql .= ( $length ? '(' . $length . ')' : '' );
         $sql .= ( $extra ? ' ' . (is_array( $extra ) ? explode(' ', $extra) : $extra ) : '' );
@@ -162,8 +162,18 @@ class ipsCore_database {
         return false;
     }
 
+    public function remove_column( $table, $column ) {
+	    $sql = 'ALTER TABLE ' . $this->validate( $table ) . ' DROP COLUMN ' . $this->validate( $column );
+
+        if ( $this->query( $sql ) ) {
+            return true;
+        }
+        ipsCore::add_error( 'The column "' . $column . '" could not be dropped from "' . $table . '".' );
+        return false;
+    }
+
 	public function select( $table, $fields = '*', $where = false, $limit = false, $join = false, $group = false ) {
-		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $table;
+		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $this->validate( $table );
 		$params = [];
 
 		if ( $join !== false ) {
@@ -215,7 +225,7 @@ class ipsCore_database {
 	}
 
 	public function insert( $table, $fields ) {
-		$sql = 'INSERT INTO ' . $table . ' SET ';
+		$sql = 'INSERT INTO ' . $this->validate( $table ) . ' SET ';
 		$params = [];
 		$first = true;
 
@@ -237,7 +247,7 @@ class ipsCore_database {
 
 	public function update( $table, $fields, $where = false ) {
 	    if ( $where && is_array( $where ) ) {
-            $sql = 'UPDATE ' . $table . ' SET ';
+            $sql = 'UPDATE ' . $this->validate( $table ) . ' SET ';
             $params = [];
             $first = true;
 
@@ -272,8 +282,32 @@ class ipsCore_database {
 	    return false;
 	}
 
-	public function delete( $sql ) {
+	public function delete( $table, $where ) {
+        $sql = 'DELETE FROM ' . $this->validate( $table ) . ' WHERE ';
+        $params = [];
+        $first = true;
 
+        foreach ( $where as $where_key => $where_value ) {
+            $sql .= ( !$first ? ' AND ' : ' ' );
+            $sql .= '`' . $where_key . '` = :' . $where_key;
+            $params[]  = [ ':' . $where_key, $where_value ];
+            $first = false;
+        }
+
+        if ($this->query($sql, $params)) {
+            return true;
+        }
+        ipsCore::add_error( 'Failed to delete from "' . $table . '".'  );
+        return false;
 	}
+
+	public function validate( $string ) {
+        if ( preg_match( '/^[a-z0-9_]*$/', $string ) ) {
+            return $string;
+        }
+
+        ipsCore::add_error( 'Database query parameter failed to validate.' );
+        return ' ';
+    }
 
 }
