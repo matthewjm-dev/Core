@@ -130,8 +130,14 @@ class ipsCore_database {
         return false;
     }
 
-	public function remove_table( $table ) {
+	public function drop_table( $table ) {
+		$sql = 'DROP TABLE ' . $this->validate( $table );
 
+		if ( $this->query( $sql ) ) {
+			return true;
+		}
+		ipsCore::add_error( 'Failed to drop table: "' . $table . '""' );
+		return false;
 	}
 
 	public function create_column( $table, $name, $type = 'text', $length = false, $default = false, $extra = false ) {
@@ -162,7 +168,7 @@ class ipsCore_database {
         return false;
     }
 
-    public function remove_column( $table, $column ) {
+    public function drop_column( $table, $column ) {
 	    $sql = 'ALTER TABLE ' . $this->validate( $table ) . ' DROP COLUMN ' . $this->validate( $column );
 
         if ( $this->query( $sql ) ) {
@@ -172,7 +178,7 @@ class ipsCore_database {
         return false;
     }
 
-	public function select( $table, $fields = '*', $where = false, $limit = false, $join = false, $group = false ) {
+	public function select( $table, $fields = '*', $where = false, $order = false, $limit = false, $join = false, $group = false ) {
 		$sql = 'SELECT ' . ( is_array( $fields ) ? implode( ',', $fields ) : $fields ) . ' FROM ' . $this->validate( $table );
 		$params = [];
 
@@ -197,6 +203,10 @@ class ipsCore_database {
 			} else {
 				$sql .= '';
 			}
+		}
+
+		if ( $order !== false ) {
+			$sql .= ' ORDER BY ' . $order[0] . ' ' . $order[1];
 		}
 
 		if ( $limit !== false ) {

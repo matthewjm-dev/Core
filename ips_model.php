@@ -124,9 +124,17 @@ class ipsCore_model
         return false;
     }
 
-    public function remove_table()
+    public function remove_table($table = false)
     {
+    	if ($table === false) {
+			$table = $this->table;
+		}
+		$table = $this->add_prefix($table);
 
+		if (ipsCore::$database->drop_table($table)) {
+			return true;
+		}
+		return false;
     }
 
     public function modify_pkey($new_name)
@@ -165,16 +173,16 @@ class ipsCore_model
     public function remove_column($name)
     {
         if ($this->table && $name) {
-            if (ipsCore::$database->remove_column($this->table, $name)) {
+            if (ipsCore::$database->drop_column($this->table, $name)) {
                 return true;
             }
         }
         return false;
     }
 
-    public function get_all_data($where = false, $limit = false)
+    public function get_all_data($where = false, $order = false, $limit = false)
     {
-        $items = ipsCore::$database->select($this->table, '*', $where, $limit);
+        $items = ipsCore::$database->select($this->table, '*', $where, $order, $limit);
 
         if (!empty($items)) {
             return $items;
@@ -182,9 +190,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all($where = false, $limit = false)
+    public function get_all($where = false, $order = false, $limit = false)
     {
-        $items = $this->get_all_data($where, $limit);
+        $items = $this->get_all_data($where, $order, $limit);
         $model = get_class($this);
         $objects = [];
 
@@ -210,7 +218,7 @@ class ipsCore_model
             $where = [$this->get_pkey() => $where];
         }
 
-        $item = ipsCore::$database->select($this->table, '*', $where, 1);
+        $item = ipsCore::$database->select($this->table, '*', $where, false, 1);
 
         if (!empty($item)) {
             $item = $item[0];
