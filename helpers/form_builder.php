@@ -258,7 +258,7 @@ class ipsCore_form_builder
     public function add_editor($name, $label, array $options = [])
     {
         $options['classes'] = $options['classes'] . ' editor';
-        $this->add_field($name, $label, 'textarea', $options);
+        $this->add_field($name, $label, 'editor', $options);
     }
 
     public function validate_editor()
@@ -516,7 +516,7 @@ class ipsCore_form_builder
                     $html .= $field['placeholder'];
                     break;
                 case 'password':
-                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="password ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<input type="password" ' . $field_id . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
                     break;
                 case 'select':
@@ -567,11 +567,11 @@ class ipsCore_form_builder
                     $html .= '</fieldset>';
                     break;
                 case 'textarea':
-                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="textarea ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
                     break;
                 case 'editor':
-                    $html .= '<fieldset id="field-' . $field['name'] . '" class="' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="editor ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<textarea ' . $field_id . $field_classes . $field_name . '>' . $field['value'] . '</textarea></fieldset>';
                     break;
                 case 'datepicker':
@@ -585,16 +585,19 @@ class ipsCore_form_builder
                     break;
                 case 'submit':
                     //$html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '><input type="submit" ' . $field_id . $field_classes . $field_name . $field_value . ' /></fieldset>';
-                    $html .= '<fieldset id="field-' . $field['name'] . '">' . $field_comment . '<button ' . $field_id . $field_classes . $field_name . '>' . $field['label'] . '</button></fieldset>';
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="submit">' . $field_comment . '<button ' . $field_id . $field_classes . $field_name . '>' . $field['label'] . '</button></fieldset>';
                     break;
                 case 'int':
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="int ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<input type="number" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
                     break;
                 case 'price':
+					$html .= '<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment;
+					$html .= '<input type="text" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
+					break;
                 case 'text':
                 default:
-                    $html .= '<fieldset id="field-' . $field['name'] . '"' . $fieldset_classes . '>' . $field_label . $field_comment;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment;
                     $html .= '<input type="text" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
                     break;
             }

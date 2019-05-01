@@ -1,6 +1,21 @@
-<?php // IPS-CORE Functions
+<?php // IPS-CORE Validation Functions
 
 class ipsCore_validate {
+	public static function link( $url ) {
+		$start = substr( $url, 0, 4 );
+
+		if ( !in_array( $start, [ 'http', 'www.' ] ) ) {
+			if ( substr( $start, 0, 1 ) != '/' ) {
+				return '/' . $url;
+			}
+		}
+		return $url;
+	}
+
+	public static function stripSlug( $url ) {
+		return trim( rtrim( $url, '/' ), '/' );
+	}
+
 	public static function notEmpty( $check ) {
 		if ( is_array( $check ) ) {
 			extract(self::_defaults($check));

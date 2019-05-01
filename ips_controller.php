@@ -118,6 +118,15 @@ class ipsCore_controller {
 		}
 	}
 
+	public function add_library( $libs ) {
+		if ( !is_array( $libs ) ) {
+			$libs = [ $libs ];
+		}
+		foreach ( $libs as $lib ) {
+			ipsCore::$data[ 'librarys' ][] = '/lib/' . $lib;
+		}
+	}
+
 	public function add_external_script( $scripts ) {
 		if ( is_array( $scripts ) ) {
 			foreach ( $scripts as $script ) {
