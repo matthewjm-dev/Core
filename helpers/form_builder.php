@@ -136,6 +136,7 @@ class ipsCore_form_builder
                 'options' => (isset($options['options']) ? $options['options'] : []),
                 'required' => (isset($options['required']) ? $options['required'] : false),
                 'placeholder' => (isset($options['placeholder']) ? $options['placeholder'] : NULL),
+                'placeholder_selectable' => (isset($options['placeholder_selectable']) ? $options['placeholder_selectable'] : NULL),
                 'comment' => (isset($options['comment']) ? $options['comment'] : NULL),
                 'classes' => (isset($options['classes']) ? $options['classes'] : NULL),
                 'fieldset_classes' => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] : NULL),
@@ -228,8 +229,8 @@ class ipsCore_form_builder
     public function validate_email( $field )
     {
         if ( filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
-            return true;
-        } return false;
+            return false;
+        } return true;
     }
 
     /* Password */
@@ -501,6 +502,11 @@ class ipsCore_form_builder
                 $field_comment = '<p>' . $field['comment'] . '</p>';
             }
 
+            $placeholder_selectable = false;
+            if ( isset( $field['placeholder_selectable'] ) && $field['placeholder_selectable'] ) {
+				$placeholder_selectable = true;
+			}
+
             switch ($field['type']) {
                 case 'section_start':
                     $html .= '<div ' . $field_id . ' class="form-section">';
@@ -525,7 +531,7 @@ class ipsCore_form_builder
                     if ($field['options'] || $field['placeholder']) {
                         $html .= '<select ' . $field_id . $field_classes . $field_name . '>';
                         if ($field['placeholder']) {
-                            $html .= '<option selected disabled="disabled">' . $field['placeholder'] . '</option>';
+                            $html .= '<option selected ' . ( $placeholder_selectable ? 'value="0"' : 'disabled="disabled"' ) . ' >' . $field['placeholder'] . '</option>';
                         }
                         if ($field['options'] && !empty($field['options'])) {
                             foreach ($field['options'] as $option) {
@@ -543,6 +549,9 @@ class ipsCore_form_builder
                 case 'radio':
                 case 'linkradio':
                     $html .= '<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment;
+				if ($field['placeholder']) {
+					$html .= '<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>';
+				}
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? '' . $field_id . '' : '';

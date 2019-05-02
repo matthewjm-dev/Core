@@ -103,8 +103,9 @@ class ipsCore_model
             $id => $this->get_pkey_args(),
             'created' => ['type' => 'varchar', 'length' => 255],
             'modified' => ['type' => 'varchar', 'length' => 255],
-            'live' => ['type' => 'int', 'length' => 11],
-            'removed' => ['type' => 'int', 'length' => 11],
+            'live' => ['type' => 'tinyint', 'length' => 1],
+            'removed' => ['type' => 'tinyint', 'length' => 1],
+            'locked' => ['type' => 'tinyint', 'length' => 1],
         ];
 
         if (ipsCore::$database->create_table($table, $fields)) {
