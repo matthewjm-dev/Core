@@ -145,4 +145,99 @@ class ipsCore_controller {
         return $view->display( true );
     }
 
+	public function set_pagination($model, $current = 1, $options = [])
+	{
+		$per_page = (isset( $options[ 'per_page'] ) ? $options[ 'per_page'] : 10 );
+		$show_around = (isset( $options[ 'show_around'] ) ? $options[ 'show_around'] : 2 );
+		$slug = (isset( $options[ 'slug'] ) ? $options[ 'slug'] . '/' : '' );
+
+		$total = $model->count();
+		$num_pages = ceil(($total / $per_page));
+		$show_pages = $show_around * 2;
+
+		$start_page = $current - $show_around;
+		$end_page = $current + $show_around;
+
+		if ($start_page <= 1) {
+			$start_page = 1;
+			$end_page = $show_pages + 1;
+			$start_show = false;
+		} else {
+			$start_show = true;
+		}
+
+		if ($end_page >= $num_pages) {
+			$start_page = $num_pages - $show_pages;
+			if ( $start_page <= 1 ) {
+				$start_page = 1;
+			}
+			$end_page = $num_pages;
+			$end_show = false;
+		} else {
+			$end_show = true;
+		}
+
+		$previous = ($current != 1 ? ipsCore::$uri_current . $slug . ($current - 1) : false);
+		$next = ($current != $num_pages ? ipsCore::$uri_current . $slug . ($current + 1) : false);
+
+		$items = [];
+
+		if ($start_show) {
+			$items[] = [
+				'href' => ipsCore::$uri_current . $slug . 1,
+				'text' => '...',
+				'current' => false
+			];
+		}
+
+		$i = $start_page;
+		while ($i <= $end_page) {
+			$items[] = [
+				'href' => ipsCore::$uri_current . $slug . $i,
+				'text' => $i,
+				'current' => ($i == $current ? true : false)
+			];
+			$i++;
+		}
+
+		if ($end_show) {
+			$items[] = [
+				'href' => ipsCore::$uri_current . $slug . $num_pages,
+				'text' => '...',
+				'current' => false
+			];
+		}
+
+		$this->add_data(['pagination' => $this->get_part('parts/pagination', [
+			'pagination_items' => $items,
+			'pagination_total' => $total,
+			'pagination_previous' => $previous,
+			'pagination_next' => $next
+		])]);
+	}
+
+	public function get_paginated($model, $current_page = 1, $options = [])
+	{
+		$per_page = (isset( $options[ 'per_page'] ) ? $options[ 'per_page'] : 10 );
+		$options[ 'per_page' ] = $per_page;
+		$where_extra = (isset( $options[ 'where'] ) ? $options[ 'where'] : [] );
+
+		if ( $where_extra === false ) {
+			$where = false;
+		} else {
+			$where = array_merge( $this->where_live(), $where_extra );
+		}
+
+		if (!$current_page) {
+			$current_page = 1;
+		}
+		$offset = ($current_page - 1) * $per_page;
+
+		$this->set_pagination($model, $current_page, $options);
+
+		$order = [$model->get_pkey(), 'DESC'];
+
+		return $model->get_all($where, $order, [$per_page, $offset]);
+	}
+
 }

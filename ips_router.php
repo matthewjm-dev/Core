@@ -119,6 +119,15 @@ class ipsCore_router
                             if ( $route_part_key == $num_route_parts ) {
                                 $this->route = $route;
                                 $this->route_canonical = $uri;
+
+                                if ( !$route->get_args() ) {
+									$args = ipsCore::$uri_parts;
+									unset($args[$route_part_key]);
+									$this->route->set_args($args);
+								}
+
+								ipsCore::$uri_current .= ipsCore::$app->get_uri() . '/' . $route->get_controller() . '/';
+
                                 $found_route = TRUE;
                                 break;
                             }
@@ -129,6 +138,9 @@ class ipsCore_router
                     }
                 }
             }
+			if ( $found_route ) {
+				break;
+			}
         }
 
         // assemble route

@@ -40,7 +40,13 @@ class ipsCore_database {
 						$name   = $param[0];
 						$value  = $param[1];
 						if ( !is_array( $value ) ) {
-							$type   = ( isset( $param[2] ) ) ? $param[2] : PDO::PARAM_STR;
+							if ( isset( $param[2] ) ) {
+								$type = $param[2];
+							} elseif( is_int($value)) {
+								$type = PDO::PARAM_INT;
+							} else {
+								$type = PDO::PARAM_STR;
+							}
 							if ( !$query->bindValue( $name, $value, $type ) ) {
 								$error = 'Failed to bind parameter: ' . $name . ' ' . $value . ' ' . $type . ' to query.';
 								ipsCore::add_error( $error, true );
@@ -201,7 +207,7 @@ class ipsCore_database {
                     $first = false;
 				}
 			} else {
-				$sql .= '';
+				$sql .= $where;
 			}
 		}
 
@@ -213,7 +219,7 @@ class ipsCore_database {
 		    if ( is_array( $limit ) ) {
                 //$sql .= ' LIMIT :limitoffset, :limitcount';
                 //$sql .= ' LIMIT :limitcount OFFSET :limitoffset';
-                $sql .= ' LIMIT ' . $limit[0] . ' OFFSET ' . $limit[1];
+                $sql .= ' LIMIT :limitcount OFFSET :limitoffset';
                 $params[]  = [ ':limitcount', $limit[0] ];
                 $params[]  = [ ':limitoffset', $limit[1] ];
             } else {
