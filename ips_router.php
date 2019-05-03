@@ -40,6 +40,7 @@ class ipsCore_route
     {
         $this->uri = $uri;
     }
+
     public function set_method($method)
     {
         $this->method = $method;
@@ -84,7 +85,7 @@ class ipsCore_router
         require_once(ipsCore::$path_app . '/routes.php'); // load App routes
         require_once(ipsCore::$path_apps . 'routes.php'); // load shared routes
 
-        $found_route = FALSE;
+        $found_route = false;
         $controller = 'pages';
         $method = 'index';
         $args = false;
@@ -100,7 +101,7 @@ class ipsCore_router
         $uri_variations = [
             ipsCore::$uri,
             ipsCore::$uri . '/',
-            rtrim(ipsCore::$uri, '/')
+            rtrim(ipsCore::$uri, '/'),
         ];
 
         // check for matching routes
@@ -108,39 +109,39 @@ class ipsCore_router
             if (isset($this->routes[$uri])) {
                 $this->route = $this->routes[$uri];
                 $this->route_canonical = $uri;
-                $found_route = TRUE;
+                $found_route = true;
                 break;
             } else {
-                foreach ( $this->routes as $route ) {
-                    $route_parts = explode( '/', $route->get_uri() );
-                    $num_route_parts = count( $route_parts ) -1;
+                foreach ($this->routes as $route) {
+                    $route_parts = explode('/', $route->get_uri());
+                    $num_route_parts = count($route_parts) - 1;
                     foreach ($route_parts as $route_part_key => $route_part) {
-                        if ( isset( ipsCore::$uri_parts[$route_part_key]) && ( ipsCore::$uri_parts[$route_part_key] == $route_part || $route_part === '*' ) ) {
-                            if ( $route_part_key == $num_route_parts ) {
+                        if (isset(ipsCore::$uri_parts[$route_part_key]) && (ipsCore::$uri_parts[$route_part_key] == $route_part || $route_part === '*')) {
+                            if ($route_part_key == $num_route_parts) {
                                 $this->route = $route;
                                 $this->route_canonical = $uri;
 
-                                if ( !$route->get_args() ) {
-									$args = ipsCore::$uri_parts;
-									unset($args[$route_part_key]);
-									$this->route->set_args($args);
-								}
+                                if (!$route->get_args()) {
+                                    $args = ipsCore::$uri_parts;
+                                    unset($args[$route_part_key]);
+                                    $this->route->set_args($args);
+                                }
 
-								ipsCore::$uri_current .= ipsCore::$app->get_uri() . '/' . $route->get_controller() . '/';
+                                ipsCore::$uri_current .= ipsCore::$app->get_uri() . '/' . $route->get_controller() . '/';
 
-                                $found_route = TRUE;
+                                $found_route = true;
                                 break;
                             }
                         }
                     }
-                    if ( $found_route ) {
+                    if ($found_route) {
                         break;
                     }
                 }
             }
-			if ( $found_route ) {
-				break;
-			}
+            if ($found_route) {
+                break;
+            }
         }
 
         // assemble route
@@ -200,7 +201,7 @@ class ipsCore_router
 
     public function add_route($uri, $controller, $method, $args = [])
     {
-        $route = new ipsCore_route( $uri, $controller, $method, $args );
+        $route = new ipsCore_route($uri, $controller, $method, $args);
         $this->routes[$uri] = $route;
     }
 
@@ -209,6 +210,7 @@ class ipsCore_router
         if (file_exists(ipsCore::get_controller_route($controller))) {
             return true;
         }
+
         return false;
     }
 
