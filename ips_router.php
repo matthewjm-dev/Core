@@ -154,7 +154,7 @@ class ipsCore_router
             }*/
 
             if (ipsCore::$app->get_uri() != '') {
-                $appless_uri = str_replace('/' . ipsCore::$app->get_uri(), '', ipsCore::$uri);
+                $appless_uri = str_replace('/' . ipsCore::$app->get_uri() . '/', '/', ipsCore::$uri);
                 ipsCore::$uri_current .= '/' . ipsCore::$app->get_uri();
             } else {
                 $appless_uri = ipsCore::$uri;
