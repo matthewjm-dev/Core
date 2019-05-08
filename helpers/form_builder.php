@@ -9,6 +9,27 @@ class ipsCore_form_builder
     protected $classes = [];
     protected $fields = [];
 
+    public static $field_types = [
+        'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
+        'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '4,2'],
+        'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
+        'email' => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
+        'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
+        'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
+        'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
+        'select' => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
+        'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
+        'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
+        'linkselect' => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
+        'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
+        'file' => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
+        'image' => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
+        'image_multi' => ['title' => 'Multiple Image Upload', 'type' => 'text', 'file' => false, 'multiple' => true],
+    ];
+
     // Getters
     public function get_name()
     {
@@ -43,7 +64,7 @@ class ipsCore_form_builder
         } elseif (isset($this->fields[$field]['default'])) {
             return $this->fields[$field]['default'];
         } else {
-            return NULL;
+            return null;
         }
     }
 
@@ -68,6 +89,11 @@ class ipsCore_form_builder
         $this->fields[$field]['value'] = $value;
     }
 
+    public static function add_field_type($key, array $args)
+    {
+        ipsCore_form_builder::$field_types[$key] = $args;
+    }
+
     // Construct
     public function __construct($name)
     {
@@ -77,39 +103,26 @@ class ipsCore_form_builder
     // Field Types
     public static function get_field_types($type = false, $nolinks = false)
     {
-        $fields = [
-            'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
-            'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '4,2'],
-            'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
-            'email' => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
-            'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
-            'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
-            'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
-            'select' => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
-            'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
-            'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
-            'linkselect' => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
-            'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
-            'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
-            'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
-            'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
-        ];
+        $fields = ipsCore_form_builder::$field_types;
 
         if ($type) {
             if (isset($fields[$type])) {
                 $field = $fields[$type];
                 $field['key'] = $type;
+
                 return $field;
             }
+
             return false;
         }
-        if ( $nolinks ) {
-            foreach( $fields as $field_key => $field ) {
-                if ( isset( $field[ 'link' ] ) && $field[ 'link' ] ) {
-                    unset( $fields[ $field_key ] );
+        if ($nolinks) {
+            foreach ($fields as $field_key => $field) {
+                if (isset($field['link']) && $field['link']) {
+                    unset($fields[$field_key]);
                 }
             }
         }
+
         return $fields;
     }
 
@@ -131,15 +144,15 @@ class ipsCore_form_builder
                 'name' => $name,
                 'label' => ($label ?: $name),
                 'type' => $type,
-                'value' => (isset($options['value']) ? $options['value'] : NULL),
-                'default' => (isset($options['default']) ? $options['default'] : NULL),
+                'value' => (isset($options['value']) ? $options['value'] : null),
+                'default' => (isset($options['default']) ? $options['default'] : null),
                 'options' => (isset($options['options']) ? $options['options'] : []),
                 'required' => (isset($options['required']) ? $options['required'] : false),
-                'placeholder' => (isset($options['placeholder']) ? $options['placeholder'] : NULL),
-                'placeholder_selectable' => (isset($options['placeholder_selectable']) ? $options['placeholder_selectable'] : NULL),
-                'comment' => (isset($options['comment']) ? $options['comment'] : NULL),
-                'classes' => (isset($options['classes']) ? $options['classes'] : NULL),
-                'fieldset_classes' => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] : NULL),
+                'placeholder' => (isset($options['placeholder']) ? $options['placeholder'] : null),
+                'placeholder_selectable' => (isset($options['placeholder_selectable']) ? $options['placeholder_selectable'] : null),
+                'comment' => (isset($options['comment']) ? $options['comment'] : null),
+                'classes' => (isset($options['classes']) ? $options['classes'] : null),
+                'fieldset_classes' => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] : null),
             ];
         } else {
             foreach ($errors as $error) {
@@ -205,6 +218,7 @@ class ipsCore_form_builder
         if (!is_int($this->fields[$field]['value'])) {
             return 'Field is not an integer';
         }
+
         return false;
     }
 
@@ -226,11 +240,13 @@ class ipsCore_form_builder
         $this->add_field($name, $label, 'email', $options);
     }
 
-    public function validate_email( $field )
+    public function validate_email($field)
     {
-        if ( filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
+        if (filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
             return false;
-        } return true;
+        }
+
+        return true;
     }
 
     /* Password */
@@ -283,6 +299,7 @@ class ipsCore_form_builder
     public function validate_select($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -302,6 +319,7 @@ class ipsCore_form_builder
     public function validate_radio($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -321,6 +339,7 @@ class ipsCore_form_builder
     public function validate_check($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -340,6 +359,7 @@ class ipsCore_form_builder
     public function validate_linkselect($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -359,6 +379,7 @@ class ipsCore_form_builder
     public function validate_linkradio($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -378,6 +399,7 @@ class ipsCore_form_builder
     public function validate_linkcheck($field)
     {
         $this->validate_field_options($field);
+
         return false;
     }
 
@@ -399,6 +421,28 @@ class ipsCore_form_builder
     }
 
     public function validate_colourpicker()
+    {
+        return false;
+    }
+
+    /* Image Upload */
+    public function add_image($name, $label, array $options = [])
+    {
+
+    }
+
+    public function validate_image()
+    {
+        return false;
+    }
+
+    /* Multiple Image Upload */
+    public function add_image_multi($name, $label, array $options = [])
+    {
+
+    }
+
+    public function validate_image_multi()
     {
         return false;
     }
@@ -459,6 +503,9 @@ class ipsCore_form_builder
 
             $field_id = 'id="' . $field['name'] . '"';
             $field_name = ' name="' . $field['name'] . '"';
+            if (isset($field['multiple']) && $field['multiple']) {
+                $field_name = ' name="' . $field['name'] . '[]"';
+            }
 
             if (isset($field['required']) && $field['required']) {
                 $required = true;
@@ -503,17 +550,13 @@ class ipsCore_form_builder
             }
 
             $placeholder_selectable = false;
-            if ( isset( $field['placeholder_selectable'] ) && $field['placeholder_selectable'] ) {
-				$placeholder_selectable = true;
-			}
+            if (isset($field['placeholder_selectable']) && $field['placeholder_selectable']) {
+                $placeholder_selectable = true;
+            }
 
             switch ($field['type']) {
                 case 'section_start':
                     $html .= '<div ' . $field_id . ' class="form-section">';
-                    break;
-                case 'section_start_repeater':
-                    $html .= '<div ' . $field_id . ' class="form-section repeater">';
-                    $html .= '	<div class="repeat-section"><span>Add</span></div>';
                     break;
                 case 'section_end':
                     $html .= '</div>';
@@ -531,7 +574,7 @@ class ipsCore_form_builder
                     if ($field['options'] || $field['placeholder']) {
                         $html .= '<select ' . $field_id . $field_classes . $field_name . '>';
                         if ($field['placeholder']) {
-                            $html .= '<option selected ' . ( $placeholder_selectable ? 'value="0"' : 'disabled="disabled"' ) . ' >' . $field['placeholder'] . '</option>';
+                            $html .= '<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>';
                         }
                         if ($field['options'] && !empty($field['options'])) {
                             foreach ($field['options'] as $option) {
@@ -549,9 +592,9 @@ class ipsCore_form_builder
                 case 'radio':
                 case 'linkradio':
                     $html .= '<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment;
-				if ($field['placeholder']) {
-					$html .= '<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>';
-				}
+                    if ($field['placeholder']) {
+                        $html .= '<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>';
+                    }
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? '' . $field_id . '' : '';
@@ -601,9 +644,35 @@ class ipsCore_form_builder
                     $html .= '<input type="number" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
                     break;
                 case 'price':
-					$html .= '<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment;
-					$html .= '<input type="text" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
-					break;
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<input type="text" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>';
+                    break;
+                case 'file':
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="file ' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<input type="file" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" />';
+                    if (isset($field['preview']) && !empty($field['preview'])) {
+                        $html .= '<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>';
+                    }
+                    $html .= '</fieldset>';
+                    break;
+                case 'image':
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="image ' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<input type="file" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" />';
+                    if (isset($field['preview']) && !empty($field['preview'])) {
+                        $html .= '<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>';
+                    }
+                    $html .= '</fieldset>';
+                    break;
+                case 'image_multi':
+                    $html .= '<fieldset id="field-' . $field['name'] . '" class="image-multi ' . $fieldset_classes . '">' . $field_label . $field_comment;
+                    $html .= '<input type="file" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" multiple />';
+                    if (isset($field['preview']) && is_array($field['preview']) && !empty($field['preview'])) {
+                        foreach ($field['preview'] as $preview) {
+                            $html .= '<div class="preview" src="' . $preview['url'] . '" ><a class="preview-url" href="' . $preview['url'] . '"><a class="preview-remove" href="' . $preview['remove'] . '"></a></a></div>';
+                        }
+                    }
+                    $html .= '</fieldset>';
+                    break;
                 case 'text':
                 default:
                     $html .= '<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment;
@@ -621,7 +690,7 @@ class ipsCore_form_builder
     public function populate_form($fields = false)
     {
         if (!$fields) {
-            $fields = ( isset( $_REQUEST ) ? $_REQUEST : [] );
+            $fields = (isset($_REQUEST) ? $_REQUEST : []);
         }
         foreach ($this->get_fields() as $field_key => $field) {
             if ($field_type = ipsCore_form_builder::get_field_types($field['type'])) {
@@ -629,26 +698,30 @@ class ipsCore_form_builder
                 if (is_object($fields)) {
                     if (isset($fields->$field_key)) {
                         $value = $fields->$field_key;
-                    } else if (isset($field->default) && !empty($field->default)) {
-                        $value = $field->default;
+                    } else {
+                        if (isset($field->default) && !empty($field->default)) {
+                            $value = $field->default;
+                        }
                     }
                 } else {
                     if (isset($fields[$field_key])) {
                         $value = $fields[$field_key];
-                    } else if (isset($field['default']) && !empty($field['default'])) {
-                        $value = $field['default'];
+                    } else {
+                        if (isset($field['default']) && !empty($field['default'])) {
+                            $value = $field['default'];
+                        }
                     }
                 }
 
-                if ( isset($field_type['link'])) {
+                if (isset($field_type['link'])) {
                     if (is_array($value)) {
                         $value = implode(',', $value);
                     }
 
                     $values = explode(',', $value);
-                    foreach( $values as $value_item ) {
+                    foreach ($values as $value_item) {
                         $option_key = array_search($value_item, array_column($this->fields[$field_key]['options'], 'value'));
-                        if ( $option_key !== false ) {
+                        if ($option_key !== false) {
                             $this->fields[$field_key]['options'][$option_key]['selected'] = true;
                         }
                     }
@@ -704,7 +777,7 @@ class ipsCore_form_builder
     {
         $return = '';
 
-        if ( (@unserialize($options) !== false) ) {
+        if ((@unserialize($options) !== false)) {
             $options = unserialize($options);
 
             if (!empty($options)) {
@@ -725,7 +798,7 @@ class ipsCore_form_builder
     {
         $return = '';
 
-        if ( (@unserialize($options) !== false) ) {
+        if ((@unserialize($options) !== false)) {
             $return = unserialize($options);
         }
 

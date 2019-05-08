@@ -221,13 +221,19 @@ class ipsCore {
         }
     }
 
-    public static function requires_helper( $helper ) {
+    public static function requires_helper( $helpers ) {
 
-        if ( in_array( $helper, self::$helpers ) && !in_array( $helper, self::$helpers_active ) ) {
-            self::$helpers_active[] = $helper;
-            require_once( self::$path_core_helpers . $helper . '.php' );
-        } else {
-            self::add_error( 'Helper "' . $helper . '" is already active.' );
+        if ( !is_array( $helpers ) ) {
+            $helpers = [ $helpers ];
+        }
+
+        foreach ( $helpers as $helper ) {
+            if ( in_array( $helper, self::$helpers ) && !in_array( $helper, self::$helpers_active ) ) {
+                self::$helpers_active[] = $helper;
+                require_once( self::$path_core_helpers . $helper . '.php' );
+            } else {
+                self::add_error( 'Helper "' . $helper . '" is already active.' );
+            }
         }
     }
 
