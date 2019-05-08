@@ -4,6 +4,8 @@ class ipsCore_uploader
 {
 
     public static $upload_directory = '/public/uploads/';
+    public static $allowed_types_images = ['jpg','png','jpeg','gif'];
+    public static $allowed_types_files = [];
 
     public static function get_sent_file($name)
     {
@@ -18,15 +20,24 @@ class ipsCore_uploader
         return $file;
     }
 
-    public static function do_upload_file($file) {
+    public static function do_upload_file($file, $type) {
+        if ($type == 'image') {
+            if (ipsCore_uploader::validate_image($file)) {
 
+            }
+        } elseif ($type == 'file') {
+            if (ipsCore_uploader::validate_file($file)) {
+
+            }
+        }
     }
 
-    public static function validate_file() {
-
+    public static function validate_file($file) {
+        return true;
     }
 
-    public static function validate_image() {
-
+    public static function validate_image($file) {
+        $fileType = pathinfo($file,PATHINFO_EXTENSION);
+        return true;
     }
 }
