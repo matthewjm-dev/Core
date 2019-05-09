@@ -27,7 +27,6 @@ class ipsCore_form_builder
         'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
         'file' => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
         'image' => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
-        'image_multi' => ['title' => 'Multiple Image Upload', 'type' => 'text', 'file' => false, 'multiple' => true],
     ];
 
     public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$';

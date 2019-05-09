@@ -28,6 +28,7 @@ class ipsCore_uploader
         $raw_file = ipsCore_uploader::get_sent_file($file_name);
         $raw_file['uploadto'] = ipsCore_uploader::$upload_directory . $raw_file['name'];
         $raw_file['extension'] = strtolower(pathinfo($raw_file['name'], PATHINFO_EXTENSION));
+        $raw_file['basename'] = basename($raw_file['uploadto'],"." . $raw_file['extension']);
 
         if ($type == 'image') {
             ipsCore_uploader::validate_image($raw_file, $errors);
@@ -37,16 +38,20 @@ class ipsCore_uploader
 
         if (empty($errors)) {
             if (file_exists(ipsCore_uploader::$upload_directory)) {
-                if (!file_exists($raw_file['uploadto'])) {
-                    if ($raw_file["size"] <= ipsCore_uploader::$max_upload_size) {
-                        if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
-                            $errors[] = 'There was a problem moving the uploaded file.';
-                        }
-                    } else {
-                        $errors[] = 'That file is too large, max upload size is: ' . ipsCore_uploader::$max_upload_size . ' bytes.';
+                $i = 2;
+                $uploadto = $raw_file['uploadto'];
+                while (file_exists($uploadto)) {
+                    $uploadto = ipsCore_uploader::$upload_directory . $raw_file['basename'] . '-' . $i . '.' . $raw_file['extension'];
+                    $i++;
+                }
+                $raw_file['uploadto'] = $uploadto;
+
+                if ($raw_file["size"] <= ipsCore_uploader::$max_upload_size) {
+                    if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
+                        $errors[] = 'There was a problem moving the uploaded file.';
                     }
                 } else {
-                    $errors[] = 'A File with that name already exists.';
+                    $errors[] = 'That file is too large, max upload size is: ' . ipsCore_uploader::$max_upload_size . ' bytes.';
                 }
             } else {
                 $errors[] = 'The uploads directory does not appear to exist.';
