@@ -30,6 +30,9 @@ class ipsCore_form_builder
         'image_multi' => ['title' => 'Multiple Image Upload', 'type' => 'text', 'file' => false, 'multiple' => true],
     ];
 
+    public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$';
+    public static $password_message = 'Passwords must be at least 6 characters long, contain at least one Uppercase and Lowercase characters and at least one number.';
+
     // Getters
     public function get_name()
     {
@@ -255,8 +258,11 @@ class ipsCore_form_builder
         $this->add_field($name, $label, 'password', $options);
     }
 
-    public function validate_password()
+    public function validate_password($field)
     {
+        if ( !preg_match(ipsCore_form_builder::$password_complexity, $this->fields[$field]['value'])) {
+            return ipsCore_form_builder::$password_message;
+        }
         return false;
     }
 
@@ -425,24 +431,25 @@ class ipsCore_form_builder
         return false;
     }
 
-    /* Image Upload */
-    public function add_image($name, $label, array $options = [])
-    {
 
+    /* File Upload */
+    public function add_file($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'file', $options);
     }
 
-    public function validate_image()
+    public function validate_file()
     {
         return false;
     }
 
-    /* Multiple Image Upload */
-    public function add_image_multi($name, $label, array $options = [])
+    /* Image Upload */
+    public function add_image($name, $label, array $options = [])
     {
-
+        $this->add_field($name, $label, 'image', $options);
     }
 
-    public function validate_image_multi()
+    public function validate_image()
     {
         return false;
     }
@@ -663,16 +670,6 @@ class ipsCore_form_builder
                     }
                     $html .= '</fieldset>';
                     break;
-                case 'image_multi':
-                    $html .= '<fieldset id="field-' . $field['name'] . '" class="image-multi ' . $fieldset_classes . '">' . $field_label . $field_comment;
-                    $html .= '<input type="file" ' . $field_id . $field_classes . $field_name . $field_value . ' placeholder="' . $field['placeholder'] . '" multiple />';
-                    if (isset($field['preview']) && is_array($field['preview']) && !empty($field['preview'])) {
-                        foreach ($field['preview'] as $preview) {
-                            $html .= '<div class="preview" src="' . $preview['url'] . '" ><a class="preview-url" href="' . $preview['url'] . '"><a class="preview-remove" href="' . $preview['remove'] . '"></a></a></div>';
-                        }
-                    }
-                    $html .= '</fieldset>';
-                    break;
                 case 'text':
                 default:
                     $html .= '<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment;
@@ -695,6 +692,7 @@ class ipsCore_form_builder
         foreach ($this->get_fields() as $field_key => $field) {
             if ($field_type = ipsCore_form_builder::get_field_types($field['type'])) {
                 $value = false;
+
                 if (is_object($fields)) {
                     if (isset($fields->$field_key)) {
                         $value = $fields->$field_key;
@@ -710,6 +708,12 @@ class ipsCore_form_builder
                         if (isset($field['default']) && !empty($field['default'])) {
                             $value = $field['default'];
                         }
+                    }
+                }
+
+                if (isset($field_type['file'])) {
+                    if (isset($_FILES['files']['name'][$field_key])) {
+                        $value = $_FILES['files']['name'][$field_key];
                     }
                 }
 

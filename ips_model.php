@@ -101,8 +101,8 @@ class ipsCore_model
         $table = $this->add_prefix($table);
         $fields = [
             $id => $this->get_pkey_args(),
-            'created' => ['type' => 'varchar', 'length' => 255],
-            'modified' => ['type' => 'varchar', 'length' => 255],
+            'created' => ['type' => 'int', 'length' => 11],
+            'modified' => ['type' => 'int', 'length' => 11],
             'live' => ['type' => 'tinyint', 'length' => 1],
             'removed' => ['type' => 'tinyint', 'length' => 1],
             'locked' => ['type' => 'tinyint', 'length' => 1],

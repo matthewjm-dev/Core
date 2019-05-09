@@ -263,6 +263,7 @@ class ipsCore_controller
 
     public function get_paginated($model, $current_page = 1, $options = [])
     {
+        if (!is_int($current_page)) { $current_page = 1; }
         $per_page = (isset($options['per_page']) ? $options['per_page'] : 10);
         $options['per_page'] = $per_page;
         $where_extra = (isset($options['where']) ? $options['where'] : []);
