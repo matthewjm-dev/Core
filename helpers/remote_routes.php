@@ -1,6 +1,6 @@
 <?php // IPS-CORE Remote Routes
 
-ipsCore::requires_helper( 'database' );
+ipsCore::requires_core_helper( 'database' );
 
 class ipsCore_remote_routes {
 

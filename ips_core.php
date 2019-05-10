@@ -10,12 +10,13 @@ class ipsCore {
     public static $environment;
 
     public static $path_base;
-    public static $path_apps;
-    public static $path_app;
     public static $path_core;
     public static $path_core_includes;
     public static $path_core_helpers;
     public static $path_libraries;
+    public static $path_apps;
+    public static $path_app;
+    public static $path_app_helpers;
     public static $path_public;
     public static $path_public_css;
     public static $path_public_js;
@@ -211,12 +212,33 @@ class ipsCore {
     }
 
     public static function find_helpers() {
-        $helpers = glob( self::$path_core_helpers . '*.php' );
-        if ( $helpers ) {
-            foreach( $helpers as $helper ) {
-                if ( is_file( $helper ) ) {
-                    self::$helpers[] = basename( $helper, '.php' );
+        $helpers_dir = [
+            glob( self::$path_core_helpers . '*.php' ),
+            glob( self::$path_app_helpers . '*.php' ),
+        ];
+        foreach( $helpers_dir as $helpers ) {
+            if ( $helpers ) {
+                foreach( $helpers as $helper ) {
+                    if ( is_file( $helper ) ) {
+                        self::$helpers[] = basename( $helper, '.php' );
+                    }
                 }
+            }
+        }
+    }
+
+    public static function requires_core_helper( $helpers ) {
+
+        if ( !is_array( $helpers ) ) {
+            $helpers = [ $helpers ];
+        }
+
+        foreach ( $helpers as $helper ) {
+            if ( in_array( $helper, self::$helpers ) && !in_array( $helper, self::$helpers_active ) ) {
+                self::$helpers_active[] = $helper;
+                require_once( self::$path_core_helpers . $helper . '.php' );
+            } else {
+                self::add_error( 'Helper "' . $helper . '" is already active.' );
             }
         }
     }
@@ -230,9 +252,9 @@ class ipsCore {
         foreach ( $helpers as $helper ) {
             if ( in_array( $helper, self::$helpers ) && !in_array( $helper, self::$helpers_active ) ) {
                 self::$helpers_active[] = $helper;
-                require_once( self::$path_core_helpers . $helper . '.php' );
+                require_once( self::$path_app_helpers . $helper . '.php' );
             } else {
-                self::add_error( 'Helper "' . $helper . '" is already active.' );
+                self::add_error( 'Helper "' . $helper . '" is already active (ensure name does not conflict with a core helper).' );
             }
         }
     }
