@@ -97,7 +97,7 @@ class ipsCore_form_builder
         $this->fields[$field]['value'] = $value;
     }
 
-    public function add_form_html($html)
+    public function form_html($html)
     {
         $this->form_html .= $html;
     }
@@ -195,7 +195,7 @@ class ipsCore_form_builder
 
     public function render_section_start($field)
     {
-        $this->add_form_html('<div id="' . $field['name'] . '" class="form-section">');
+        $this->form_html('<div id="' . $field['name'] . '" class="form-section">');
     }
 
     public function end_section($name)
@@ -206,9 +206,9 @@ class ipsCore_form_builder
         ];
     }
 
-    public function render_section_end($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_section_end($field, $args)
     {
-        $this->add_form_html('</div>');
+        $this->form_html('</div>');
     }
 
     public function add_html($name, $content)
@@ -220,9 +220,9 @@ class ipsCore_form_builder
         ];
     }
 
-    public function render_html($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_html($field, $args)
     {
-        $this->add_form_html($field['placeholder']);
+        $this->form_html($field['placeholder']);
     }
 
     /* Text Box */
@@ -236,10 +236,10 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_text($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_text($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '' ) . '" /></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="text ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '' ) . '" /></fieldset>');
     }
 
     /* Int */
@@ -259,10 +259,10 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_int($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_int($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="int ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="int ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Price */
@@ -277,10 +277,10 @@ class ipsCore_form_builder
 
     }
 
-    public function render_price($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_price($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes .  $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="price ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] .  $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Email Address */
@@ -298,7 +298,7 @@ class ipsCore_form_builder
         return true;
     }
 
-    public function render_email($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_email($field, $args)
     {
 
     }
@@ -318,10 +318,10 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_password($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_password($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="password ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="password" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="password ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="password" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Textarea */
@@ -335,10 +335,10 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_textarea($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_textarea($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['value'] . '</textarea></fieldset>');
     }
 
     /* WYSIWYG Editor */
@@ -353,10 +353,10 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_editor($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_editor($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['value'] . '</textarea></fieldset>');
     }
 
     /* Select Dropdown */
@@ -379,31 +379,31 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_select($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_select($field, $args)
     {
         $placeholder_selectable = false;
         if (isset($field['placeholder_selectable']) && $field['placeholder_selectable']) {
             $placeholder_selectable = true;
         }
 
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $fieldset_classes . '">' . $field_label . $field_comment);
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options'] || $field['placeholder']) {
-            $this->add_form_html('<select id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>');
+            $this->form_html('<select id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>');
             if ($field['placeholder']) {
-                $this->add_form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
+                $this->form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
             }
             if ($field['options'] && !empty($field['options'])) {
                 foreach ($field['options'] as $option) {
                     $option_selected = ((isset($option['selected']) && $option['selected'] === true) || ($option['value'] == $field['value'])) ? 'selected' : '';
                     $option_disabled = (isset($option['disabled']) && $option['disabled'] === true) ? ' disabled' : '';
-                    $this->add_form_html('<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>');
+                    $this->form_html('<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>');
                 }
             }
-            $this->add_form_html('</select>');
+            $this->form_html('</select>');
         } else {
-            $this->add_form_html('<p>No Options</p>');
+            $this->form_html('<p>No Options</p>');
         }
-        $this->add_form_html('</fieldset>');
+        $this->form_html('</fieldset>');
     }
 
     /* Radio Buttons */
@@ -426,22 +426,22 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_radio($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_radio($field, $args)
     {
         $first = true;
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment);
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['placeholder']) {
-            $this->add_form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
+            $this->form_html('<label class="radiofield"><input' . $args['field_classes'] . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
         }
         if ($field['options']) {
             foreach ($field['options'] as $option) {
                 $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                 $option_selected = ($option['value'] == $field['value']) ? 'checked' : '';
-                $this->add_form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                $this->form_html('<label class="radiofield"><input' . $args['field_classes'] . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                 $first = false;
             }
         }
-        $this->add_form_html('</fieldset>');
+        $this->form_html('</fieldset>');
     }
 
     /* Check Boxes */
@@ -464,19 +464,19 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_check($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_check($field, $args)
     {
         $first = true;
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="check ' . $fieldset_classes . '">' . $field_label . $field_comment);
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="check ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options']) {
             foreach ($field['options'] as $option) {
                 $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                 $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                $this->add_form_html('<label class="checkfield"><input' . $field_classes . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                $this->form_html('<label class="checkfield"><input' . $args['field_classes'] . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                 $first = false;
             }
         }
-        $this->add_form_html('</fieldset>');
+        $this->form_html('</fieldset>');
     }
 
     /* Select Dropdown ( LINK field ) */
@@ -499,9 +499,9 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_linkselect($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_linkselect($field, $args)
     {
-        return $this->render_select($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment);
+        return $this->render_select($field, $args);
     }
 
     /* Radio Buttons ( LINK field ) */
@@ -524,9 +524,9 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_linkradio($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_linkradio($field, $args)
     {
-        return $this->render_radio($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment);
+        return $this->render_radio($field, $args);
     }
 
     /* Check Boxes ( LINK field ) */
@@ -549,9 +549,9 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_linkcheck($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_linkcheck($field, $args)
     {
-        return $this->render_check($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment);
+        return $this->render_check($field, $args);
     }
 
     /* Date Picker */
@@ -565,7 +565,7 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_datepicker($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_datepicker($field, $args)
     {
 
     }
@@ -581,7 +581,7 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_colourpicker($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_colourpicker($field, $args)
     {
 
     }
@@ -597,14 +597,14 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_file($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_file($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="file ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="file ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
-            $this->add_form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
+            $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
         }
-        $this->add_form_html('</fieldset>');
+        $this->form_html('</fieldset>');
     }
 
     /* Image Upload */
@@ -618,14 +618,14 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_image($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_image($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $fieldset_classes . '">' . $field_label . $field_comment);
-        $this->add_form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
-            $this->add_form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
+            $this->form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
         }
-        $this->add_form_html('</fieldset>');
+        $this->form_html('</fieldset>');
     }
 
     /* Hidden */
@@ -639,9 +639,9 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_hidden($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_hidden($field, $args)
     {
-        $this->add_form_html('<input type="hidden" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' />');
+        $this->form_html('<input type="hidden" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' />');
     }
 
     /* Submit */
@@ -650,9 +650,9 @@ class ipsCore_form_builder
         $this->add_field($name, $label, 'submit', $options);
     }
 
-    public function render_submit($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment)
+    public function render_submit($field, $args)
     {
-        $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $field_comment . '<button id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['label'] . '</button></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['label'] . '</button></fieldset>');
     }
 
     public function render_fields()
@@ -663,7 +663,7 @@ class ipsCore_form_builder
     public function render($fields_only = false)
     {
         if (!$fields_only) {
-            $this->add_form_html('<form id="' . $this->get_name() . '"
+            $this->form_html('<form id="' . $this->get_name() . '"
 					class="' . implode(' ', $this->get_classes()) . '"
 					action="' . $this->get_action() . '"
 					method="' . $this->get_method() . '">');
@@ -716,21 +716,29 @@ class ipsCore_form_builder
             if (!method_exists($this, $render_function)) {
                 $render_function = 'render_text';
             }
-            $this->{$render_function}($field, $field_classes, $fieldset_classes, $field_label, $field_default, $field_value, $field_comment );
+            $args = [
+				'field_classes' => $field_classes,
+				'fieldset_classes' => $fieldset_classes,
+				'field_label' => $field_label,
+				'field_default' => $field_default,
+				'field_value' => $field_value,
+				'field_comment' => $field_comment,
+			];
+            $this->{$render_function}($field, $args );
 
             /*switch ($field['type']) {
                 case 'section_start':
-                    $this->add_form_html('<div id="' . $field['name'] . '" class="form-section">');
+                    $this->form_html('<div id="' . $field['name'] . '" class="form-section">');
                     break;
                 case 'section_end':
-                    $this->add_form_html('</div>');
+                    $this->form_html('</div>');
                     break;
                 case 'html':
-                    $this->add_form_html($field['placeholder']);
+                    $this->form_html($field['placeholder']);
                     break;
                 case 'password':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="password ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="password" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="password ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="password" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
                     break;
                 case 'select':
                 case 'linkselect':
@@ -739,63 +747,63 @@ class ipsCore_form_builder
                         $placeholder_selectable = true;
                     }
 
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $fieldset_classes . '">' . $field_label . $field_comment);
                     if ($field['options'] || $field['placeholder']) {
-                        $this->add_form_html('<select id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>');
+                        $this->form_html('<select id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>');
                         if ($field['placeholder']) {
-                            $this->add_form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
+                            $this->form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
                         }
                         if ($field['options'] && !empty($field['options'])) {
                             foreach ($field['options'] as $option) {
                                 $option_selected = ((isset($option['selected']) && $option['selected'] === true) || ($option['value'] == $field['value'])) ? 'selected' : '';
                                 $option_disabled = (isset($option['disabled']) && $option['disabled'] === true) ? ' disabled' : '';
-                                $this->add_form_html('<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>');
+                                $this->form_html('<option value="' . $option['value'] . '" ' . $option_selected . $option_disabled . '>' . $option['text'] . '</option>');
                             }
                         }
-                        $this->add_form_html('</select>');
+                        $this->form_html('</select>');
                     } else {
-                        $this->add_form_html('<p>No Options</p>');
+                        $this->form_html('<p>No Options</p>');
                     }
-                    $this->add_form_html('</fieldset>');
+                    $this->form_html('</fieldset>');
                     break;
                 case 'radio':
                 case 'linkradio':
                     $first = true;
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $fieldset_classes . '">' . $field_label . $field_comment);
                     if ($field['placeholder']) {
-                        $this->add_form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
+                        $this->form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
                     }
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                             $option_selected = ($option['value'] == $field['value']) ? 'checked' : '';
-                            $this->add_form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                            $this->form_html('<label class="radiofield"><input' . $field_classes . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                             $first = false;
                         }
                     }
-                    $this->add_form_html('</fieldset>');
+                    $this->form_html('</fieldset>');
                     break;
                 case 'check':
                 case 'linkcheck':
                     $first = true;
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="check ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="check ' . $fieldset_classes . '">' . $field_label . $field_comment);
                     if ($field['options']) {
                         foreach ($field['options'] as $option) {
                             $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                             $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                            $this->add_form_html('<label class="checkfield"><input' . $field_classes . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                            $this->form_html('<label class="checkfield"><input' . $field_classes . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                             $first = false;
                         }
                     }
-                    $this->add_form_html('</fieldset>');
+                    $this->form_html('</fieldset>');
                     break;
                 case 'textarea':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
                     break;
                 case 'editor':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['value'] . '</textarea></fieldset>');
                     break;
                 case 'datepicker':
 
@@ -804,44 +812,44 @@ class ipsCore_form_builder
 
                     break;
                 case 'hidden':
-                    $this->add_form_html('<input type="hidden" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' />');
+                    $this->form_html('<input type="hidden" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_value . ' />');
                     break;
                 case 'submit':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $field_comment . '<button id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['label'] . '</button></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $field_comment . '<button id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . '>' . $field['label'] . '</button></fieldset>');
                     break;
                 case 'int':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="int ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="int ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
                     break;
                 case 'price':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes .  $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="price ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes .  $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
                     break;
                 case 'file':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="file ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="file ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
                     if (isset($field['preview']) && !empty($field['preview'])) {
-                        $this->add_form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
+                        $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
                     }
-                    $this->add_form_html('</fieldset>');
+                    $this->form_html('</fieldset>');
                     break;
                 case 'image':
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" />');
                     if (isset($field['preview']) && !empty($field['preview'])) {
-                        $this->add_form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
+                        $this->form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
                     }
-                    $this->add_form_html('</fieldset>');
+                    $this->form_html('</fieldset>');
                     break;
                 case 'text':
                 default:
-                    $this->add_form_html('<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment);
-                    $this->add_form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+                    $this->form_html('<fieldset id="field-' . $field['name'] . '" class="text ' . $fieldset_classes . '">' . $field_label . $field_comment);
+                    $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $field_classes . $field_value . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
                     break;
             }*/
         }
         if (!$fields_only) {
-            $this->add_form_html('</form>');
+            $this->form_html('</form>');
         }
 
         return $this->get_form_html();
