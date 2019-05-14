@@ -108,11 +108,12 @@ class ips_json {
 			if ( $this->view_exists( $view_path ) ) {
 				include( $view_path );
 			}
+
 			if (isset(ipsCore::$data[ 'json' ])) {
 			    $json = ipsCore::$data[ 'json' ];
                 unset( ipsCore::$data[ 'json' ] );
             } else {
-                $json = '';
+                $json = true;
             }
 
 			$data = [ 'html' => ob_get_clean(), 'json' => $json ];
