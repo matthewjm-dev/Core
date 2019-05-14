@@ -67,11 +67,19 @@ class ipsCore_form_builder
     public function get_field_value($field)
     {
         //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
-        if (isset($this->fields[$field]['value'])) {
+        if (isset($this->fields[$field]['value']) && $this->fields[$field]['value']) {
             return $this->fields[$field]['value'];
-        } elseif (isset($this->fields[$field]['default'])) {
+        } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default']) {
             return $this->fields[$field]['default'];
         } else {
+            $field_type = self::get_field_types($this->fields[$field]['type']);
+            if ( $field_type['type'] == 'int') {
+                if ( isset( $field_type['default'])) {
+                    return $field_type['default'];
+                } else {
+                    return 0;
+                }
+            }
             return null;
         }
     }

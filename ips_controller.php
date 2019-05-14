@@ -5,6 +5,7 @@ class ipsCore_controller
 
     protected $name;
     protected $view;
+    protected $additional;
 
     public $models = [];
 
@@ -21,6 +22,11 @@ class ipsCore_controller
         return $this->view;
     }
 
+    public function get_additional()
+    {
+        return $this->additional;
+    }
+
     // SETTERS
     public function set_name($name)
     {
@@ -32,9 +38,15 @@ class ipsCore_controller
         $this->view = $view;
     }
 
-    public function __construct($controller)
+    public function set_additional($additional)
+    {
+        $this->additional = $additional;
+    }
+
+    public function __construct($controller, $additional = false)
     {
         $this->set_name($controller);
+        $this->set_additional($additional);
     }
 
     public function set_page_title($title)
@@ -84,7 +96,6 @@ class ipsCore_controller
 
     public function build_view($build = 'html', $show_in_layout = true)
     {
-
         if ($build == 'html') {
             if (!$this->get_view()) {
                 $view_path = $this->get_name() . '/' . ipsCore::$router->get_route()->get_method();

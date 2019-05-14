@@ -133,15 +133,17 @@ class ipsCore {
 
     public static function requires_controller( $controllers, $app = false ) {
         if ( !is_array( $controllers ) ) {
-            $controllers = array( $controllers );
+            $controllers = [ $controllers ];
         }
         foreach ( $controllers as $controller ) {
             $controller_path = self::get_controller_route( $controller, $app );
 
             if ( file_exists( $controller_path ) ) {
                 require_once( $controller_path );
+                return true;
             } else {
                 self::add_error( 'Required Controller "' . $controller . '" does not exist.' );
+                return false;
             }
         }
     }
@@ -159,20 +161,6 @@ class ipsCore {
                 require_once( $model_path );
             } else {
                 self::add_error( 'Required Model "' . $model . '" does not exist.' );
-            }
-        }
-    }
-
-    public static function requires_object( $objects, $app = false ) {
-        if ( !is_array( $objects ) ) {
-            $objects = [ $objects ];
-        }
-        foreach ( $objects as $object ) {
-            $object_path = self::get_object_path_route( $object, $app );
-            if ( file_exists( $object_path ) ) {
-                require_once( $object_path );
-            } else {
-                self::add_error( 'Required Object "' . $object . '" does not exist.' );
             }
         }
     }
@@ -199,6 +187,21 @@ class ipsCore {
 
     public static function get_part_route( $part ) {
         return self::get_file_route( $part, 'parts' );
+    }
+
+    public static function get_additional_controller( $controller ) {
+        if (ipsCore::requires_controller($controller)) {
+
+            $controller_name = str_replace('/', '_', $controller) . '_controller';
+
+            if (class_exists($controller_name)) {
+                $controller = new $controller_name($controller, true);
+
+                return $controller;
+            }
+        }
+
+        return false;
     }
 
     private static function get_file_route( $file, $dir, $app = false ) {
