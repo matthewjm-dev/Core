@@ -447,7 +447,7 @@ class ipsCore_form_builder
         if ($field['options']) {
             foreach ($field['options'] as $option) {
                 $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
-                $option_selected = ($option['value'] == $field['value']) ? 'checked' : '';
+                $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
                 $this->form_html('<label class="radiofield"><input' . $args['field_classes'] . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                 $first = false;
             }
