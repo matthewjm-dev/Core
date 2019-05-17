@@ -9,8 +9,6 @@ class ipsCore_controller
 
     public $models = [];
 
-    private $reserved_data_keys = array('stylesheets', 'scripts', 'page_title', /*'breadcrumbs', 'flash_message'*/);
-
     // GETTERS
     public function get_name()
     {
@@ -110,22 +108,7 @@ class ipsCore_controller
 
     public function add_data(array $data_items)
     {
-        foreach ($data_items as $data_key => $data_value) {
-            if (!in_array($data_key, $this->reserved_data_keys)) {
-                ipsCore::$data[$data_key] = $data_value;
-            } else {
-                ipsCore::add_error('Data key "' . $data_key . '" ( "' . print_r($data_value, true) . '" ) is reserved.');
-            }
-        }
-    }
-
-    public function get_data($key)
-    {
-        if (isset(ipsCore::$data[$key])) {
-            return ipsCore::$data[$key];
-        } else {
-            ipsCore::add_error('Data key "' . $key . '" does not exist.');
-        }
+        ipsCore::add_data($data_items);
     }
 
     public function add_stylesheet($stylesheets)
