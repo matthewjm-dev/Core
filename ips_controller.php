@@ -153,7 +153,7 @@ class ipsCore_controller
                 $extentions = [$extentions];
             }
             foreach ($extentions as $extention) {
-                if ( in_array($extention, [ 'min.js', 'js' ] ) ) {
+                if (in_array($extention, ['min.js', 'js'])) {
                     ipsCore::$data['libraries']['scripts'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
                 } else {
                     ipsCore::$data['libraries']['styles'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
@@ -194,6 +194,9 @@ class ipsCore_controller
 
         $start_page = $current - $show_around;
         $end_page = $current + $show_around;
+
+        $start_item = ($current == 1 ? 1 : ($current * $per_page) - ($per_page - 1));
+        $end_item = ($current == 1 ? ($per_page > $total ? $total : $per_page) : (($current * $per_page) > $total ? $total : ($current * $per_page)));
 
         if ($start_page <= 1) {
             $start_page = 1;
@@ -248,7 +251,7 @@ class ipsCore_controller
         $this->add_data([
             'pagination' => $this->get_part('parts/pagination', [
                 'pagination_items' => $items,
-                'pagination_total' => $total,
+                'pagination_total' => 'Showing ' . $start_item . ' - ' . $end_item . ' of ' . $total,
                 'pagination_previous' => $previous,
                 'pagination_next' => $next,
             ]),
@@ -257,7 +260,6 @@ class ipsCore_controller
 
     public function get_paginated($model, $current_page = 1, $options = [])
     {
-        if (!is_int($current_page)) { $current_page = 1; }
         $per_page = (isset($options['per_page']) ? $options['per_page'] : 10);
         $options['per_page'] = $per_page;
         $where_extra = (isset($options['where']) ? $options['where'] : []);
@@ -278,6 +280,11 @@ class ipsCore_controller
         $order = [$model->get_pkey(), 'DESC'];
 
         return $model->get_all($where, $order, [$per_page, $offset]);
+    }
+
+    public function where_live()
+    {
+        return ['live' => 1, 'removed' => 0];
     }
 
 }
