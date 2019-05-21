@@ -70,6 +70,40 @@ class ipsCore_model
         return (substr($text, 0, strlen(DB_PREFIX)) === DB_PREFIX ? $text : DB_PREFIX . $text);
     }
 
+    public function prefix_join($join)
+    {
+        if ($join) {
+            if (isset($join['table'])) {
+                $join['table'] = $this->add_prefix($join['table']);
+            }
+
+            if (isset($join['on'][0]) && isset($join['on'][1])) {
+                if (strpos($join['on'][0], ".") !== false) {
+                    $join['on'][0] = $this->add_prefix($join['on'][0]);
+                }
+                if (strpos($join['on'][1], ".") !== false) {
+                    $join['on'][1] = $this->add_prefix($join['on'][1]);
+                }
+            }
+        }
+
+        return $join;
+    }
+
+    public function prefix_where($where)
+    {
+        if ($where) {
+            foreach($where as $where_key => $where_item) {
+                if (strpos($where_key, ".") !== false) {
+                    unset($where[$where_key]);
+                    $where[$this->add_prefix($where_key)] = $where_item;
+                }
+            }
+        }
+
+        return $where;
+    }
+
     public function set_schema()
     {
         $this->fields = [];
@@ -181,9 +215,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all_data($where = false, $order = false, $limit = false)
+    public function get_all_data($where = false, $order = false, $limit = false, $join = false)
     {
-        $items = ipsCore::$database->select($this->table, '*', $where, $order, $limit);
+        $items = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
 
         if (!empty($items)) {
             return $items;
@@ -191,9 +225,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all($where = false, $order = false, $limit = false)
+    public function get_all($where = false, $order = false, $limit = false, $join = false)
     {
-        $items = $this->get_all_data($where, $order, $limit);
+        $items = $this->get_all_data($where, $order, $limit, $join);
         $model = get_class($this);
         $objects = [];
 
@@ -219,7 +253,7 @@ class ipsCore_model
             $where = [$this->get_pkey() => $where];
         }
 
-        $item = ipsCore::$database->select($this->table, '*', $where, false, 1);
+        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
 
         if (!empty($item)) {
             $item = $item[0];
@@ -235,13 +269,17 @@ class ipsCore_model
         return false;
     }
 
-    public function retrieve($where)
+    public function retrieve($where, $order = false, $limit = false, $join = false)
     {
         if (!is_array($where)) {
             $where = [$this->get_pkey() => $where];
         }
 
-        $item = ipsCore::$database->select($this->table, '*', $where)[0];
+        if (isset($join['table'])) {
+            $join['table'] = $this->add_prefix($join['table']);
+        }
+
+        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $join])[0];
 
         if ($item) {
             foreach ($item as $item_data_key => $item_data) {
@@ -252,10 +290,10 @@ class ipsCore_model
         return false;
     }
 
-    public function count($where = false)
+    public function count($where = false, $order = false, $limit = false, $join = false)
     {
         $count_str = 'COUNT(*)';
-        $count = ipsCore::$database->select($this->table, $count_str, $where);
+        $count = ipsCore::$database->select($this->table, ['fields' => $count_str, 'where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
 
         if (!empty( $count ) ) {
             return $count[0][$count_str];
@@ -279,7 +317,7 @@ class ipsCore_model
         }
 
         if ( $where ) {
-            if ( ipsCore::$database->delete( $this->table, $where ) ) {
+            if ( ipsCore::$database->delete( $this->table, $this->prefix_where($where) ) ) {
                 return true;
             }
         }
