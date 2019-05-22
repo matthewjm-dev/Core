@@ -290,10 +290,10 @@ class ipsCore_model
         return false;
     }
 
-    public function count($where = false, $order = false, $limit = false, $join = false)
+    public function count($where = false, $join = false)
     {
         $count_str = 'COUNT(*)';
-        $count = ipsCore::$database->select($this->table, ['fields' => $count_str, 'where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
+        $count = ipsCore::$database->select($this->table, ['fields' => $count_str, 'where' => $this->prefix_where($where), 'join' => $this->prefix_join($join)]);
 
         if (!empty( $count ) ) {
             return $count[0][$count_str];

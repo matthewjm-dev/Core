@@ -296,7 +296,6 @@ class ipsCore
 
     public static function requires_core_helper($helpers)
     {
-
         if (!is_array($helpers)) {
             $helpers = [$helpers];
         }
@@ -305,8 +304,6 @@ class ipsCore
             if (in_array($helper, self::$helpers) && !in_array($helper, self::$helpers_active)) {
                 self::$helpers_active[] = $helper;
                 require_once(self::$path_core_helpers . $helper . '.php');
-            } else {
-                self::add_error('Helper "' . $helper . '" is already active.');
             }
         }
     }

@@ -182,13 +182,14 @@ class ipsCore_controller
         return $view->display(true);
     }
 
-    public function set_pagination($model, $current = 1, $options = [])
+    protected function set_pagination($args) // ($model, $current = 1, $options = [])
     {
-        $per_page = (isset($options['per_page']) ? $options['per_page'] : 10);
-        $show_around = (isset($options['show_around']) ? $options['show_around'] : 2);
-        $slug = (isset($options['slug']) ? $options['slug'] . '/' : '');
+        $current = $args['current_page'];
+        $per_page = (isset($args['per_page']) ? $args['per_page'] : 10);
+        $show_around = (isset($args['show_around']) ? $args['show_around'] : 2);
+        $slug = (isset($args['slug']) ? $args['slug'] . '/' : '');
 
-        $total = $model->count();
+        $total = $args['model']->count($args['where']);
         $num_pages = ceil(($total / $per_page));
         $show_pages = $show_around * 2;
 
@@ -258,28 +259,59 @@ class ipsCore_controller
         ]);
     }
 
-    public function get_paginated($model, $current_page = 1, $options = [])
+    public function get_filtered_list($args) {//$model, $current_page = 1, $options = []) {
+        $items = [];
+
+        $defaults = [
+            'model' => false,
+            'current_page' => 1,
+            'per_page' => 10,
+            'where' => [],
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        if ($args['model']) {
+            $items = $this->get_paginated($args);
+        }
+        return $items;
+    }
+
+    protected function get_paginated($args)
     {
-        $per_page = (isset($options['per_page']) ? $options['per_page'] : 10);
-        $options['per_page'] = $per_page;
-        $where_extra = (isset($options['where']) ? $options['where'] : []);
+        $defaults = [
+            'model' => false,
+            'current_page' => 1,
+            'per_page' => 10,
+            'where' => [],
+        ];
 
-        if ($where_extra === false) {
-            $where = false;
-        } else {
-            $where = array_merge($this->where_live(), $where_extra);
+        $args = array_merge($defaults, $args);
+
+        $items = [];
+
+        if ($args['model']) {
+
+            if ($args['where'] === false) {
+                $where = false;
+            } else {
+                $where = array_merge($this->where_live(), $args['where']);
+            }
+
+            $offset = ($args['current_page'] - 1) * $args['per_page'];
+
+            $this->set_pagination($args);
+
+            if (isset($args['order'])) {
+                $order = $args['order'];
+            } else {
+                $order = [$args['model']->get_pkey(), 'DESC'];
+            }
+
+            $items = $args['model']->get_all($where, $order, [$args['per_page'], $offset]);
         }
 
-        if (!$current_page) {
-            $current_page = 1;
-        }
-        $offset = ($current_page - 1) * $per_page;
-
-        $this->set_pagination($model, $current_page, $options);
-
-        $order = [$model->get_pkey(), 'DESC'];
-
-        return $model->get_all($where, $order, [$per_page, $offset]);
+        return $items;
     }
 
     public function where_live()

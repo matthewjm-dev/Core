@@ -259,7 +259,7 @@ class ipsCore_database
                 }
 
                 if ($join_sql) {
-                    if (isset($join['on'])) {
+                    if (isset($args['join']['on'])) {
                         $join_sql .= 'ON ';
                         $join_sql .= (strpos($args['join']['on'][0], ".") !== false ? '' : $table . '.') . $args['join']['on'][0] . ' = ';
                         $join_sql .= (strpos($args['join']['on'][1], ".") !== false ? '' : $args['join']['table'] . '.') . $args['join']['on'][1] . ' ';
@@ -282,12 +282,23 @@ class ipsCore_database
                 $sql .= ' WHERE';
                 $first = true;
                 foreach ($args['where'] as $where_key => $where_value) {
+                    $where_like = false;
+                    if ( is_array( $where_value ) && $where_value[1] = 'like') {
+                        $where_value = $where_value[0];
+                        $where_like = true;
+                    }
                     $sql .= (!$first ? ' AND ' : ' ');
                     if (strpos($where_key, ".") === false) {
                         $sql .= '`' . $table . '`.';
                     }
-                    $sql .= '`' . $this->format_key($where_key) . '` = :' . $this->format_param($where_key);
-                    $params[] = [':' . $this->format_param($where_key), $where_value];
+                    if ( $where_like ) {
+                        $sql .= '`' . $this->format_key($where_key) . '` LIKE :' . $this->format_param($where_key);
+                        $params[] = [':' . $this->format_param($where_key), '%' . $where_value . '%'];
+                    } else {
+                        $sql .= '`' . $this->format_key($where_key) . '` = :' . $this->format_param($where_key);
+                        $params[] = [':' . $this->format_param($where_key), $where_value];
+                    }
+
                     $first = false;
                 }
             } else {
@@ -306,8 +317,8 @@ class ipsCore_database
         if ($args['limit'] !== false) {
             if (is_array($args['limit'])) {
                 $sql .= ' LIMIT :limitcount OFFSET :limitoffset';
-                $params[] = [':limitcount', $args['limit'][0]];
-                $params[] = [':limitoffset', $args['limit'][1]];
+                $params[] = [':limitcount', (int)$args['limit'][0]];
+                $params[] = [':limitoffset', (int)$args['limit'][1]];
             } else {
                 $sql .= ' LIMIT ' . $args['limit'];
             }
