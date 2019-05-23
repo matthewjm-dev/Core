@@ -140,6 +140,7 @@ class ipsCore_model
             'live' => ['type' => 'tinyint', 'length' => 1],
             'removed' => ['type' => 'tinyint', 'length' => 1],
             'locked' => ['type' => 'tinyint', 'length' => 1],
+            'position' => ['type' => 'int', 'length' => 11],
         ];
 
         if (ipsCore::$database->create_table($table, $fields)) {

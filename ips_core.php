@@ -203,14 +203,16 @@ class ipsCore
         return self::get_file_route($object, 'objects', $app);
     }
 
-    public static function get_view_route($view)
+    public static function get_view_route($view, $twig = false)
     {
-        return self::get_file_route($view, 'views');
+        $extension = ($twig ? 'twig' : false);
+        return self::get_file_route($view, 'views', false, $extension);
     }
 
-    public static function get_layout_route($layout)
+    public static function get_layout_route($layout, $twig = false)
     {
-        return self::get_file_route($layout, 'layouts');
+        $extension = ($twig ? 'twig' : false);
+        return self::get_file_route($layout, 'layouts', false, $extension);
     }
 
     public static function get_part_route($part)
@@ -218,15 +220,19 @@ class ipsCore
         return self::get_file_route($part, 'parts');
     }
 
-    private static function get_file_route($file, $dir, $app = false)
+    private static function get_file_route($file, $dir, $app = false, $extension = false)
     {
         $path = ipsCore::$path_app;
+
+        if (!$extension) {
+            $extension = 'php';
+        }
 
         if ($app) {
             $path = ipsCore::$path_apps . $app;
         }
 
-        $file = $path . '/' . $dir . '/' . $file . '.php';
+        $file = $path . '/' . $dir . '/' . $file . '.' . $extension;
 
         return $file;
     }
@@ -247,9 +253,9 @@ class ipsCore
         return false;
     }
 
-    public static function get_part($name, $data)
+    public static function get_part($name, $data, $twig = false)
     {
-        $view = new ips_view($name, false);
+        $view = new ips_view($name, false, $twig);
         ipsCore::add_data($data);
         $view->build();
 

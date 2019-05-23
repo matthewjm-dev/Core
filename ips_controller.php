@@ -94,12 +94,16 @@ class ipsCore_controller
 
     public function build_view($build = 'html', $show_in_layout = true)
     {
-        if ($build == 'html') {
+        if ($build == 'html' || $build == 'twig') {
             if (!$this->get_view()) {
                 $view_path = $this->get_name() . '/' . ipsCore::$router->get_route()->get_method();
                 $this->set_view($view_path);
             }
-            ipsCore::$output = new ips_view($this->view, $show_in_layout);
+            if ( $build == 'twig' ) {
+                ipsCore::$output = new ips_view($this->view, $show_in_layout, true);
+            } else {
+                ipsCore::$output = new ips_view($this->view, $show_in_layout);
+            }
         } else {
             ipsCore::$output = new ips_json($this->view);
             ipsCore::$output_type = 'json';
