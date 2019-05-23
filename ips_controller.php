@@ -92,9 +92,9 @@ class ipsCore_controller
         }
     }
 
-    public function build_view($build = 'html', $show_in_layout = true)
+    public function build_view($build = 'twig', $show_in_layout = true)
     {
-        if ($build == 'html' || $build == 'twig') {
+        if ($build == 'php' || $build == 'twig') {
             if (!$this->get_view()) {
                 $view_path = $this->get_name() . '/' . ipsCore::$router->get_route()->get_method();
                 $this->set_view($view_path);
