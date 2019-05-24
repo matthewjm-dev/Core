@@ -3,24 +3,30 @@
 class ips_view {
 
 	protected $template;
+    protected $content = false;
+    protected $show_in_layout;
+	protected $type = 'twig';
+    protected $allowed_types = ['twig', 'php', 'html', 'js', 'css'];
 	protected $is_twig = false;
 	protected $twig_helper;
-	protected $content = false;
-	protected $show_in_layout;
 
 	// Construct
-	public function __construct( $template, $show_in_layout, $twig = false ) {
-	    if ( $twig ) {
+	public function __construct( $template, $show_in_layout = 'main', $type = 'twig' ) {
+        $this->template = $template;
+        $this->show_in_layout = $show_in_layout;
+        if (is_string($type) && in_array($type, $this->allowed_types)) {
+            $this->type = $type;
+        }
+
+	    if ( $this->type == 'twig' ) {
 	        ipsCore::requires_core_helper(['twig']);
 	        $this->is_twig = true;
 	        $this->twig_helper = new twig_helper();
         }
-	    if ( !$this->view_exists( ipsCore::get_view_route( $template, $this->is_twig ) ) ) {
+
+	    if ( !$this->view_exists( ipsCore::get_view_route( $template, $this->type ) ) ) {
             ipsCore::add_error( 'View "' . $template . '" could not be found' );
         }
-
-		$this->template = $template;
-		$this->show_in_layout = $show_in_layout;
 	}
 
 	// Methods
@@ -31,12 +37,10 @@ class ips_view {
 	}
 
 	public function build() {
-        extract( ipsCore::$data );
-
 		ob_start();
 
 		if ( $this->show_in_layout !== true && $this->show_in_layout !== false ) {
-            $this->include_template($this->show_in_layout, 'get_layout_route');
+            $this->include_layout($this->show_in_layout);
         } else {
             if ( $this->show_in_layout ) {
                 ?><!DOCTYPE html>
@@ -62,8 +66,8 @@ class ips_view {
 		$this->content = ob_get_clean();
 	}
 
-	public function include_template($path, $route = 'get_view_route') {
-        $path_extension = ipsCore::{$route}( $path, $this->is_twig );
+	public function include_template($path) {
+        $path_extension = ipsCore::get_view_route( $path, $this->type );
         if ( $this->view_exists( $path_extension ) ) {
             if ( $this->is_twig ) {
                 $this->twig_helper->render($path, ipsCore::$data);
@@ -71,6 +75,14 @@ class ips_view {
                 extract(ipsCore::$data);
                 include($path_extension);
             }
+        }
+    }
+
+    public function include_layout($path) {
+        $path_extension = ipsCore::get_layout_route( $path );
+        if ( $this->view_exists( $path_extension ) ) {
+            extract(ipsCore::$data);
+            include($path_extension);
         }
     }
 
@@ -91,10 +103,23 @@ class ips_json {
 
 	protected $template;
 	protected $content;
+    protected $type = 'twig';
+    protected $allowed_types = ['twig', 'php', 'html', 'js', 'css'];
+    protected $is_twig = false;
+    protected $twig_helper;
 
 	// Construct
-	public function __construct( $template = false ) {
-		$this->template = $template;
+	public function __construct( $template = false, $type = 'twig' ) {
+        $this->template = $template;
+        if (in_array($type, $this->allowed_types)) {
+            $this->type = $type;
+        }
+
+        if ( $this->type == 'twig' ) {
+            ipsCore::requires_core_helper(['twig']);
+            $this->is_twig = true;
+            $this->twig_helper = new twig_helper();
+        }
 	}
 
 	// Methods
@@ -105,14 +130,10 @@ class ips_json {
 	}
 
 	public function build() {
-
 		if ( $this->template ) {
-			extract( ipsCore::$data );
 			ob_start();
-			$view_path   = ipsCore::get_view_route( $this->template );
-			if ( $this->view_exists( $view_path ) ) {
-				include( $view_path );
-			}
+
+			$this->include_template($this->template);
 
 			if (isset(ipsCore::$data[ 'json' ])) {
 			    $json = ipsCore::$data[ 'json' ];
@@ -134,6 +155,18 @@ class ips_json {
 
 		$this->content = json_encode( $data );
 	}
+
+    public function include_template($path) {
+        $path_extension = ipsCore::get_view_route( $path, $this->type );
+        if ( $this->view_exists( $path_extension ) ) {
+            if ( $this->is_twig ) {
+                $this->twig_helper->render($path, ipsCore::$data);
+            } else {
+                extract(ipsCore::$data);
+                include($path_extension);
+            }
+        }
+    }
 
 	public function display() {
 		if ( $this->content ) {

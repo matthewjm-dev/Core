@@ -92,21 +92,26 @@ class ipsCore_controller
         }
     }
 
-    public function build_view($build = 'twig', $show_in_layout = true)
+    public function build_view(array $args = []) //$show_in_layout = true, $build = 'twig' )
     {
-        if ($build == 'php' || $build == 'twig') {
+        $defaults = [
+            'layout' => true,
+            'json' => false,
+            'type' => 'twig',
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        if ($args['json']) {
+            ipsCore::$output = new ips_json($this->view, $args['type']);
+            ipsCore::$output_type = 'json';
+        } else {
             if (!$this->get_view()) {
                 $view_path = $this->get_name() . '/' . ipsCore::$router->get_route()->get_method();
                 $this->set_view($view_path);
             }
-            if ( $build == 'twig' ) {
-                ipsCore::$output = new ips_view($this->view, $show_in_layout, true);
-            } else {
-                ipsCore::$output = new ips_view($this->view, $show_in_layout);
-            }
-        } else {
-            ipsCore::$output = new ips_json($this->view);
-            ipsCore::$output_type = 'json';
+
+            ipsCore::$output = new ips_view($this->view, $args['layout'], $args['type']);
         }
     }
 
@@ -177,14 +182,14 @@ class ipsCore_controller
         }
     }
 
-    public function get_part($name, $data = false)
+    /*public function get_part($name, $data = false)
     {
         $view = new ips_view($name, false);
         $this->add_data($data);
         $view->build();
 
         return $view->display(true);
-    }
+    }*/
 
     protected function set_pagination($args) // ($model, $current = 1, $options = [])
     {
@@ -254,7 +259,7 @@ class ipsCore_controller
         }
 
         $this->add_data([
-            'pagination' => $this->get_part('parts/pagination', [
+            'pagination' => ipsCore::get_part('parts/pagination', [
                 'pagination_items' => $items,
                 'pagination_total' => 'Showing ' . $start_item . ' - ' . $end_item . ' of ' . $total,
                 'pagination_previous' => $previous,
@@ -263,7 +268,8 @@ class ipsCore_controller
         ]);
     }
 
-    public function get_filtered_list($args) {//$model, $current_page = 1, $options = []) {
+    public function get_filtered_list($args)
+    {//$model, $current_page = 1, $options = []) {
         $items = [];
 
         $defaults = [
@@ -274,10 +280,14 @@ class ipsCore_controller
         ];
 
         $args = array_merge($defaults, $args);
+        if ($args['current_page'] === false) {
+            $args['current_page'] = 1;
+        }
 
         if ($args['model']) {
             $items = $this->get_paginated($args);
         }
+
         return $items;
     }
 
@@ -300,6 +310,7 @@ class ipsCore_controller
                 $where = false;
             } else {
                 $where = array_merge($this->where_live(), $args['where']);
+                $args['where'] = $where;
             }
 
             $offset = ($args['current_page'] - 1) * $args['per_page'];

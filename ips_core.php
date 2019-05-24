@@ -203,16 +203,14 @@ class ipsCore
         return self::get_file_route($object, 'objects', $app);
     }
 
-    public static function get_view_route($view, $twig = false)
+    public static function get_view_route($view, $type = 'twig')
     {
-        $extension = ($twig ? 'twig' : false);
-        return self::get_file_route($view, 'views', false, $extension);
+        return self::get_file_route($view, 'views', false, $type);
     }
 
-    public static function get_layout_route($layout, $twig = false)
+    public static function get_layout_route($layout, $type = 'php')
     {
-        $extension = ($twig ? 'twig' : false);
-        return self::get_file_route($layout, 'layouts', false, $extension);
+        return self::get_file_route($layout, 'layouts', false, $type);
     }
 
     public static function get_part_route($part)
@@ -253,9 +251,9 @@ class ipsCore
         return false;
     }
 
-    public static function get_part($name, $data, $twig = false)
+    public static function get_part($name, $data, $type = 'twig')
     {
-        $view = new ips_view($name, false, $twig);
+        $view = new ips_view($name, false, $type);
         ipsCore::add_data($data);
         $view->build();
 
