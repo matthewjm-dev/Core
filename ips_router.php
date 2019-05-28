@@ -90,14 +90,6 @@ class ipsCore_router
         $method = 'index';
         $args = false;
 
-        // create URI match variations
-        /*if ( ipsCore::$app->get_uri() != '' ) {
-            $appless_uri = str_replace( '/' . ipsCore::$app->get_uri(), '', ipsCore::$uri );
-        } else {
-            $appless_uri = ipsCore::$uri;
-        }*/
-
-
         $uri_variations = [
             ipsCore::$uri,
             ipsCore::$uri . '/',
@@ -146,12 +138,6 @@ class ipsCore_router
 
         // assemble route
         if (!$found_route) {
-
-            /*if ( count( $path_parts ) > 3 ) {
-                $path_parts_controller = $path_parts[0] . '/' . $path_parts[1];
-            } else {
-                $path_parts_controller = $path_parts[0];
-            }*/
 
             if (ipsCore::$app->get_uri() != '') {
                 $appless_uri = str_replace('/' . ipsCore::$app->get_uri() . '/', '/', ipsCore::$uri);
@@ -240,9 +226,6 @@ class ipsCore_router
                 } else {
                     ipsCore::$controller->{$route->get_method()}($route->get_args());
                 }
-                //} else { // rather than erroring and dieing now just selecting index method
-                //	ipsCore::add_error( 'Requested Method "' . $method . '" Does Not Exist' );
-                //}
             } else {
                 ipsCore::add_error('Requested Controller Class "' . $controller_name . '" Does Not Exist');
             }

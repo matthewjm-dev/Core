@@ -30,7 +30,7 @@ class ipsCore_form_builder
         'image' => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
     ];
 
-    public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$';
+    public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$^';
     public static $password_message = 'Passwords must be at least 6 characters long, contain at least one Uppercase and Lowercase characters and at least one number.';
 
     // Getters
@@ -67,21 +67,23 @@ class ipsCore_form_builder
     public function get_field_value($field)
     {
         //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
-        if (isset($this->fields[$field]['value']) && $this->fields[$field]['value']) {
-            return $this->fields[$field]['value'];
-        } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default']) {
-            return $this->fields[$field]['default'];
-        } else {
-            $field_type = self::get_field_types($this->fields[$field]['type']);
-            if ( $field_type['type'] == 'int') {
-                if ( isset( $field_type['default'])) {
-                    return $field_type['default'];
-                } else {
-                    return 0;
+        if (isset($this->fields[$field])) {
+            if (isset($this->fields[$field]['value']) && $this->fields[$field]['value']) {
+                return $this->fields[$field]['value'];
+            } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default']) {
+                return $this->fields[$field]['default'];
+            } else {
+                $field_type = self::get_field_types($this->fields[$field]['type']);
+                if ( $field_type['type'] == 'int') {
+                    if ( isset( $field_type['default'])) {
+                        return $field_type['default'];
+                    } else {
+                        return 0;
+                    }
                 }
             }
-            return null;
         }
+        return null;
     }
 
     // Setters
@@ -194,6 +196,15 @@ class ipsCore_form_builder
                 ipsCore::error($error);
             }
         }
+    }
+
+    public function remove_field($name)
+    {
+        if (isset($this->fields[$name])) {
+            unset($this->fields[$name]);
+            return true;
+        }
+        return false;
     }
 
     public function start_section($name)
@@ -311,7 +322,8 @@ class ipsCore_form_builder
 
     public function render_email($field, $args)
     {
-
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="email ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="email" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Password */

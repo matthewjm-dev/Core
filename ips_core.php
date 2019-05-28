@@ -27,22 +27,23 @@ class ipsCore
     public static $site_url;
     public static $site_base;
 
-    public static $includes = array();
-    public static $helpers = array();
-    public static $helpers_active = array();
+    public static $includes = [];
+    public static $helpers = [];
+    public static $helpers_active = [];
 
     public static $functions;
     public static $database;
+    public static $mailer;
     public static $session;
     public static $controller;
 
     public static $router;
-    public static $errors = array();
+    public static $errors = [];
 
     public static $request;
     public static $request_type;
 
-    public static $data = array(); // Front end data
+    public static $data = []; // Front end data
     public static $output; // Front end page output
     public static $output_type = 'html'; // html / json
 
@@ -78,10 +79,13 @@ class ipsCore
         self::get_includes();
         self::find_helpers(self::$path_core_helpers);
         self::find_helpers(self::$path_app_helpers);
+        self::setup_mailer();
         self::$session = new ipsCore_session();
         self::$functions = new ipsCore_functions();
         self::$router = new ipsCore_router();
         self::$router->init();
+
+
     }
 
     // METHODS
@@ -366,6 +370,19 @@ class ipsCore
         }
     }
 
+    public static function setup_mailer() {
+        $mailer_file = 'mailer';
+
+        if (MAILER != 'mailer') {
+            $mailer_file .= '_' . MAILER;
+        }
+
+        $mailer = 'ipsCore_' . $mailer_file;
+
+        self::requires_core_helper([$mailer_file]);
+        self::$mailer = new $mailer();
+    }
+
 }
 
 class ipsCore_app
@@ -404,6 +421,16 @@ class ipsCore_app
             define('DB_USER', $current_app['db-' . ipsCore::$environment]['user']);
             define('DB_PASS', $current_app['db-' . ipsCore::$environment]['password']);
             define('DB_PREFIX', $current_app['db-' . ipsCore::$environment]['prefix']);
+        }
+
+        if (isset($current_app['mail-' . ipsCore::$environment])) {
+            if (!isset($current_app['mail-' . ipsCore::$environment]['mailer'])) {
+                define('MAILER', 'mailer');
+            }
+
+            foreach($current_app['mail-' . ipsCore::$environment] as $mail_config => $mail_config_value) {
+                define(strtoupper($mail_config), $mail_config_value);
+            }
         }
     }
 
