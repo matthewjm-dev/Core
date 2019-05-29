@@ -15,26 +15,33 @@ class ipsCore_mailer_mailgun
     public function __construct()
     {
         if ($this->server) {
-            $this->mailgun = Mailgun::create($this->key, $this->server);
+            $this->mailgun = new Mailgun($this->key, $this->server); // Mailgun::create
         } else {
-            $this->mailgun = Mailgun::create($this->key);
+            $this->mailgun = new Mailgun($this->key);
         }
     }
 
     // Methods
 
-    public function send($to, $subject, $content, $from = false)
+    public function send($to, $subject, $content, $from = false, $args = [])
     {
-        if (!$from) {
-            $from = $this->from;
-        }
+        if ($this->mailgun) {
+            if (!$from) {
+                $from = $this->from;
+            }
 
-        $this->mailgun->messages($this->domain, [
-            'from' => $from,
-            'to' => $to,
-            'subject' => $subject,
-            'text' => $content,
-        ]);
+            $args = array_merge([
+                'from' => $from,
+                'to' => $to,
+                'subject' => $subject,
+                'html' => $content,
+            ], $args);
+
+            if( $response = $this->mailgun->sendMessage($this->domain, $args) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function add_to_queue()

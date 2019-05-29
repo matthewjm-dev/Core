@@ -424,13 +424,15 @@ class ipsCore_app
         }
 
         if (isset($current_app['mail-' . ipsCore::$environment])) {
-            if (!isset($current_app['mail-' . ipsCore::$environment]['mailer'])) {
-                define('MAILER', 'mailer');
-            }
-
             foreach($current_app['mail-' . ipsCore::$environment] as $mail_config => $mail_config_value) {
                 define(strtoupper($mail_config), $mail_config_value);
             }
+        }
+        if (!defined('MAILER')) {
+            define('MAILER', 'mailer');
+        }
+        if (!defined('MAILER_FROM')) {
+            define('MAILER_FROM', 'Tester <test@example.com>');
         }
     }
 
