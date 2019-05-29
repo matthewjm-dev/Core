@@ -28,6 +28,7 @@ class ipsCore_form_builder
         'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
         'file' => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
         'image' => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
+        'hidden' => ['title' => 'Hidden Field', 'type' => 'text', 'length' => '255', 'unselectable' => true],
     ];
 
     public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$^';
@@ -68,9 +69,9 @@ class ipsCore_form_builder
     {
         //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
         if (isset($this->fields[$field])) {
-            if (isset($this->fields[$field]['value']) && $this->fields[$field]['value']) {
+            if (isset($this->fields[$field]['value']) && $this->fields[$field]['value'] != '') {
                 return $this->fields[$field]['value'];
-            } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default']) {
+            } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default'] != '') {
                 return $this->fields[$field]['default'];
             } else {
                 $field_type = self::get_field_types($this->fields[$field]['type']);
@@ -652,9 +653,9 @@ class ipsCore_form_builder
     }
 
     /* Hidden */
-    public function add_hidden($name, $label, array $options = [])
+    public function add_hidden($name, array $options = [])
     {
-        $this->add_field($name, $label, 'hidden', $options);
+        $this->add_field($name, false, 'hidden', $options);
     }
 
     public function validate_hidden()

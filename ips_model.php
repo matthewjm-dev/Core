@@ -141,6 +141,7 @@ class ipsCore_model
             'removed' => ['type' => 'tinyint', 'length' => 1],
             'locked' => ['type' => 'tinyint', 'length' => 1],
             'position' => ['type' => 'int', 'length' => 11],
+            'title' => ['type' => 'text', 'length' => 255],
         ];
 
         if (ipsCore::$database->create_table($table, $fields)) {
