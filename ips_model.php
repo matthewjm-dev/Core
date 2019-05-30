@@ -249,6 +249,27 @@ class ipsCore_model
         return false;
     }
 
+    public function get_all_array($where = false, $order = false, $limit = false, $join = false)
+    {
+        $items = $this->get_all_data($where, $order, $limit, $join);
+        $arrays = [];
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $array = [];
+                foreach ($item as $item_data_key => $item_data) {
+                    $array[$item_data_key] = $item_data;
+                }
+                $arrays[] = $array;
+            }
+        }
+
+        if (!empty($arrays)) {
+            return $arrays;
+        }
+        return [];
+    }
+
     public function get($where)
     {
         if (!is_array($where)) {
