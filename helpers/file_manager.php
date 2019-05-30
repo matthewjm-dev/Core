@@ -4,7 +4,7 @@ class ipsCore_file_manager
 {
 
     public static $upload_directory = 'uploads/';
-    public static $max_upload_size = '500000';
+    public static $max_upload_size = '5000000';
     public static $allowed_types_images = ['jpg', 'png', 'jpeg', 'gif'];
     public static $allowed_types_files = ['pdf'];
 
@@ -54,7 +54,7 @@ class ipsCore_file_manager
                         $errors[] = 'There was a problem moving the uploaded file.';
                     }
                 } else {
-                    $errors[] = 'That file is too large, max upload size is: ' . ipsCore_file_manager::$max_upload_size . ' bytes.';
+                    $errors[] = 'That file is too large, max upload size is: ' . ipsCore::$functions->format_bytes(ipsCore_file_manager::$max_upload_size) . ' bytes.';
                 }
             } else {
                 $errors[] = 'The uploads directory does not appear to exist.';
