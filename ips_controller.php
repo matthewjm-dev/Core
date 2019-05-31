@@ -158,14 +158,18 @@ class ipsCore_controller
             $libs = [$libs];
         }
         foreach ($libs as $lib => $extentions) {
-            if (!is_array($extentions)) {
-                $extentions = [$extentions];
-            }
-            foreach ($extentions as $extention) {
-                if (in_array($extention, ['min.js', 'js'])) {
-                    ipsCore::$data['libraries']['scripts'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
-                } else {
-                    ipsCore::$data['libraries']['styles'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
+            if ($extentions === false) {
+                ipsCore::$data['libraries']['styles'][] = $lib;
+            } else {
+                if (!is_array($extentions)) {
+                    $extentions = [$extentions];
+                }
+                foreach ($extentions as $extention) {
+                    if (in_array($extention, ['min.js', 'js'])) {
+                        ipsCore::$data['libraries']['scripts'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
+                    } else {
+                        ipsCore::$data['libraries']['styles'][] = '/lib/' . $lib . '/' . $lib . '.' . $extention;
+                    }
                 }
             }
         }

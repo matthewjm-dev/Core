@@ -178,7 +178,7 @@ class ipsCore_model
     {
         $args = $this->get_pkey_args();
 
-        if ($this->modify_column($this->get_pkey(), $new_name, $args['type'], $args['length'], false, $args['extra'])) {
+        if ($this->modify_column($this->get_pkey(), $new_name, $args['type'], $args['length'], false/*, $args['extra']*/)) {
             $this->set_pkey($new_name);
             return true;
         }
@@ -199,7 +199,7 @@ class ipsCore_model
     {
         // To Do: Check schema if column already exists
 
-        if ($this->table && $name) {
+        if ($this->table && $name && $new_name) {
             if (ipsCore::$database->modify_column($this->table, $name, $new_name, $type, $length, $default, $extra)) {
                 return true;
             }

@@ -189,7 +189,7 @@ class ipsCore_database
         $sql = 'ALTER TABLE ' . $this->validate($table) . ' CHANGE `' . $this->validate($old_name) . '` `' . $this->validate($name) . '` ' . strtoupper($type);
 
         $sql .= ($length ? '(' . $length . ')' : '');
-        $sql .= ($extra ? ' ' . (is_array($extra) ? explode(' ', $extra) : $extra) : '');
+        $sql .= ($extra ? ' ' . (is_array($extra) ? implode(' ', $extra) : $extra) : '');
         $sql .= ($default ? ' DEFAULT ' . (substr($default, -2) == '()' ? $default : '"' . $default . '"') : '');
 
         if ($this->query($sql)) {
