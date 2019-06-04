@@ -179,7 +179,6 @@ class ipsCore_router
             }
 
             $this->route = new ipsCore_route(ipsCore::$uri_current, $controller, $method, $args);
-
         }
 
         $this->dispatch($this->route);
