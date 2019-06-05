@@ -30,6 +30,13 @@ class ipsCore_model
         return $this->{$this->get_pkey()};
     }
 
+    public function get_prop($property) {
+        if (isset($this->{$property})) {
+            return $this->{$property};
+        }
+        return '';
+    }
+
     // Setters
     public function set_name($name)
     {

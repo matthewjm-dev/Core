@@ -285,26 +285,7 @@ class ipsCore_database
             if (is_array($args['where'])) {
                 $sql .= ' WHERE';
                 $first = true;
-                foreach ($args['where'] as $where_key => $where_value) {
-                    $where_like = false;
-                    if ( is_array( $where_value ) && $where_value[1] = 'like') {
-                        $where_value = $where_value[0];
-                        $where_like = true;
-                    }
-                    $sql .= (!$first ? ' AND ' : ' ');
-                    if (strpos($where_key, ".") === false) {
-                        $sql .= '`' . $table . '`.';
-                    }
-                    if ( $where_like ) {
-                        $sql .= '`' . $this->format_key($where_key) . '` LIKE :' . $this->format_param($where_key);
-                        $params[] = [':' . $this->format_param($where_key), '%' . $where_value . '%'];
-                    } else {
-                        $sql .= '`' . $this->format_key($where_key) . '` = :' . $this->format_param($where_key);
-                        $params[] = [':' . $this->format_param($where_key), $where_value];
-                    }
-
-                    $first = false;
-                }
+                $this->build_where_query($args['where'], $table, $sql, $first);
             } else {
                 $sql .= $args['where'];
             }
@@ -333,6 +314,42 @@ class ipsCore_database
         }
 
         return false;
+    }
+
+    public function build_where_query($wheres, $table, &$sql, &$first) {
+        foreach ($wheres as $where_key => $where_value) {
+            if ($where_key == 'group') {
+
+            } else {
+                $where_args = [
+                    'value' => '',
+                    'operator' => '=',
+                    'like' => false,
+                    'binding' => 'AND',
+                    'sub' => false,
+                ];
+
+                if (!is_array($where_value)) {
+                    $where_args = array_merge($where_args, ['value' => $where_value]);
+                } else {
+                    $where_args = array_merge($where_args, $where_value);
+                }
+
+                $sql .= (!$first ? ' ' . $where_args['binding'] . ' ' : ' ');
+                if (strpos($where_key, ".") === false) {
+                    $sql .= '`' . $table . '`.';
+                }
+                if ($where_args['like']) {
+                    $sql .= '`' . $this->format_key($where_key) . '` LIKE :' . $this->format_param($where_key);
+                    $params[] = [':' . $this->format_param($where_key), '%' . $where_args['value'] . '%'];
+                } else {
+                    $sql .= '`' . $this->format_key($where_key) . '` = :' . $this->format_param($where_key);
+                    $params[] = [':' . $this->format_param($where_key), $where_args['value']];
+                }
+            }
+
+            $first = false;
+        }
     }
 
     public function insert_custom($sql, $params)
