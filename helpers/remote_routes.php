@@ -13,7 +13,7 @@ class ipsCore_remote_routes {
 
 	public function get_routes() {
 		$sql = 'SELECT uri, route
-				FROM ' . DB_PREFIX . 'routes';
+				FROM ' . ipsCore::$app->database['prefix'] . 'routes';
 
 		$results = $this->temp_db->query($sql, [], true);
 

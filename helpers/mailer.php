@@ -2,12 +2,11 @@
 
 class ipsCore_mailer
 {
-    protected $from = MAILER_FROM;
 
     public function send($to, $subject, $content, $from = false)
     {
         if (!$from) {
-            $from = $this->from;
+            $from = ipsCore::$app->mailer['from'];
         }
 
         $headers = "MIME-Version: 1.0" . "\r\n";

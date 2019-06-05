@@ -78,8 +78,8 @@ class ipsCore_controller
             $table = $model;
         }
         if ($table !== false) {
-            if (!strpos($table, DB_PREFIX)) {
-                $table = DB_PREFIX . $table;
+            if (!strpos($table, ipsCore::$app->database['prefix'])) {
+                $table = ipsCore::$app->database['prefix'] . $table;
             }
         }
         $name = str_replace('/', '_', $name);

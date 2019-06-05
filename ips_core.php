@@ -3,6 +3,7 @@
 class ipsCore
 {
 
+    public static $apps;
     public static $app;
     public static $uri;
     public static $uri_parts;
@@ -75,17 +76,16 @@ class ipsCore
         require_once(self::$path_core . 'ips_model.php');
         require_once(self::$path_core . 'ips_view.php');
         require_once(self::$path_core . 'ips_router.php');
+        require_once(self::$path_core . 'ips_helper.php');
 
         self::get_includes();
-        self::find_helpers(self::$path_core_helpers);
-        self::find_helpers(self::$path_app_helpers);
+        /*self::find_helpers(self::$path_core_helpers);
+        self::find_helpers(self::$path_app_helpers);*/
         self::setup_mailer();
         self::$session = new ipsCore_session();
         self::$functions = new ipsCore_functions();
         self::$router = new ipsCore_router();
         self::$router->init();
-
-
     }
 
     // METHODS
@@ -202,6 +202,11 @@ class ipsCore
         return self::get_file_route($model, 'models', $app);
     }
 
+    public static function get_helper_route($helper, $app = false)
+    {
+        return self::get_file_route($helper, 'helpers', $app);
+    }
+
     public static function get_object_route($object, $app = false)
     {
         return self::get_file_route($object, 'objects', $app);
@@ -284,7 +289,7 @@ class ipsCore
         }
     }
 
-    public static function find_helpers($pattern, $current_dir = '')
+    /*public static function find_helpers($pattern, $current_dir = '')
     {
         $helpers = glob($pattern . '*.php');
         foreach ($helpers as $helper) {
@@ -334,6 +339,38 @@ class ipsCore
                 self::add_error('Helper "' . $helper . '" is already active (ensure name does not conflict with a core helper).');
             }
         }
+    }*/
+
+    public static function requires_core_helper($helpers)
+    {
+        if (!is_array($helpers)) {
+            $helpers = [$helpers];
+        }
+
+        foreach ($helpers as $helper) {
+            $helper_path = self::$path_core_helpers . $helper . '.php';
+            if (file_exists($helper_path)) {
+                require_once($helper_path);
+            }
+        }
+    }
+
+    public static function requires_helper($helpers, $app = false)
+    {
+        if (!$app) {
+            $app = ipsCore::$app->get_directory();
+        }
+
+        if (!is_array($helpers)) {
+            $helpers = [$helpers];
+        }
+
+        foreach ($helpers as $helper) {
+            $helper_path = self::get_helper_route($helper, $app);
+            if (file_exists($helper_path)) {
+                require_once($helper_path);
+            }
+        }
     }
 
     public static function build()
@@ -376,8 +413,8 @@ class ipsCore
     public static function setup_mailer() {
         $mailer_file = 'mailer';
 
-        if (MAILER != 'mailer') {
-            $mailer_file .= '_' . MAILER;
+        if (ipsCore::$app->mailer['type'] != 'mailer') {
+            $mailer_file .= '_' . ipsCore::$app->mailer['type'];
         }
 
         $mailer = 'ipsCore_' . $mailer_file;
@@ -395,47 +432,67 @@ class ipsCore_app
     private $uri;
     private $core_version;
 
-    public function __construct($current_app_dir, $current_app)
+    public $database = [
+        'host' => false, 'name' => false, 'user' => false, 'pass' => false, 'prefix' => false,
+    ];
+    public $mailer = [
+        'type' => false, 'from' => false, 'settings' => [],
+    ];
+
+    public function __construct($app)
     {
-        if (isset($current_app['app']['name'])) {
-            $this->name = $current_app['app']['name'];
+        if (isset($app['app']['name'])) {
+            $this->name = $app['app']['name'];
         } else {
             ipsCore::add_error('App Config missing: App > Name', true);
         }
-        if (!empty($current_app_dir)) {
-            $this->directory = $current_app_dir;
+        if (isset($app['app']['dir'])) {
+            $this->directory = $app['app']['dir'];
         } else {
             ipsCore::add_error('App Config missing: directory', true);
         }
-        if (isset($current_app['app']['uri'])) {
-            $this->uri = $current_app['app']['uri'];
+        if (isset($app['app']['uri'])) {
+            $this->uri = $app['app']['uri'];
         } else {
             ipsCore::add_error('App Config missing: App > Uri', true);
         }
-        if (isset($current_app['core']['version'])) {
-            $this->core_version = $current_app['core']['version'];
+        if (isset($app['core']['version'])) {
+            $this->core_version = $app['core']['version'];
         } else {
             ipsCore::add_error('App Config missing: Core > Version', true);
         }
 
-        if (isset($current_app['db-' . ipsCore::$environment])) {
-            define('DB_HOST', $current_app['db-' . ipsCore::$environment]['host']);
-            define('DB_NAME', $current_app['db-' . ipsCore::$environment]['name']);
-            define('DB_USER', $current_app['db-' . ipsCore::$environment]['user']);
-            define('DB_PASS', $current_app['db-' . ipsCore::$environment]['password']);
-            define('DB_PREFIX', $current_app['db-' . ipsCore::$environment]['prefix']);
+        if (isset($app['db-' . ipsCore::$environment])) {
+            $this->database['host'] = $app['db-' . ipsCore::$environment]['host'];
+            $this->database['name'] =  $app['db-' . ipsCore::$environment]['name'];
+            $this->database['user'] =  $app['db-' . ipsCore::$environment]['user'];
+            $this->database['pass'] =  $app['db-' . ipsCore::$environment]['password'];
+            $this->database['prefix'] =  $app['db-' . ipsCore::$environment]['prefix'];
         }
 
-        if (isset($current_app['mail-' . ipsCore::$environment])) {
-            foreach($current_app['mail-' . ipsCore::$environment] as $mail_config => $mail_config_value) {
-                define(strtoupper($mail_config), $mail_config_value);
+        if (isset($app['mail-' . ipsCore::$environment])) {
+            $configs = $app['mail-' . ipsCore::$environment];
+
+            if (isset($configs['mailer'])) {
+                $this->mailer['type'] = $configs['mailer'];
+                unset($configs['mailer']);
+            }
+
+            if (isset($configs['mailer_from'])) {
+                $this->mailer['from'] = $configs['mailer_from'];
+                unset($configs['mailer_from']);
+            }
+
+            foreach($configs as $mail_config => $mail_config_value) {
+                $this->mailer[$mail_config] = $mail_config_value;
             }
         }
-        if (!defined('MAILER')) {
-            define('MAILER', 'mailer');
+
+        if (!$this->mailer['type']) {
+            $this->mailer['type'] = 'mailer';
         }
-        if (!defined('MAILER_FROM')) {
-            define('MAILER_FROM', 'Tester <test@example.com>');
+        if (!$this->mailer['from']) {
+            $this->mailer['from'] = 'Tester <test@example.com>';
         }
     }
 

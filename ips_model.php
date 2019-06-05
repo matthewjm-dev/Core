@@ -59,7 +59,7 @@ class ipsCore_model
         ipsCore::$session = new ipsCore_session();
 
         if ($this->table !== false) {
-            $this->table = (substr($table, 0, strlen(DB_PREFIX)) === DB_PREFIX ? $table : DB_PREFIX . $table);
+            $this->table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
             $this->set_schema();
         }
     }
@@ -67,7 +67,7 @@ class ipsCore_model
     // Methods
     public function add_prefix($text)
     {
-        return (substr($text, 0, strlen(DB_PREFIX)) === DB_PREFIX ? $text : DB_PREFIX . $text);
+        return (substr($text, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $text : ipsCore::$app->database['prefix'] . $text);
     }
 
     public function prefix_join($join)

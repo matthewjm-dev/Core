@@ -2,26 +2,30 @@
 
 class ipsCore_database
 {
-    private $db_host = DB_HOST;
-    private $db_name = DB_NAME;
-    private $db_user = DB_USER;
-    private $db_pass = DB_PASS;
     public $connected = false;
     public $connection;
     public $connection_error = false;
 
     public function __construct()
     {
-        try {
-            $this->connection = new PDO('mysql:host=' . $this->db_host . ';dbname=' . $this->db_name . ';charset=utf8', $this->db_user, $this->db_pass);
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            $this->connection_error = $e->getMessage();
-        }
-        if (!$this->connection_error) {
-            $this->connected = true;
+        if (ipsCore::$app->database['host']) {
+            try {
+                $this->connection = new PDO(
+                    'mysql:host=' . ipsCore::$app->database['host'] . ';dbname=' . ipsCore::$app->database['name'] . ';charset=utf8',
+                    ipsCore::$app->database['user'],
+                    ipsCore::$app->database['pass']
+                );
+                $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $e) {
+                $this->connection_error = $e->getMessage();
+            }
+            if (!$this->connection_error) {
+                $this->connected = true;
+            } else {
+                ipsCore::add_error('Database connection failure: ' . $e->getMessage(), true);
+            }
         } else {
-            ipsCore::add_error('Database connection failure: ' . $e->getMessage(), true);
+            ipsCore::add_error('Database did not attempt to connect, app database config missing', true);
         }
     }
 
