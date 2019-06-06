@@ -285,7 +285,7 @@ class ipsCore_database
             if (is_array($args['where'])) {
                 $sql .= ' WHERE';
                 $first = true;
-                $this->build_where_query($args['where'], $table, $sql, $first);
+                $this->build_where_query($args['where'], $table, $sql, $params, $first);
             } else {
                 $sql .= $args['where'];
             }
@@ -316,7 +316,8 @@ class ipsCore_database
         return false;
     }
 
-    public function build_where_query($wheres, $table, &$sql, &$first) {
+    public function build_where_query($wheres, $table, &$sql, &$params, &$first)
+    {
         foreach ($wheres as $where_key => $where_value) {
             if ($where_key == 'group') {
 
@@ -465,6 +466,233 @@ class ipsCore_database
     public function format_key($key)
     {
         return str_replace('.', '`.`', $key);
+    }
+
+}
+
+class ipsCore_query
+{
+    public $query_table = '';
+    public $query_sql = '';
+    public $query_params = [];
+
+    public function __construct($table)
+    {
+        if (ipsCore::$database->is_connected()) {
+            if (ipsCore::$database->does_table_exist($table)) {
+                $this->query_table = $table;
+            } else {
+                ipsCore::add_error('Database table does not exist');
+            }
+        } else {
+            ipsCore::add_error('Database is not currently connected');
+        }
+
+        return $this;
+    }
+
+    public function process($return = false) {
+        if ($return) {
+            if ($data = ipsCore::$database->query($this->query_sql, $this->query_params, true)) {
+                return $data;
+            }
+        } else {
+            if (ipsCore::$database->query($this->query_sql, $this->query_params)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function select($args)
+    {
+        $defaults = [
+            'fields' => $this->query_table . '.*',
+            'where' => false,
+            'order' => false,
+            'limit' => false,
+            'join' => false,
+            'group' => false,
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        $this->query_sql = 'SELECT ' . (is_array($args['fields']) ? implode(',', $args['fields']) : $args['fields']) . ' FROM ' . $this->validate($this->query_table);
+
+        if ($args['join'] !== false) {
+            if (is_array($args['join'])) {
+                $join_sql = '';
+                if (isset($args['join']['type'])) {
+                    switch ($args['join']['type']) {
+                        case 'full':
+                            $join_sql .= ' FULL JOIN ';
+                            break;
+                        case 'inner':
+                            $join_sql .= ' INNER JOIN ';
+                            break;
+                        case 'right':
+                            $join_sql .= ' RIGHT JOIN ';
+                            break;
+                        case 'left':
+                        default:
+                            $join_sql .= ' LEFT JOIN ';
+                            break;
+                    }
+                } else {
+                    $join_sql .= ' LEFT JOIN ';
+                }
+
+                if (isset($args['join']['table'])) {
+                    $join_sql .= $args['join']['table'] . ' ';
+                } else {
+                    ipsCore::add_error('Failed to Join in select, "table" statement missing.');
+                    $join_sql = false;
+                }
+
+                if ($join_sql) {
+                    if (isset($args['join']['on'])) {
+                        $join_sql .= 'ON ';
+                        $join_sql .= (strpos($args['join']['on'][0], ".") !== false ? '' : $this->query_table . '.') . $args['join']['on'][0] . ' = ';
+                        $join_sql .= (strpos($args['join']['on'][1], ".") !== false ? '' : $args['join']['table'] . '.') . $args['join']['on'][1] . ' ';
+                    } else {
+                        ipsCore::add_error('Failed to Join in select, "on" statement missing.');
+                        $join_sql = false;
+                    }
+                }
+
+                if ($join_sql) {
+                    $this->query_sql .= $join_sql;
+                }
+            } else {
+                $this->query_sql .= $args['join'];
+            }
+        }
+
+        if ($args['where'] !== false) {
+            if (is_array($args['where'])) {
+                $this->query_sql .= ' WHERE';
+                $first = true;
+                $this->build_where_query($args['where'], $first);
+            } else {
+                $this->query_sql .= $args['where'];
+            }
+        }
+
+        if ($args['group'] !== false) {
+
+        }
+
+        if ($args['order'] !== false) {
+            $this->query_sql .= ' ORDER BY ' . $args['order'][0] . ' ' . $args['order'][1];
+        }
+
+        if ($args['limit'] !== false) {
+            if (is_array($args['limit'])) {
+                $this->query_sql .= ' LIMIT ' . $this->add_param('limitcount', (int)$args['limit'][0]);
+                $this->query_sql .= ' OFFSET ' . $this->add_param('limitoffset', (int)$args['limit'][1]);
+            } else {
+                $this->query_sql .= ' LIMIT ' . $args['limit'];
+            }
+        }
+
+        return $this;
+    }
+
+    public function build_where_query($wheres, &$first)
+    {
+        foreach ($wheres as /*$where_key => */ $where_value) {
+            $where_key = key($where_value);
+            $where_value = $where_value[$where_key];
+            if ($where_key === 'where_and_group') {
+                $this->query_sql .= ' AND (';
+                $first = true;
+                $this->build_where_query($where_value, $first);
+                $this->query_sql .= ') ';
+            } elseif ($where_key === 'where_or_group') {
+                $this->query_sql .= ' OR (';
+                $first = true;
+                $this->build_where_query($where_value, $first);
+                $this->query_sql .= ') ';
+            } else {
+                $where_args = [
+                    'value' => '',
+                    'operator' => '=',
+                    'like' => false,
+                    'binding' => 'AND',
+                    'sub' => false,
+                ];
+
+                if (!is_array($where_value)) {
+                    $where_args = array_merge($where_args, ['value' => $where_value]);
+                } else {
+                    $where_args = array_merge($where_args, $where_value);
+                }
+
+                $this->query_sql .= (!$first ? ' ' . $where_args['binding'] . ' ' : ' ');
+                if (strpos($where_key, ".") === false) {
+                    $this->query_sql .= '`' . $this->query_table . '`.';
+                }
+                if ($where_args['like']) {
+                    $this->query_sql .= '`' . $this->format_key($where_key) . '` LIKE ' . $this->add_param($where_key, '%' . $where_args['value'] . '%');
+                } else {
+                    $this->query_sql .= '`' . $this->format_key($where_key) . '` = ' . $this->add_param($where_key, $where_args['value']);
+                }
+            }
+
+            $first = false;
+        }
+    }
+
+    public function add_param($field, $value)
+    {
+        $i = 1;
+        $field = ':' . $this->format_param($field);
+        $exists = true;
+        while ($exists) {
+            if ($this->has_param($field, $this->query_params)) {
+                $field = $field . $i++;
+            } else {
+                $exists = false;
+                break;
+            }
+        }
+        $this->query_params[] = [$field, $value];
+
+        return $field;
+    }
+
+    public function has_param($field)
+    {
+        if (!empty($this->query_params)) {
+            foreach ($this->query_params as $param) {
+                if ($field == $param[0]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function format_param($key)
+    {
+        return preg_replace('/[^a-zA-Z0-9_]/', '_', $key);
+    }
+
+    public function format_key($key)
+    {
+        return str_replace('.', '`.`', $key);
+    }
+
+    public function validate($string)
+    {
+        if (preg_match('/^[a-z0-9_]*$/', $string)) {
+            return $string;
+        }
+
+        ipsCore::add_error('Database query parameter failed to validate.');
+
+        return ' ';
     }
 
 }
