@@ -9,6 +9,11 @@ class ipsCore_model
     protected $fields;
     protected $pkey;
 
+    protected $query_where = [];
+    protected $query_order = [];
+    protected $query_limit = [];
+    protected $query_join = [];
+
     // Getters
     public function get_name()
     {
@@ -115,7 +120,7 @@ class ipsCore_model
     {
         if ($where) {
             foreach($where as $where_key => $where_item) {
-                $where_field = key($where_item);
+                /*$where_field = key($where_item);
 
                 if ($where_field == 'where_and_group') {
                     //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_and_group']);
@@ -125,6 +130,13 @@ class ipsCore_model
                     if (strpos($where_field, ".") !== false) {
                         unset($where[$where_key]);
                         $where[$this->add_prefix($where_key)] = $where_item;
+                    }
+                }*/
+                foreach($where_item['fields'] as $field_key => $field) {
+                    $where_field = key($field);
+                    if (strpos($where_field, ".") !== false) {
+                        unset($where[$where_key]['fields'][$field_key]);
+                        $where[$where_key]['fields'][$this->add_prefix($field_key)] = $field;
                     }
                 }
             }
@@ -278,43 +290,6 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all_data_new($where = false, $order = false, $limit = false, $join = false)
-    {
-        $items = (new ipsCore_query($this->table))->select([
-            'where' => $this->prefix_where_new($where),
-            'order' => $order,
-            'limit' => $limit,
-            'join' => $this->prefix_join($join)
-        ])->process(true);
-
-        if (!empty($items)) {
-            return $items;
-        }
-        return false;
-    }
-
-    public function get_all_new($where = false, $order = false, $limit = false, $join = false)
-    {
-        $items = $this->get_all_data_new($where, $order, $limit, $join);
-        $model = get_class($this);
-        $objects = [];
-
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $object = new $model($this->name, $this->table);
-                foreach ($item as $item_data_key => $item_data) {
-                    $object->{$item_data_key} = $item_data;
-                }
-                $objects[] = $object;
-            }
-        }
-
-        if (!empty($objects)) {
-            return $objects;
-        }
-        return false;
-    }
-
     public function get_all_array($where = false, $order = false, $limit = false, $join = false)
     {
         $items = $this->get_all_data($where, $order, $limit, $join);
@@ -334,6 +309,115 @@ class ipsCore_model
             return $arrays;
         }
         return [];
+    }
+
+    public function addwheretoquery($args) {
+
+        /*if (count($args['fields']) > 1) {
+            $this->query_where[] = ['group' => true, 'binding' => ]
+        } else {
+            $this->query_where[] = array_merge($args, $defaults);
+        }*/
+
+        foreach($args['fields'] as $field_key => $field) {
+            if (!is_array($field)) {
+                unset($args['fields'][$field_key]);
+                $args['fields'][] = [$this->get_pkey() => $field];
+            }
+        }
+
+        $this->query_where[] = $args;
+
+    }
+
+    public function where() {
+        $this->addwheretoquery(['fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function orwhere() {
+        $this->addwheretoquery(['binding' => 'OR', 'fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function andwhere() {
+        $this->addwheretoquery(['binding' => 'AND', 'fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function wherein() {
+        $this->addwheretoquery(['operator' => 'IN', 'fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function orwherein() {
+        $this->addwheretoquery(['binding' => 'OR', 'operator' => 'IN', 'fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function andwherein() {
+        $this->addwheretoquery(['binding' => 'AND', 'operator' => 'IN', 'fields' => func_get_args()]);
+        return $this;
+    }
+
+    public function order($args) {
+        $this->query_order = $args;
+
+        return $this;
+    }
+
+    public function limit($args) {
+        $this->query_limit = $args;
+
+        return $this;
+    }
+
+    public function join($args) {
+        /*if (isset($join['table'])) {
+            $join['table'] = $this->add_prefix($join['table']);
+        }*/
+
+
+        $this->query_join[] = $args;
+
+        return $this;
+    }
+
+    public function get_all_data_new()
+    {
+        $items = (new ipsCore_query($this->table))->select([
+            'where' => $this->prefix_where_new($this->query_where),
+            'order' => $this->query_order,
+            'limit' => $this->query_limit,
+            'join' => $this->prefix_join($this->query_join)
+        ])->process(true);
+
+        if (!empty($items)) {
+            return $items;
+        }
+        return false;
+    }
+
+    public function get_all_new()
+    {
+        $items = $this->get_all_data_new();
+        $model = get_class($this);
+        $objects = [];
+
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $object = new $model($this->name, $this->table);
+                foreach ($item as $item_data_key => $item_data) {
+                    $object->{$item_data_key} = $item_data;
+                }
+                $objects[] = $object;
+            }
+        }
+
+        if (!empty($objects)) {
+            return $objects;
+        }
+        return false;
     }
 
     public function get($where)
@@ -405,24 +489,16 @@ class ipsCore_model
         return false;
     }
 
-    public function retrieve_new($where, $order = false, $join = false)
+    public function retrieve_new()
     {
-        if (!is_array($where)) {
-            $where = [[$this->get_pkey() => $where]];
-        }
-
-        if (isset($join['table'])) {
-            $join['table'] = $this->add_prefix($join['table']);
-        }
-
         //$item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $join])[0];
 
         $item = (new ipsCore_query($this->table))->select([
-            'where' => $this->prefix_where_new($where),
-            'order' => $order,
+            'where' => $this->prefix_where_new($this->query_where),
+            'order' => $this->query_order,
             'limit' => 1,
-            'join' => $join,
-        ])->process(true);
+            'join' => $this->query_join,
+        ])->process(true)[0];
 
         if ($item) {
             foreach ($item as $item_data_key => $item_data) {

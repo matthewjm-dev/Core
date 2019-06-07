@@ -519,7 +519,7 @@ class ipsCore_query
 
         $this->query_sql = 'SELECT ' . (is_array($args['fields']) ? implode(',', $args['fields']) : $args['fields']) . ' FROM ' . $this->validate($this->query_table);
 
-        if ($args['join'] !== false) {
+        if (isset($args['join']) && !empty($args['join']) && $args['join'] !== false) {
             if (is_array($args['join'])) {
                 $join_sql = '';
                 if (isset($args['join']['type'])) {
@@ -582,11 +582,11 @@ class ipsCore_query
 
         }
 
-        if ($args['order'] !== false) {
+        if (isset($args['order']) && !empty($args['order']) && $args['order'] !== false) {
             $this->query_sql .= ' ORDER BY ' . $args['order'][0] . ' ' . $args['order'][1];
         }
 
-        if ($args['limit'] !== false) {
+        if (isset($args['limit']) && !empty($args['limit']) && $args['limit'] !== false) {
             if (is_array($args['limit'])) {
                 $this->query_sql .= ' LIMIT ' . $this->add_param('limitcount', (int)$args['limit'][0]);
                 $this->query_sql .= ' OFFSET ' . $this->add_param('limitoffset', (int)$args['limit'][1]);
@@ -601,9 +601,55 @@ class ipsCore_query
     public function build_where_query($wheres, &$first)
     {
         foreach ($wheres as /*$where_key => */ $where_value) {
-            $where_key = key($where_value);
-            $where_value = $where_value[$where_key];
-            if ($where_key === 'where_and_group') {
+            //$where_key = key($where_value);
+            //$where_value = $where_value[$where_key];
+
+            if (isset($where_value['binding'])) {
+                $this->query_sql .= ' ' . $where_value['binding'] . ' ';
+            }
+
+            if (isset($where_value['fields']) && !empty($where_value['fields'])) {
+                if (count($where_value['fields']) > 1) {
+                    $first = true;
+                    $this->query_sql .= '(';
+                }
+
+                foreach($where_value['fields'] as $field_value) {
+                    $field_key = key($field_value);
+                    $field_value = $field_value[$field_key];
+
+                    $field_args = [
+                        'value' => '',
+                        'operator' => '=',
+                        'like' => false,
+                        'binding' => 'AND',
+                    ];
+
+                    if (!is_array($field_value)) {
+                        $field_args = array_merge($field_args, ['value' => $field_value]);
+                    } else {
+                        $field_args = array_merge($field_args, $field_value);
+                    }
+
+                    $this->query_sql .= (!$first ? ' ' . $field_args['binding'] . ' ' : ' ');
+                    if (strpos($field_key, ".") === false) {
+                        $this->query_sql .= '`' . $this->query_table . '`.';
+                    }
+                    if ($field_args['like']) {
+                        $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
+                    } else {
+                        $this->query_sql .= '`' . $this->format_key($field_key) . '` = ' . $this->add_param($field_key, $field_args['value']);
+                    }
+
+                    $first = false;
+                }
+
+                if (count($where_value['fields']) > 1) {
+                    $this->query_sql .= ')';
+                }
+            }
+
+            /*if ($where_key === 'where_and_group') {
                 $this->query_sql .= ' AND (';
                 $first = true;
                 $this->build_where_query($where_value, $first);
@@ -637,7 +683,7 @@ class ipsCore_query
                 } else {
                     $this->query_sql .= '`' . $this->format_key($where_key) . '` = ' . $this->add_param($where_key, $where_args['value']);
                 }
-            }
+            }*/
 
             $first = false;
         }
