@@ -9,10 +9,14 @@ class ipsCore_model
     protected $fields;
     protected $pkey;
 
-    protected $query_where = [];
-    protected $query_order = [];
-    protected $query_limit = [];
     protected $query_join = [];
+    protected $query_where = [];
+    protected $query_order = false;
+    protected $query_orderby = false;
+    protected $query_limit = false;
+    protected $query_offset = false;
+
+    protected $current_page = 0;
 
     // Getters
     public function get_name()
@@ -102,6 +106,34 @@ class ipsCore_model
         return $join;
     }
 
+    public function get_query_join()
+    {
+        if ($this->query_join && $this->query_join !== false) {
+            if (!is_array($this->query_join)) {
+                $this->query_join = [$this->query_join];
+            }
+
+            if (!empty($this->query_join)) {
+                foreach($this->query_join as $join_key => $join) {
+                    if (isset($join['table'])) {
+                        $this->query_join[$join_key]['table'] = $this->add_prefix($join['table']);
+                    }
+
+                    if (isset($join['on'][0]) && isset($join['on'][1])) {
+                        if (strpos($join['on'][0], ".") !== false) {
+                            $this->query_join[$join_key]['on'][0] = $this->add_prefix($join['on'][0]);
+                        }
+                        if (strpos($join['on'][1], ".") !== false) {
+                            $this->query_join[$join_key]['on'][1] = $this->add_prefix($join['on'][1]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->query_join;
+    }
+
     public function prefix_where($where)
     {
         if ($where) {
@@ -116,33 +148,40 @@ class ipsCore_model
         return $where;
     }
 
-    public function prefix_where_new($where)
+    public function get_query_where()
     {
-        if ($where) {
-            foreach($where as $where_key => $where_item) {
-                /*$where_field = key($where_item);
+        if ($this->query_where && $this->query_where !== false) {
+            if (!is_array($this->query_where)) {
+                $this->query_where = [$this->query_where];
+            }
 
-                if ($where_field == 'where_and_group') {
-                    //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_and_group']);
-                } elseif ($where_field == 'where_or_group') {
-                    //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_or_group']);
-                } else {
-                    if (strpos($where_field, ".") !== false) {
-                        unset($where[$where_key]);
-                        $where[$this->add_prefix($where_key)] = $where_item;
-                    }
-                }*/
-                foreach($where_item['fields'] as $field_key => $field) {
-                    $where_field = key($field);
-                    if (strpos($where_field, ".") !== false) {
-                        unset($where[$where_key]['fields'][$field_key]);
-                        $where[$where_key]['fields'][$this->add_prefix($field_key)] = $field;
+            if (!empty($this->query_where)) {
+                foreach($this->query_where as $where_key => $where_item) {
+                    /*$where_field = key($where_item);
+
+                    if ($where_field == 'where_and_group') {
+                        //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_and_group']);
+                    } elseif ($where_field == 'where_or_group') {
+                        //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_or_group']);
+                    } else {
+                        if (strpos($where_field, ".") !== false) {
+                            unset($where[$where_key]);
+                            $where[$this->add_prefix($where_key)] = $where_item;
+                        }
+                    }*/
+                    foreach($where_item['fields'] as $field_key => $field) {
+                        $where_field = key($field);
+                        $where_value = $field[$where_field];
+                        if (strpos($where_field, ".") !== false) {
+                            unset($this->query_where[$where_key]['fields'][$field_key]);
+                            $this->query_where[$where_key]['fields'][$field_key][$this->add_prefix($where_field)] = $where_value;
+                        }
                     }
                 }
             }
         }
 
-        return $where;
+        return $this->query_where;
     }
 
     public function set_schema()
@@ -331,43 +370,65 @@ class ipsCore_model
     }
 
     public function where() {
-        $this->addwheretoquery(['fields' => func_get_args()]);
+        $wheres = ['fields' => func_get_args()];
+        if (!empty($this->query_where)) {
+            $wheres = array_merge($wheres, ['binding' => 'AND']);
+        }
+        $this->addwheretoquery($wheres);
         return $this;
     }
 
-    public function orwhere() {
+    public function or_where() {
         $this->addwheretoquery(['binding' => 'OR', 'fields' => func_get_args()]);
         return $this;
     }
 
-    public function andwhere() {
+    public function and_where() {
         $this->addwheretoquery(['binding' => 'AND', 'fields' => func_get_args()]);
         return $this;
     }
 
-    public function wherein() {
+    public function where_in() {
         $this->addwheretoquery(['operator' => 'IN', 'fields' => func_get_args()]);
         return $this;
     }
 
-    public function orwherein() {
+    public function or_where_in() {
         $this->addwheretoquery(['binding' => 'OR', 'operator' => 'IN', 'fields' => func_get_args()]);
         return $this;
     }
 
-    public function andwherein() {
+    public function and_where_in() {
         $this->addwheretoquery(['binding' => 'AND', 'operator' => 'IN', 'fields' => func_get_args()]);
         return $this;
     }
 
-    public function order($args) {
-        $this->query_order = $args;
+    public function where_live() {
+        if (!empty($this->query_where)) {
+            $this->and_where(['live' => 1], ['removed' => 0]);
+        } else {
+            $this->where(['live' => 1], ['removed' => 0]);
+        }
 
         return $this;
     }
 
-    public function limit($args) {
-        $this->query_limit = $args;
+    public function order($orderby, $order) {
+        $this->query_orderby = $orderby;
+        $this->query_order = $order;
+
+        return $this;
+    }
+
+    public function limit($limit, $offset = false) {
+        $this->query_limit = $limit;
+        $this->query_offset = $offset;
+
+        return $this;
+    }
+
+    public function offset($offset) {
+        $this->query_offset = $offset;
 
         return $this;
     }
@@ -377,7 +438,6 @@ class ipsCore_model
             $join['table'] = $this->add_prefix($join['table']);
         }*/
 
-
         $this->query_join[] = $args;
 
         return $this;
@@ -386,10 +446,12 @@ class ipsCore_model
     public function get_all_data_new()
     {
         $items = (new ipsCore_query($this->table))->select([
-            'where' => $this->prefix_where_new($this->query_where),
+            'join' => $this->get_query_join(),
+            'where' => $this->get_query_where(),
+            'orderby' => $this->query_orderby,
             'order' => $this->query_order,
             'limit' => $this->query_limit,
-            'join' => $this->prefix_join($this->query_join)
+            'offset' => $this->query_offset,
         ])->process(true);
 
         if (!empty($items)) {
@@ -450,7 +512,7 @@ class ipsCore_model
 
         //$item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
         $item = (new ipsCore_query($this->table))->select([
-            'where' => $this->prefix_where_new($where),
+            'where' => $this->get_query_where($where),
             'limit' => 1,
         ])->process(true);
 
@@ -494,10 +556,10 @@ class ipsCore_model
         //$item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $join])[0];
 
         $item = (new ipsCore_query($this->table))->select([
-            'where' => $this->prefix_where_new($this->query_where),
+            'join' => $this->get_query_join(),
+            'where' => $this->get_query_where($this->query_where),
             'order' => $this->query_order,
             'limit' => 1,
-            'join' => $this->query_join,
         ])->process(true)[0];
 
         if ($item) {
@@ -516,6 +578,21 @@ class ipsCore_model
 
         if (!empty( $count ) ) {
             return $count[0][$count_str];
+        }
+        return false;
+    }
+
+    public function count_new()
+    {
+        $count_str = 'COUNT(*)';
+        $count = (new ipsCore_query($this->table))->select([
+            'fields' => $count_str,
+            'join' => $this->get_query_join(),
+            'where' => $this->get_query_where($this->query_where),
+        ])->process(true)[0];
+
+        if (!empty( $count ) ) {
+            return $count[$count_str];
         }
         return false;
     }

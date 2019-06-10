@@ -202,7 +202,7 @@ class ipsCore_controller
         $show_around = (isset($args['show_around']) ? $args['show_around'] : 2);
         $slug = (isset($args['slug']) ? $args['slug'] . '/' : '');
 
-        $total = $args['model']->count($args['where']);
+        $total = $args['model']->count_new();
         $num_pages = ceil(($total / $per_page));
         $show_pages = $show_around * 2;
 
@@ -280,7 +280,6 @@ class ipsCore_controller
             'model' => false,
             'current_page' => 1,
             'per_page' => 10,
-            'where' => [],
         ];
 
         $args = array_merge($defaults, $args);
@@ -297,37 +296,33 @@ class ipsCore_controller
 
     protected function get_paginated($args)
     {
-        $defaults = [
-            'model' => false,
-            'current_page' => 1,
-            'per_page' => 10,
-            'where' => [],
-        ];
-
-        $args = array_merge($defaults, $args);
-
         $items = [];
 
-        if ($args['model']) {
+        if (isset($args['model']) && $args['model']) {
 
-            if ($args['where'] === false) {
-                $where = false;
-            } else {
-                $where = array_merge($this->where_live(), $args['where']);
-                $args['where'] = $where;
-            }
+            $defaults = [
+                'current_page' => 1,
+                'per_page' => 10,
+                'orderby' => $args['model']->get_pkey(),
+                'order' => 'DESC',
+            ];
+
+            $args = array_merge($defaults, $args);
+
+            /*if ($args['where'] !== false) {
+                $args['model']->where(...$args['where'])->where_live();
+            }*/
 
             $offset = ($args['current_page'] - 1) * $args['per_page'];
 
             $this->set_pagination($args);
 
-            if (isset($args['order'])) {
-                $order = $args['order'];
-            } else {
-                $order = [$args['model']->get_pkey(), 'DESC'];
-            }
+            //$items = $args['model']->get_all($where, $order, [$args['per_page'], $offset]);
 
-            $items = $args['model']->get_all($where, $order, [$args['per_page'], $offset]);
+            $items = $args['model']
+                ->order($args['orderby'], $args['order'])
+                ->limit($args['per_page'], $offset)
+                ->get_all_new();
         }
 
         return $items;

@@ -508,11 +508,13 @@ class ipsCore_query
     {
         $defaults = [
             'fields' => $this->query_table . '.*',
-            'where' => false,
-            'order' => false,
-            'limit' => false,
             'join' => false,
+            'where' => false,
+            'orderby' => false,
+            'order' => false,
             'group' => false,
+            'limit' => false,
+            'offset' => false,
         ];
 
         $args = array_merge($defaults, $args);
@@ -521,47 +523,49 @@ class ipsCore_query
 
         if (isset($args['join']) && !empty($args['join']) && $args['join'] !== false) {
             if (is_array($args['join'])) {
-                $join_sql = '';
-                if (isset($args['join']['type'])) {
-                    switch ($args['join']['type']) {
-                        case 'full':
-                            $join_sql .= ' FULL JOIN ';
-                            break;
-                        case 'inner':
-                            $join_sql .= ' INNER JOIN ';
-                            break;
-                        case 'right':
-                            $join_sql .= ' RIGHT JOIN ';
-                            break;
-                        case 'left':
-                        default:
-                            $join_sql .= ' LEFT JOIN ';
-                            break;
-                    }
-                } else {
-                    $join_sql .= ' LEFT JOIN ';
-                }
-
-                if (isset($args['join']['table'])) {
-                    $join_sql .= $args['join']['table'] . ' ';
-                } else {
-                    ipsCore::add_error('Failed to Join in select, "table" statement missing.');
-                    $join_sql = false;
-                }
-
-                if ($join_sql) {
-                    if (isset($args['join']['on'])) {
-                        $join_sql .= 'ON ';
-                        $join_sql .= (strpos($args['join']['on'][0], ".") !== false ? '' : $this->query_table . '.') . $args['join']['on'][0] . ' = ';
-                        $join_sql .= (strpos($args['join']['on'][1], ".") !== false ? '' : $args['join']['table'] . '.') . $args['join']['on'][1] . ' ';
+                foreach($args['join'] as $join) {
+                    $join_sql = '';
+                    if (isset($join['type'])) {
+                        switch ($join['type']) {
+                            case 'full':
+                                $join_sql .= ' FULL JOIN ';
+                                break;
+                            case 'inner':
+                                $join_sql .= ' INNER JOIN ';
+                                break;
+                            case 'right':
+                                $join_sql .= ' RIGHT JOIN ';
+                                break;
+                            case 'left':
+                            default:
+                                $join_sql .= ' LEFT JOIN ';
+                                break;
+                        }
                     } else {
-                        ipsCore::add_error('Failed to Join in select, "on" statement missing.');
+                        $join_sql .= ' LEFT JOIN ';
+                    }
+
+                    if (isset($join['table'])) {
+                        $join_sql .= $join['table'] . ' ';
+                    } else {
+                        ipsCore::add_error('Failed to Join in select, "table" statement missing.');
                         $join_sql = false;
                     }
-                }
 
-                if ($join_sql) {
-                    $this->query_sql .= $join_sql;
+                    if ($join_sql) {
+                        if (isset($join['on'])) {
+                            $join_sql .= 'ON ';
+                            $join_sql .= (strpos($join['on'][0], ".") !== false ? '' : $this->query_table . '.') . $join['on'][0] . ' = ';
+                            $join_sql .= (strpos($join['on'][1], ".") !== false ? '' : $join['table'] . '.') . $join['on'][1] . ' ';
+                        } else {
+                            ipsCore::add_error('Failed to Join in select, "on" statement missing.');
+                            $join_sql = false;
+                        }
+                    }
+
+                    if ($join_sql) {
+                        $this->query_sql .= $join_sql;
+                    }
                 }
             } else {
                 $this->query_sql .= $args['join'];
@@ -570,9 +574,11 @@ class ipsCore_query
 
         if ($args['where'] !== false) {
             if (is_array($args['where'])) {
-                $this->query_sql .= ' WHERE';
-                $first = true;
-                $this->build_where_query($args['where'], $first);
+                if (!empty($args['where'])) {
+                    $this->query_sql .= ' WHERE';
+                    $first = true;
+                    $this->build_where_query($args['where'], $first);
+                }
             } else {
                 $this->query_sql .= $args['where'];
             }
@@ -582,16 +588,25 @@ class ipsCore_query
 
         }
 
-        if (isset($args['order']) && !empty($args['order']) && $args['order'] !== false) {
-            $this->query_sql .= ' ORDER BY ' . $args['order'][0] . ' ' . $args['order'][1];
+        if (isset($args['orderby']) && !empty($args['orderby']) && $args['orderby'] !== false) {
+            $this->query_sql .= ' ORDER BY ' . $args['orderby'];
+
+            if (isset($args['order']) && !empty($args['order']) && $args['order'] !== false) {
+                $this->query_sql .= ' ' . $args['order'];
+            }
         }
 
         if (isset($args['limit']) && !empty($args['limit']) && $args['limit'] !== false) {
-            if (is_array($args['limit'])) {
+            /*if (is_array($args['limit'])) {
                 $this->query_sql .= ' LIMIT ' . $this->add_param('limitcount', (int)$args['limit'][0]);
                 $this->query_sql .= ' OFFSET ' . $this->add_param('limitoffset', (int)$args['limit'][1]);
             } else {
                 $this->query_sql .= ' LIMIT ' . $args['limit'];
+            }*/
+            $this->query_sql .= ' LIMIT ' . $this->add_param('limitcount', (int)$args['limit']);
+
+            if (isset($args['offset']) && !empty($args['offset']) && $args['offset'] !== false) {
+                $this->query_sql .= ' OFFSET ' . $this->add_param('limitoffset', (int)$args['offset']);
             }
         }
 
