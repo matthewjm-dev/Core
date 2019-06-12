@@ -157,18 +157,6 @@ class ipsCore_model
 
             if (!empty($this->query_where)) {
                 foreach($this->query_where as $where_key => $where_item) {
-                    /*$where_field = key($where_item);
-
-                    if ($where_field == 'where_and_group') {
-                        //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_and_group']);
-                    } elseif ($where_field == 'where_or_group') {
-                        //$where_item['where_and_group'] = $this->prefix_where_new($where_item['where_or_group']);
-                    } else {
-                        if (strpos($where_field, ".") !== false) {
-                            unset($where[$where_key]);
-                            $where[$this->add_prefix($where_key)] = $where_item;
-                        }
-                    }*/
                     foreach($where_item['fields'] as $field_key => $field) {
                         $where_field = key($field);
                         $where_value = $field[$where_field];
@@ -267,7 +255,7 @@ class ipsCore_model
 
     public function create_column($name, $type = 'text', $length = false, $default = false, $extra = false)
     {
-        // To Do: Check schema if column already exists
+        // TODO: Check schema if column already exists
 
         if (ipsCore::$database->create_column($this->table, $name, $type, $length, $default, $extra)) {
             return true;
@@ -277,7 +265,7 @@ class ipsCore_model
 
     public function modify_column($name, $new_name, $type = 'text', $length = false, $default = false, $extra = false)
     {
-        // To Do: Check schema if column already exists
+        // TODO: Check schema if column already exists
 
         if ($this->table && $name && $new_name) {
             if (ipsCore::$database->modify_column($this->table, $name, $new_name, $type, $length, $default, $extra)) {
@@ -297,7 +285,7 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all_data($where = false, $order = false, $limit = false, $join = false)
+    /*public function get_all_data($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
     {
         $items = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
 
@@ -305,9 +293,9 @@ class ipsCore_model
             return $items;
         }
         return false;
-    }
+    }*/
 
-    public function get_all($where = false, $order = false, $limit = false, $join = false)
+    /*public function get_all($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
     {
         $items = $this->get_all_data($where, $order, $limit, $join);
         $model = get_class($this);
@@ -327,9 +315,9 @@ class ipsCore_model
             return $objects;
         }
         return false;
-    }
+    }*/
 
-    public function get_all_array($where = false, $order = false, $limit = false, $join = false)
+    /*public function get_all_array($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
     {
         $items = $this->get_all_data($where, $order, $limit, $join);
         $arrays = [];
@@ -348,15 +336,52 @@ class ipsCore_model
             return $arrays;
         }
         return [];
-    }
+    }*/
+
+    /*public function get($where) // TODO: remove old method
+    {
+        if (!is_array($where)) {
+            $where = [$this->get_pkey() => $where];
+        }
+
+        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
+
+        if (!empty($item)) {
+            $item = $item[0];
+            $model = get_class($this);
+
+            $object = new $model($this->name, $this->table);
+            foreach ($item as $item_data_key => $item_data) {
+                $object->{$item_data_key} = $item_data;
+            }
+
+            return $object;
+        }
+        return false;
+    }*/
+
+    /*public function retrieve($where, $order = false, $join = false) // TODO: remove old method
+    {
+        if (!is_array($where)) {
+            $where = [$this->get_pkey() => $where];
+        }
+
+        if (isset($join['table'])) {
+            $join['table'] = $this->add_prefix($join['table']);
+        }
+
+        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'join' => $join])[0];
+
+        if ($item) {
+            foreach ($item as $item_data_key => $item_data) {
+                $this->{$item_data_key} = $item_data;
+            }
+            return true;
+        }
+        return false;
+    }*/
 
     public function addwheretoquery($args) {
-
-        /*if (count($args['fields']) > 1) {
-            $this->query_where[] = ['group' => true, 'binding' => ]
-        } else {
-            $this->query_where[] = array_merge($args, $defaults);
-        }*/
 
         foreach($args['fields'] as $field_key => $field) {
             if (!is_array($field)) {
@@ -366,7 +391,6 @@ class ipsCore_model
         }
 
         $this->query_where[] = $args;
-
     }
 
     public function where() {
@@ -434,6 +458,7 @@ class ipsCore_model
     }
 
     public function join($args) {
+        // TODO: do add prefix to join?
         /*if (isset($join['table'])) {
             $join['table'] = $this->add_prefix($join['table']);
         }*/
@@ -443,7 +468,7 @@ class ipsCore_model
         return $this;
     }
 
-    public function get_all_data_new()
+    public function get_all_data()
     {
         $items = (new ipsCore_query($this->table))->select([
             'join' => $this->get_query_join(),
@@ -460,9 +485,9 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all_new()
+    public function get_all()
     {
-        $items = $this->get_all_data_new();
+        $items = $this->get_all_data();
         $model = get_class($this);
         $objects = [];
 
@@ -482,37 +507,41 @@ class ipsCore_model
         return false;
     }
 
-    public function get($where)
+    public function get_all_array()
     {
-        if (!is_array($where)) {
-            $where = [$this->get_pkey() => $where];
-        }
+        $items = $this->get_all_data();
+        $arrays = [];
 
-        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
-
-        if (!empty($item)) {
-            $item = $item[0];
-            $model = get_class($this);
-
-            $object = new $model($this->name, $this->table);
-            foreach ($item as $item_data_key => $item_data) {
-                $object->{$item_data_key} = $item_data;
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $array = [];
+                foreach ($item as $item_data_key => $item_data) {
+                    $array[$item_data_key] = $item_data;
+                }
+                $arrays[] = $array;
             }
-
-            return $object;
         }
-        return false;
+
+        if (!empty($arrays)) {
+            return $arrays;
+        }
+        return [];
     }
 
-    public function get_new($where)
+    public function get()
     {
-        if (!is_array($where)) {
-            $where = [$this->get_pkey() => $where];
+        $args = func_get_args();
+        if ($args) {
+            if (!is_array($args[0])) {
+                $args = [$this->get_pkey() => $args[0]];
+                $this->where($args);
+            } else {
+                $this->where(...$args);
+            }
         }
 
-        //$item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
         $item = (new ipsCore_query($this->table))->select([
-            'where' => $this->get_query_where($where),
+            'where' => $this->get_query_where(),
             'limit' => 1,
         ])->process(true);
 
@@ -530,30 +559,17 @@ class ipsCore_model
         return false;
     }
 
-    public function retrieve($where, $order = false, $join = false)
+    public function retrieve()
     {
-        if (!is_array($where)) {
-            $where = [$this->get_pkey() => $where];
-        }
-
-        if (isset($join['table'])) {
-            $join['table'] = $this->add_prefix($join['table']);
-        }
-
-        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'join' => $join])[0];
-
-        if ($item) {
-            foreach ($item as $item_data_key => $item_data) {
-                $this->{$item_data_key} = $item_data;
+        $args = func_get_args();
+        if ($args) {
+            if (!is_array($args[0])) {
+                $args = [$this->get_pkey() => $args[0]];
+                $this->where($args);
+            } else {
+                $this->where(...$args);
             }
-            return true;
         }
-        return false;
-    }
-
-    public function retrieve_new()
-    {
-        //$item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $join])[0];
 
         $item = (new ipsCore_query($this->table))->select([
             'join' => $this->get_query_join(),
@@ -595,11 +611,6 @@ class ipsCore_model
             return $count[$count_str];
         }
         return false;
-    }
-
-    public function modify()
-    {
-
     }
 
     public function remove( $where = false )
@@ -656,5 +667,3 @@ class ipsCore_model
     }
 
 }
-
-
