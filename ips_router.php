@@ -41,9 +41,14 @@ class ipsCore_route
         $this->uri = $uri;
     }
 
+    public function set_controller($controller)
+    {
+        $this->controller = $controller;
+    }
+
     public function set_method($method)
     {
-        $this->method = $method;
+        $this->method = str_replace('-', '_', $method );
     }
 
     public function set_args($args)
@@ -54,10 +59,10 @@ class ipsCore_route
     // Construct
     public function __construct($uri, $controller, $method, $args = [])
     {
-        $this->uri = $uri;
-        $this->controller = $controller;
-        $this->method = $method;
-        $this->args = $args;
+        $this->set_uri($uri);
+        $this->set_controller($controller);
+        $this->set_method($method);
+        $this->set_args($args);
     }
 }
 
@@ -155,8 +160,8 @@ class ipsCore_router
                     if (!empty($path_parts)) {
                         require_once(ipsCore::get_controller_route($controller));
 
-                        if (method_exists($controller . '_controller', $path_parts[0])) {
-                            $method = str_replace('-', '_', array_shift($path_parts));
+                        if (method_exists($controller . '_controller', str_replace('-', '_', $path_parts[0]))) {
+                            $method = array_shift($path_parts);
                             ipsCore::$uri_current .= '/' . $method;
                         } else {
                             $method = 'index';

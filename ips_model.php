@@ -9,12 +9,18 @@ class ipsCore_model
     protected $fields;
     protected $pkey;
 
-    protected $query_join = [];
-    protected $query_where = [];
-    protected $query_order = false;
-    protected $query_orderby = false;
-    protected $query_limit = false;
-    protected $query_offset = false;
+    protected $query_join;
+    protected $query_join_default = [];
+    protected $query_where;
+    protected $query_where_default = [];
+    protected $query_order;
+    protected $query_order_default = false;
+    protected $query_orderby;
+    protected $query_orderby_default = false;
+    protected $query_limit;
+    protected $query_limit_default = false;
+    protected $query_offset;
+    protected $query_offset_default = false;
 
     protected $current_page = 0;
 
@@ -71,8 +77,10 @@ class ipsCore_model
         }
         $this->set_table($table);
 
-        ipsCore::$database = new ipsCore_database();
-        ipsCore::$session = new ipsCore_session();
+        /*ipsCore::$database = new ipsCore_database();
+        ipsCore::$session = new ipsCore_session();*/
+
+        $this->reset();
 
         if ($this->table !== false) {
             $this->table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
@@ -81,6 +89,7 @@ class ipsCore_model
     }
 
     // Methods
+
     public function add_prefix($text)
     {
         return (substr($text, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $text : ipsCore::$app->database['prefix'] . $text);
@@ -380,6 +389,19 @@ class ipsCore_model
         }
         return false;
     }*/
+
+    /* Query Functions */
+
+    public function reset() {
+        $this->query_join = $this->query_join_default;
+        $this->query_where = $this->query_where_default;
+        $this->query_order = $this->query_order_default;
+        $this->query_orderby = $this->query_orderby_default;
+        $this->query_limit = $this->query_limit_default;
+        $this->query_offset = $this->query_offset_default;
+
+        return $this;
+    }
 
     public function addwheretoquery($args) {
 

@@ -322,7 +322,7 @@ class ipsCore_controller
             $items = $args['model']
                 ->order($args['orderby'], $args['order'])
                 ->limit($args['per_page'], $offset)
-                ->get_all_new();
+                ->get_all();
         }
 
         return $items;
