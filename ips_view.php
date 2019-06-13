@@ -3,8 +3,8 @@
 class ips_view {
 
 	protected $template;
-    protected $content = false;
     protected $show_in_layout;
+    protected $content = false;
 	protected $type = 'twig';
     protected $allowed_types = ['twig', 'php', 'html', 'js', 'css'];
 	protected $is_twig = false;

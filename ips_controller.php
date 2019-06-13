@@ -95,7 +95,7 @@ class ipsCore_controller
     public function build_view(array $args = []) //$show_in_layout = true, $build = 'twig' )
     {
         $defaults = [
-            'layout' => true,
+            'layout' => 'main',
             'json' => false,
             'type' => 'twig',
         ];

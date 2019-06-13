@@ -218,7 +218,7 @@ class ipsCore
         return self::get_file_route($view, 'views', false, $type);
     }
 
-    public static function get_layout_route($layout, $type = 'php')
+    public static function get_layout_route($layout, $type = 'twig')
     {
         return self::get_file_route($layout, 'layouts', false, $type);
     }
