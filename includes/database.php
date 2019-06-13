@@ -646,14 +646,14 @@ class ipsCore_query
                         $field_args = array_merge($field_args, $field_value);
                     }
 
-                    $this->query_sql .= (!$first ? ' ' . $field_args['binding'] . ' ' : ' ');
+                    $this->query_sql .= (!$first && count($where_value['fields']) > 1 ? ' ' . $field_args['binding'] . ' ' : ' ');
                     if (strpos($field_key, ".") === false) {
                         $this->query_sql .= '`' . $this->query_table . '`.';
                     }
                     if ($field_args['like']) {
                         $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
                     } else {
-                        $this->query_sql .= '`' . $this->format_key($field_key) . '` = ' . $this->add_param($field_key, $field_args['value']);
+                        $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['operator'] . ' ' . $this->add_param($field_key, $field_args['value']);
                     }
 
                     $first = false;

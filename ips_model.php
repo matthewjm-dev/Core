@@ -450,11 +450,7 @@ class ipsCore_model
     }
 
     public function where_live() {
-        if (!empty($this->query_where)) {
-            $this->and_where(['live' => 1], ['removed' => 0]);
-        } else {
-            $this->where(['live' => 1], ['removed' => 0]);
-        }
+        $this->where(['live' => 1], ['removed' => 0]);
 
         return $this;
     }
