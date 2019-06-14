@@ -4,10 +4,10 @@
 class ipsCore_model
 {
 
-    protected $name;
-    protected $table;
-    protected $fields;
-    protected $pkey;
+    protected $model_name;
+    protected $model_table;
+    protected $model_fields;
+    protected $model_pkey;
 
     protected $query_join;
     protected $query_join_default = [];
@@ -25,19 +25,19 @@ class ipsCore_model
     protected $current_page = 0;
 
     // Getters
-    public function get_name()
+    public function get_model_name()
     {
-        return $this->name;
+        return $this->model_name;
     }
 
-    public function get_table()
+    public function get_model_table()
     {
-        return $this->table;
+        return $this->model_table;
     }
 
     public function get_pkey()
     {
-        return $this->pkey;
+        return $this->model_pkey;
     }
 
     public function get_id()
@@ -55,25 +55,25 @@ class ipsCore_model
     // Setters
     public function set_name($name)
     {
-        $this->name = $name;
+        $this->model_name = $name;
     }
 
     public function set_table($table)
     {
-        $this->table = $table;
+        $this->model_table = $table;
     }
 
     public function set_pkey($pkey)
     {
-        $this->pkey = $pkey;
+        $this->model_pkey = $pkey;
     }
 
     // Construct
-    public function __construct($model, $table = ' ')
+    public function __construct($name, $table = ' ')
     {
-        $this->set_name($model);
+        $this->set_name($name);
         if ($table == ' ') {
-            $table = $model;
+            $table = $name;
         }
         $this->set_table($table);
 
@@ -82,8 +82,8 @@ class ipsCore_model
 
         $this->reset();
 
-        if ($this->table !== false) {
-            $this->table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
+        if ($this->model_table !== false) {
+            $this->model_table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
             $this->set_schema();
         }
     }
@@ -185,15 +185,21 @@ class ipsCore_model
     {
         $this->fields = [];
 
-        if ($this->table && ipsCore::$database->does_table_exist($this->table)) {
-            $fields = ipsCore::$database->get_table_schema($this->table);
+        if ($this->model_table && ipsCore::$database->does_table_exist($this->model_table)) {
+            $fields = ipsCore::$database->get_table_schema($this->get_model_table());
 
             foreach ($fields as $field) {
                 $name = $field['Field'];
                 $type = $field['Type'];
+                $default = $field['Default'];
+                $extra = $field['Extra'];
 
-                $this->$name = false;
-                $this->fields[$name] = ['type' => $type];
+                $this->$name = $default;
+                $this->fields[$name] = [
+                    'type' => $type,
+                    'default' => $default,
+                    'extra' => $extra
+                ];
 
                 if ($field['Key'] == 'PRI') {
                     $this->set_pkey($field['Field']);
@@ -214,10 +220,10 @@ class ipsCore_model
             $id => $this->get_pkey_args(),
             'created' => ['type' => 'int', 'length' => 11],
             'modified' => ['type' => 'int', 'length' => 11],
-            'live' => ['type' => 'tinyint', 'length' => 1],
-            'removed' => ['type' => 'tinyint', 'length' => 1],
-            'locked' => ['type' => 'tinyint', 'length' => 1],
-            'position' => ['type' => 'int', 'length' => 11],
+            'live' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
+            'removed' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
+            'locked' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
+            'position' => ['type' => 'int', 'length' => 11, 'default' => '0'],
             'title' => ['type' => 'text', 'length' => 255],
         ];
 
@@ -241,7 +247,7 @@ class ipsCore_model
     public function remove_table($table = false)
     {
     	if ($table === false) {
-			$table = $this->table;
+			$table = $this->get_model_table();
 		}
 		$table = $this->add_prefix($table);
 
@@ -266,7 +272,7 @@ class ipsCore_model
     {
         // TODO: Check schema if column already exists
 
-        if (ipsCore::$database->create_column($this->table, $name, $type, $length, $default, $extra)) {
+        if (ipsCore::$database->create_column($this->get_model_table(), $name, $type, $length, $default, $extra)) {
             return true;
         }
         return false;
@@ -276,8 +282,8 @@ class ipsCore_model
     {
         // TODO: Check schema if column already exists
 
-        if ($this->table && $name && $new_name) {
-            if (ipsCore::$database->modify_column($this->table, $name, $new_name, $type, $length, $default, $extra)) {
+        if ($this->get_model_table() && $name && $new_name) {
+            if (ipsCore::$database->modify_column($this->get_model_table(), $name, $new_name, $type, $length, $default, $extra)) {
                 return true;
             }
         }
@@ -286,8 +292,8 @@ class ipsCore_model
 
     public function remove_column($name)
     {
-        if ($this->table && $name) {
-            if (ipsCore::$database->drop_column($this->table, $name)) {
+        if ($this->get_model_table() && $name) {
+            if (ipsCore::$database->drop_column($this->get_model_table(), $name)) {
                 return true;
             }
         }
@@ -296,7 +302,7 @@ class ipsCore_model
 
     /*public function get_all_data($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
     {
-        $items = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
+        $items = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
 
         if (!empty($items)) {
             return $items;
@@ -312,7 +318,7 @@ class ipsCore_model
 
         if (!empty($items)) {
             foreach ($items as $item) {
-                $object = new $model($this->name, $this->table);
+                $object = new $model($this->get_model_name(), $this->get_model_table());
                 foreach ($item as $item_data_key => $item_data) {
                     $object->{$item_data_key} = $item_data;
                 }
@@ -353,13 +359,13 @@ class ipsCore_model
             $where = [$this->get_pkey() => $where];
         }
 
-        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'limit' => 1]);
+        $item = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'limit' => 1]);
 
         if (!empty($item)) {
             $item = $item[0];
             $model = get_class($this);
 
-            $object = new $model($this->name, $this->table);
+            $object = new $model($this->get_model_name(), $this->get_model_table());
             foreach ($item as $item_data_key => $item_data) {
                 $object->{$item_data_key} = $item_data;
             }
@@ -379,7 +385,7 @@ class ipsCore_model
             $join['table'] = $this->add_prefix($join['table']);
         }
 
-        $item = ipsCore::$database->select($this->table, ['where' => $this->prefix_where($where), 'order' => $order, 'join' => $join])[0];
+        $item = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'order' => $order, 'join' => $join])[0];
 
         if ($item) {
             foreach ($item as $item_data_key => $item_data) {
@@ -488,7 +494,7 @@ class ipsCore_model
 
     public function get_all_data()
     {
-        $items = (new ipsCore_query($this->table))->select([
+        $items = (new ipsCore_query($this->get_model_table()))->select([
             'join' => $this->get_query_join(),
             'where' => $this->get_query_where(),
             'orderby' => $this->query_orderby,
@@ -511,7 +517,7 @@ class ipsCore_model
 
         if (!empty($items)) {
             foreach ($items as $item) {
-                $object = new $model($this->name, $this->table);
+                $object = new $model($this->get_model_name(), $this->get_model_table());
                 foreach ($item as $item_data_key => $item_data) {
                     $object->{$item_data_key} = $item_data;
                 }
@@ -558,7 +564,7 @@ class ipsCore_model
             }
         }
 
-        $item = (new ipsCore_query($this->table))->select([
+        $item = (new ipsCore_query($this->get_model_table()))->select([
             'where' => $this->get_query_where(),
             'limit' => 1,
         ])->process(true);
@@ -567,7 +573,7 @@ class ipsCore_model
             $item = $item[0];
             $model = get_class($this);
 
-            $object = new $model($this->name, $this->table);
+            $object = new $model($this->get_model_name(), $this->get_model_table());
             foreach ($item as $item_data_key => $item_data) {
                 $object->{$item_data_key} = $item_data;
             }
@@ -589,7 +595,7 @@ class ipsCore_model
             }
         }
 
-        $item = (new ipsCore_query($this->table))->select([
+        $item = (new ipsCore_query($this->get_model_table()))->select([
             'join' => $this->get_query_join(),
             'where' => $this->get_query_where($this->query_where),
             'order' => $this->query_order,
@@ -608,7 +614,7 @@ class ipsCore_model
     public function count($where = false, $join = false)
     {
         $count_str = 'COUNT(*)';
-        $count = ipsCore::$database->select($this->table, ['fields' => $count_str, 'where' => $this->prefix_where($where), 'join' => $this->prefix_join($join)]);
+        $count = ipsCore::$database->select($this->get_model_table(), ['fields' => $count_str, 'where' => $this->prefix_where($where), 'join' => $this->prefix_join($join)]);
 
         if (!empty( $count ) ) {
             return $count[0][$count_str];
@@ -619,7 +625,7 @@ class ipsCore_model
     public function count_new()
     {
         $count_str = 'COUNT(*)';
-        $count = (new ipsCore_query($this->table))->select([
+        $count = (new ipsCore_query($this->get_model_table()))->select([
             'fields' => $count_str,
             'join' => $this->get_query_join(),
             'where' => $this->get_query_where($this->query_where),
@@ -642,7 +648,7 @@ class ipsCore_model
         }
 
         if ( $where ) {
-            if ( ipsCore::$database->delete( $this->table, $this->prefix_where($where) ) ) {
+            if ( ipsCore::$database->delete( $this->get_model_table(), $this->prefix_where($where) ) ) {
                 return true;
             }
         }
@@ -659,7 +665,7 @@ class ipsCore_model
         foreach ($this->fields as $field_key => $field) {
             if ($first) {
                 $first = false;
-                if ($this->{$field_key} !== false) {
+                if ($this->{$field_key} !== false && $this->{$field_key} !== null) {
                     $where[$field_key] = $this->{$field_key};
                 } else {
                     $insert = $field_key;
@@ -671,12 +677,12 @@ class ipsCore_model
 
         if (!empty($fields) && ($insert || !empty($where))) {
             if ($insert !== false) {
-                if ($id = ipsCore::$database->insert($this->table, $fields)) {
+                if ($id = ipsCore::$database->insert($this->get_model_table(), $fields)) {
                     $this->{$insert} = $id;
                     return true;
                 }
             } else {
-                if (ipsCore::$database->update($this->table, $fields, $where)) {
+                if (ipsCore::$database->update($this->get_model_table(), $fields, $where)) {
                     return true;
                 }
             }

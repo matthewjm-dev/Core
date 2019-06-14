@@ -362,7 +362,7 @@ class ipsCore_form_builder
     public function render_textarea($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['value'] . '</textarea></fieldset>');
+        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . htmlentities($field['value']) . '</textarea></fieldset>');
     }
 
     /* WYSIWYG Editor */
@@ -725,10 +725,10 @@ class ipsCore_form_builder
 
             $field_value = '';
             if (isset($field['value'])) {
-                $field_value = ' value="' . $field['value'] . '"';
+                $field_value = ' value="' . htmlentities($field['value']) . '"';
             } elseif ($field_default !== false) {
-                $field['value'] = $field['default'];
-                $field_value = ' value="' . $field_default . '"';
+                $field['value'] = $field_default;
+                $field_value = ' value="' . htmlentities($field_default) . '"';
             }
 
             $field_comment = '';
@@ -905,11 +905,13 @@ class ipsCore_form_builder
 
         if (!empty($options)) {
             foreach ($options as $option) {
-                $option = explode(' : ', $option);
-                $return[] = [
-                    'value' => $option[0],
-                    'text' => $option[1],
-                ];
+                if ($option && $option != '' && $option != ' ') {
+                    $option = explode(' : ', $option);
+                    $return[] = [
+                        'value' => $option[0],
+                        'text' => $option[1],
+                    ];
+                }
             }
         }
 
