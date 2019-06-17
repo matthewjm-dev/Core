@@ -52,6 +52,10 @@ class ipsCore_controller
         ipsCore::$data['page_title'] = $title;
     }
 
+    public function set_error404($func = 'call_error404') {
+        ipsCore::$router->get_route()->set_method($func);
+    }
+
     public function call_error404()
     {
         header('HTTP/1.0 404 Not Found');
