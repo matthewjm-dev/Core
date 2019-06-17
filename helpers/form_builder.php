@@ -791,15 +791,17 @@ class ipsCore_form_builder
                 }
 
                 if (isset($field_type['link'])) {
-                    if (is_array($value)) {
-                        $value = implode(',', $value);
-                    }
+                    if (is_array($this->fields[$field_key]['options'])) {
+                        if (is_array($value)) {
+                            $value = implode(',', $value);
+                        }
 
-                    $values = explode(',', $value);
-                    foreach ($values as $value_item) {
-                        $option_key = array_search($value_item, array_column($this->fields[$field_key]['options'], 'value'));
-                        if ($option_key !== false) {
-                            $this->fields[$field_key]['options'][$option_key]['selected'] = true;
+                        $values = explode(',', $value);
+                        foreach ($values as $value_item) {
+                            $option_key = array_search($value_item, array_column($this->fields[$field_key]['options'], 'value'));
+                            if ($option_key !== false) {
+                                $this->fields[$field_key]['options'][$option_key]['selected'] = true;
+                            }
                         }
                     }
                 }
