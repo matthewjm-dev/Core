@@ -651,10 +651,15 @@ class ipsCore_query
                     if (strpos($field_key, ".") === false) {
                         $this->query_sql .= '`' . $this->query_table . '`.';
                     }
-                    if ($field_args['like']) {
-                        $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
+
+                    if ($field_args['value'] === 'IS NULL' || $field_args['value'] === 'IS NOT NULL') {
+                        $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['value'];
                     } else {
-                        $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['operator'] . ' ' . $this->add_param($field_key, $field_args['value']);
+                        if ($field_args['like']) {
+                            $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
+                        } else {
+                            $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['operator'] . ' ' . $this->add_param($field_key, $field_args['value']);
+                        }
                     }
 
                     $first = false;

@@ -461,7 +461,7 @@ class ipsCore_model
         return $this;
     }
 
-    public function order($orderby, $order) {
+    public function order($orderby, $order = 'DESC') {
         $this->query_orderby = $orderby;
         $this->query_order = $order;
 
