@@ -509,7 +509,7 @@ class ipsCore_model
         return false;
     }
 
-    public function get_all()
+    public function get_all($array_keys = false)
     {
         $items = $this->get_all_data();
         $model = get_class($this);
@@ -521,7 +521,11 @@ class ipsCore_model
                 foreach ($item as $item_data_key => $item_data) {
                     $object->{$item_data_key} = $item_data;
                 }
-                $objects[] = $object;
+                if ($array_keys) {
+                    $objects[$object->get_id()] = $object;
+                } else {
+                    $objects[] = $object;
+                }
             }
         }
 
