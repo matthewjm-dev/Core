@@ -139,10 +139,11 @@ class ips_json {
 			    $json = ipsCore::$data[ 'json' ];
                 unset( ipsCore::$data[ 'json' ] );
             } else {
-                $json = true;
+                $json = [];
             }
 
-			$data = [ 'html' => ob_get_clean(), 'json' => $json ];
+			//$data = [ 'html' => ob_get_clean(), 'json' => $json ];
+			$data = array_merge(['html' => ob_get_clean()], $json);
 		} else {
 			$data = ipsCore::$data['json'];
 
