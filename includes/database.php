@@ -654,6 +654,18 @@ class ipsCore_query
 
                     if ($field_args['value'] === 'IS NULL' || $field_args['value'] === 'IS NOT NULL') {
                         $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['value'];
+                    } elseif ($field_args['operator'] === 'IN' && is_array($field_args['value'])) {
+                        $this->query_sql .= '`' . $this->format_key($field_key) . '` IN (';
+                        $in_first = true;
+                        foreach ($field_args['value'] as $in_key => $in_value) {
+                            if (!$in_first) {
+                                $this->query_sql .= ', ';
+                            } else {
+                                $in_first = false;
+                            }
+                            $this->query_sql .= $this->add_param($field_key . $in_key, $in_value);
+                        }
+                        $this->query_sql .= ') ';
                     } else {
                         if ($field_args['like']) {
                             $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
