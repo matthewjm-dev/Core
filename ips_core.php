@@ -92,9 +92,12 @@ class ipsCore
     // METHODS
     public static function set_environment()
     {
-        $environment_settings = parse_ini_file(ipsCore::$path_base . '/environment.ini', true);
-
-        self::$environment = $environment_settings['environment_settings']['environment'];
+    	$env_file = ipsCore::$path_base . '/environment.ini';
+        if (file_exists($env_file) && $environment_settings = parse_ini_file(ipsCore::$path_base . '/environment.ini', true)) {
+			self::$environment = $environment_settings[ 'environment_settings' ][ 'environment' ];
+		} else {
+        	die('Environment file missing');
+		}
     }
 
     public static function is_environment_dev()
