@@ -80,7 +80,8 @@ class ipsCore_file_manager
     public static function validate_image(&$raw_file, &$errors)
     {
         if (in_array($raw_file['extension'], ipsCore_file_manager::$allowed_types_images)) {
-            $data = getimagesize($raw_file["tmp_name"]);
+            $name = (!empty($raw_file["tmp_name"]) ? $raw_file["tmp_name"] : $raw_file["name"]);
+            $data = getimagesize($name);
 
             if ($data === false) {
                 $errors[] = 'Uploaded Image type is not allowed (image extension faked?).';
