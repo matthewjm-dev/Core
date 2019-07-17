@@ -222,7 +222,7 @@ class ipsCore_router
                 ipsCore::$controller = new $controller_name($controller);
 
                 if (!method_exists(ipsCore::$controller, $route->get_method())) {
-                    $route->set_action($route->get_method());
+                    //$route->set_action($route->get_method());
                     $route->set_method('index');
                 }
                 if (is_array($route->get_args())) {
