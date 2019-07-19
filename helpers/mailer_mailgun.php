@@ -5,10 +5,10 @@ use Mailgun\Mailgun;
 class ipsCore_mailer_mailgun
 {
     protected $mailgun = false;
-    protected $required_settings = ['mailgun_key', 'mailgun_server', 'mailgun_domain'];
-    protected $key = false;
-    protected $server = false;
-    protected $domain = false;
+    protected $required_settings = ['mailgun_key', 'mailgun_server', 'mailgun_domain', 'from'];
+    protected $mailgun_key = false;
+    protected $mailgun_server = false;
+    protected $mailgun_domain = false;
     protected $from = false;
 
     // Construct
@@ -16,11 +16,10 @@ class ipsCore_mailer_mailgun
     public function __construct()
     {
         if ($this->setup()) {
-
-            if ($this->server) {
-                $this->mailgun = new Mailgun($this->key, $this->server); // Mailgun::create
+            if ($this->mailgun_server) {
+                $this->mailgun = new Mailgun($this->mailgun_key, null, $this->mailgun_server); // Mailgun::create
             } else {
-                $this->mailgun = new Mailgun($this->key);
+                $this->mailgun = new Mailgun($this->mailgun_key);
             }
         } else {
             ipsCore::add_error('Failed to setup Mailgun', true);
@@ -29,10 +28,11 @@ class ipsCore_mailer_mailgun
 
     // Methods
 
-    public function setup() {
+    public function setup()
+    {
         $error = false;
 
-        foreach($this->required_settings as $setting) {
+        foreach ($this->required_settings as $setting) {
             if (isset(ipsCore::$app->mailer[$setting])) {
                 $this->{$setting} = ipsCore::$app->mailer[$setting];
             } else {
@@ -44,6 +44,7 @@ class ipsCore_mailer_mailgun
         if (!$error) {
             return true;
         }
+
         return false;
     }
 
@@ -61,10 +62,11 @@ class ipsCore_mailer_mailgun
                 'html' => $content,
             ], $args);
 
-            if( $response = $this->mailgun->sendMessage($this->domain, $args) ) {
+            if ($response = $this->mailgun->sendMessage($this->mailgun_domain, $args)) {
                 return true;
             }
         }
+
         return false;
     }
 
