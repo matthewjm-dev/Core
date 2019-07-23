@@ -309,6 +309,8 @@ class ipsCore_controller
                 'per_page' => 10,
                 'orderby' => $args['model']->get_pkey(),
                 'order' => 'DESC',
+                'include_unlive' => false,
+                'include_deleted' => false,
             ];
 
             $args = array_merge($defaults, $args);
@@ -325,8 +327,17 @@ class ipsCore_controller
 
             $items = $args['model']
                 ->order($args['orderby'], $args['order'])
-                ->limit($args['per_page'], $offset)
-                ->get_all();
+                ->limit($args['per_page'], $offset);
+
+            if (!$args['include_unlive']) {
+                $items->where(['live' => 1]);
+            }
+
+            if (!$args['include_deleted']) {
+                $items->where(['removed' => 0]);
+            }
+
+            $items->get_all();
         }
 
         return $items;
