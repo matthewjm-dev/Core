@@ -615,7 +615,7 @@ class ipsCore_model
         return false;
     }
 
-    public function count($where = false, $join = false)
+    /*public function count($where = false, $join = false)
     {
         $count_str = 'COUNT(*)';
         $count = ipsCore::$database->select($this->get_model_table(), ['fields' => $count_str, 'where' => $this->prefix_where($where), 'join' => $this->prefix_join($join)]);
@@ -624,9 +624,9 @@ class ipsCore_model
             return $count[0][$count_str];
         }
         return false;
-    }
+    }*/
 
-    public function count_new()
+    public function count()
     {
         $count_str = 'COUNT(*)';
         $count = (new ipsCore_query($this->get_model_table()))->select([

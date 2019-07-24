@@ -206,7 +206,7 @@ class ipsCore_controller
         $show_around = (isset($args['show_around']) ? $args['show_around'] : 2);
         $slug = (isset($args['slug']) ? $args['slug'] . '/' : '');
 
-        $total = $args['model']->count_new();
+        $total = $args['model']->count();
         $num_pages = ceil(($total / $per_page));
         $show_pages = $show_around * 2;
 
@@ -315,29 +315,23 @@ class ipsCore_controller
 
             $args = array_merge($defaults, $args);
 
-            /*if ($args['where'] !== false) {
-                $args['model']->where(...$args['where'])->where_live();
-            }*/
-
             $offset = ($args['current_page'] - 1) * $args['per_page'];
 
-            $this->set_pagination($args);
-
-            //$items = $args['model']->get_all($where, $order, [$args['per_page'], $offset]);
-
-            $items = $args['model']
+            $args['model']
                 ->order($args['orderby'], $args['order'])
                 ->limit($args['per_page'], $offset);
 
             if (!$args['include_unlive']) {
-                $items->where(['live' => 1]);
+                $args['model']->where(['live' => 1]);
             }
 
             if (!$args['include_deleted']) {
-                $items->where(['removed' => 0]);
+                $args['model']->where(['removed' => 0]);
             }
 
-            $items->get_all();
+            $this->set_pagination($args);
+
+            $items = $args['model']->get_all();
         }
 
         return $items;
