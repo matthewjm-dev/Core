@@ -310,7 +310,7 @@ class ipsCore_controller
                 'orderby' => $args['model']->get_pkey(),
                 'order' => 'DESC',
                 'include_unlive' => false,
-                'include_deleted' => false,
+                'include_removed' => false,
             ];
 
             $args = array_merge($defaults, $args);
@@ -325,7 +325,7 @@ class ipsCore_controller
                 $args['model']->where(['live' => 1]);
             }
 
-            if (!$args['include_deleted']) {
+            if (!$args['include_removed']) {
                 $args['model']->where(['removed' => 0]);
             }
 

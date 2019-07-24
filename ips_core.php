@@ -160,6 +160,10 @@ class ipsCore
 
     public static function requires_controller($controllers, $app = false)
     {
+        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
+            $app = ipsCore::$app->get_directory();
+        }
+
         if (!is_array($controllers)) {
             $controllers = [$controllers];
         }
@@ -180,7 +184,7 @@ class ipsCore
 
     public static function requires_model($models, $app = false)
     {
-        if (!$app) {
+        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
             $app = ipsCore::$app->get_directory();
         }
         if (!is_array($models)) {
@@ -192,6 +196,38 @@ class ipsCore
                 require_once($model_path);
             } else {
                 self::add_error('Required Model "' . $model . '" does not exist.');
+            }
+        }
+    }
+
+    public static function requires_core_helper($helpers)
+    {
+        if (!is_array($helpers)) {
+            $helpers = [$helpers];
+        }
+
+        foreach ($helpers as $helper) {
+            $helper_path = self::$path_core_helpers . $helper . '.php';
+            if (file_exists($helper_path)) {
+                require_once($helper_path);
+            }
+        }
+    }
+
+    public static function requires_helper($helpers, $app = false)
+    {
+        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
+            $app = ipsCore::$app->get_directory();
+        }
+
+        if (!is_array($helpers)) {
+            $helpers = [$helpers];
+        }
+
+        foreach ($helpers as $helper) {
+            $helper_path = self::get_helper_route($helper, $app);
+            if (file_exists($helper_path)) {
+                require_once($helper_path);
             }
         }
     }
@@ -345,38 +381,6 @@ class ipsCore
         }
     }*/
 
-    public static function requires_core_helper($helpers)
-    {
-        if (!is_array($helpers)) {
-            $helpers = [$helpers];
-        }
-
-        foreach ($helpers as $helper) {
-            $helper_path = self::$path_core_helpers . $helper . '.php';
-            if (file_exists($helper_path)) {
-                require_once($helper_path);
-            }
-        }
-    }
-
-    public static function requires_helper($helpers, $app = false)
-    {
-        if (!$app) {
-            $app = ipsCore::$app->get_directory();
-        }
-
-        if (!is_array($helpers)) {
-            $helpers = [$helpers];
-        }
-
-        foreach ($helpers as $helper) {
-            $helper_path = self::get_helper_route($helper, $app);
-            if (file_exists($helper_path)) {
-                require_once($helper_path);
-            }
-        }
-    }
-
     public static function build()
     {
         if (self::$controller) {
@@ -425,6 +429,16 @@ class ipsCore
 
         self::requires_core_helper([$mailer_file]);
         self::$mailer = new $mailer();
+    }
+
+    public static function get_app_dir_from_name($name) {
+        $name = strtolower($name);
+        foreach (ipsCore::$apps as $app) {
+            if (strtolower($app->get_name()) == $name) {
+                return $app->get_directory();
+            }
+        }
+        return false;
     }
 
 }
