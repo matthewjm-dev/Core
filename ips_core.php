@@ -470,62 +470,36 @@ class ipsCore_app
         if (isset($app['app']['name'])) {
             $this->name = $app['app']['name'];
         } else {
-            ipsCore::add_error('App Config missing: App > Name', true);
+            ipsCore::add_error('App.ini missing: App > Name', true);
         }
         if (isset($app['app']['dir'])) {
             $this->directory = $app['app']['dir'];
         } else {
-            ipsCore::add_error('App Config missing: directory', true);
+            ipsCore::add_error('App.ini missing: directory', true);
         }
         if (isset($app['app']['uri'])) {
             $this->uri = $app['app']['uri'];
         } else {
-            ipsCore::add_error('App Config missing: App > Uri', true);
+            ipsCore::add_error('App.ini missing: App > Uri', true);
         }
         if (isset($app['core']['version'])) {
             $this->core_version = $app['core']['version'];
         } else {
-            ipsCore::add_error('App Config missing: Core > Version', true);
+            ipsCore::add_error('App.ini missing: Core > Version', true);
         }
 
-        if (isset($app['db-' . ipsCore::$environment])) {
-            $this->database['host'] = $app['db-' . ipsCore::$environment]['host'];
-            $this->database['name'] =  $app['db-' . ipsCore::$environment]['name'];
-            $this->database['user'] =  $app['db-' . ipsCore::$environment]['user'];
-            $this->database['pass'] =  $app['db-' . ipsCore::$environment]['password'];
-            $this->database['prefix'] =  $app['db-' . ipsCore::$environment]['prefix'];
-        }
-
-        if (isset($app['mail-' . ipsCore::$environment])) {
-            $configs = $app['mail-' . ipsCore::$environment];
-
-            if (isset($configs['mailer'])) {
-                $this->mailer['type'] = $configs['mailer'];
-                unset($configs['mailer']);
-            }
-
-            if (isset($configs['mailer_from'])) {
-                $this->mailer['from'] = $configs['mailer_from'];
-                unset($configs['mailer_from']);
-            }
-
-            foreach($configs as $mail_config => $mail_config_value) {
-                $this->mailer[$mail_config] = $mail_config_value;
-            }
-        }
-
-        if (!$this->mailer['type']) {
-            $this->mailer['type'] = 'mailer';
-        }
-        if (!$this->mailer['from']) {
-            $this->mailer['from'] = 'Tester <test@example.com>';
-        }
+        $this->load_config();
     }
 
     // Getters
     public function get_name()
     {
         return $this->name;
+    }
+
+    public function get_lower_name()
+    {
+        return strtolower($this->name);
     }
 
     public function get_directory()
@@ -541,5 +515,50 @@ class ipsCore_app
     public function get_core_version()
     {
         return $this->core_version;
+    }
+
+    // Methods
+
+    public function load_config() {
+        $config_file = ipsCore::$path_apps . 'config-' . $this->get_lower_name() . '.ini';
+
+        if (file_exists($config_file)) {
+            $config = parse_ini_file($config_file, true);
+
+            if (isset($config['db-' . ipsCore::$environment])) {
+                $this->database['host'] = $config['db-' . ipsCore::$environment]['host'];
+                $this->database['name'] =  $config['db-' . ipsCore::$environment]['name'];
+                $this->database['user'] =  $config['db-' . ipsCore::$environment]['user'];
+                $this->database['pass'] =  $config['db-' . ipsCore::$environment]['password'];
+                $this->database['prefix'] =  $config['db-' . ipsCore::$environment]['prefix'];
+            }
+
+            if (isset($config['mail-' . ipsCore::$environment])) {
+                $configs = $config['mail-' . ipsCore::$environment];
+
+                if (isset($configs['mailer'])) {
+                    $this->mailer['type'] = $configs['mailer'];
+                    unset($configs['mailer']);
+                }
+
+                if (isset($configs['mailer_from'])) {
+                    $this->mailer['from'] = $configs['mailer_from'];
+                    unset($configs['mailer_from']);
+                }
+
+                foreach($configs as $mail_config => $mail_config_value) {
+                    $this->mailer[$mail_config] = $mail_config_value;
+                }
+            }
+
+            if (!$this->mailer['type']) {
+                $this->mailer['type'] = 'mailer';
+            }
+            if (!$this->mailer['from']) {
+                $this->mailer['from'] = 'Tester <test@example.com>';
+            }
+        } else {
+            ipsCore::add_error('App Config (apps/config-' . $this->get_lower_name() . '.ini) missing', true);
+        }
     }
 }
