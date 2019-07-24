@@ -160,8 +160,10 @@ class ipsCore
 
     public static function requires_controller($controllers, $app = false)
     {
-        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
+        if (!$app) {
             $app = ipsCore::$app->get_directory();
+        } else {
+            $app = ipsCore::get_app_dir_from_name($app);
         }
 
         if (!is_array($controllers)) {
@@ -184,12 +186,16 @@ class ipsCore
 
     public static function requires_model($models, $app = false)
     {
-        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
+        if (!$app) {
             $app = ipsCore::$app->get_directory();
+        } else {
+            $app = ipsCore::get_app_dir_from_name($app);
         }
+
         if (!is_array($models)) {
             $models = [$models];
         }
+
         foreach ($models as $model) {
             $model_path = self::get_model_route($model, $app);
             if (file_exists($model_path)) {
@@ -216,8 +222,10 @@ class ipsCore
 
     public static function requires_helper($helpers, $app = false)
     {
-        if (!$app || !$app = ipsCore::get_app_dir_from_name($app)) {
+        if (!$app) {
             $app = ipsCore::$app->get_directory();
+        } else {
+            $app = ipsCore::get_app_dir_from_name($app);
         }
 
         if (!is_array($helpers)) {
