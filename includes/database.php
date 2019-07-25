@@ -6,6 +6,8 @@ class ipsCore_database
     public $connection;
     public $connection_error = false;
 
+    public $queries_executed = [];
+
     public function __construct()
     {
         if (ipsCore::$app->database['host']) {
@@ -87,6 +89,31 @@ class ipsCore_database
         }
 
         return false;
+    }
+
+    public function add_executed_query($query, $params, $note) {
+        $this->queries_executed[] = [
+            'query' => $query,
+            'params' => $params,
+            'note' => $note,
+        ];
+    }
+
+    public function dump($die = false) {
+        $content = '<div style="width:100%;border-top: 1px solid red;padding-top:10px;">
+            <div style="border-bottom: 1px solid red;padding-bottom:10px;">Total Queries: ' . count($this->queries_executed) . '</div>';
+
+        foreach ($this->queries_executed as $query) {
+            $content .= '<div style="border-bottom: 1px solid red;padding-bottom:10px;">
+                            Query: ' . $query['query'] . '<br />Params: ' . print_r($query['params'], true) . '<br />Notes: ' . $query['note'] . '
+                        </div>';
+        }
+        $content .= '<br />';
+
+        echo $content;
+        if ($die) {
+            die();
+        }
     }
 
     public function does_table_exist($table)
@@ -495,13 +522,16 @@ class ipsCore_query
     public function process($return = false) {
         if ($return) {
             if ($data = ipsCore::$database->query($this->query_sql, $this->query_params, true)) {
+                ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Returned');
                 return $data;
             }
         } else {
             if (ipsCore::$database->query($this->query_sql, $this->query_params)) {
+                ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Success');
                 return true;
             }
         }
+        ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Failed');
         return false;
     }
 
@@ -648,28 +678,37 @@ class ipsCore_query
                     }
 
                     $this->query_sql .= (!$first && count($where_value['fields']) > 1 ? ' ' . $field_args['binding'] . ' ' : ' ');
-                    if (strpos($field_key, ".") === false) {
-                        $this->query_sql .= '`' . $this->query_table . '`.';
-                    }
 
                     if ($field_args['value'] === 'IS NULL' || $field_args['value'] === 'IS NOT NULL') {
+                        $this->add_table_prefix($field_key);
                         $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['value'];
-                    } elseif ($field_args['operator'] === 'IN' && is_array($field_args['value'])) {
-                        $this->query_sql .= '`' . $this->format_key($field_key) . '` IN (';
-                        $in_first = true;
-                        foreach ($field_args['value'] as $in_key => $in_value) {
-                            if (!$in_first) {
-                                $this->query_sql .= ', ';
-                            } else {
-                                $in_first = false;
-                            }
-                            $this->query_sql .= $this->add_param($field_key . $in_key, $in_value);
+                    } elseif ($field_args['operator'] === 'IN') {
+                        if (!is_array($field_args['value'])) {
+                            $field_args['value'] = explode(',', $field_args['value']);
                         }
-                        $this->query_sql .= ') ';
+                        if (!empty($field_args['value'])) {
+                            $this->add_table_prefix($field_key);
+                            $this->query_sql .= '`' . $this->format_key($field_key) . '` IN (';
+                            $in_first = true;
+                            foreach ($field_args['value'] as $in_key => $in_value) {
+                                if (!$in_first) {
+                                    $this->query_sql .= ', ';
+                                } else {
+                                    $in_first = false;
+                                }
+                                $this->query_sql .= $this->add_param($field_key . $in_key, $in_value);
+                            }
+                            $this->query_sql .= ') ';
+                        }
+                    } elseif ($field_args['operator'] == 'FIND') {
+                        $this->query_sql .= 'FIND_IN_SET(' . $this->add_param($field_key, $field_args['value']) . ', `' . $this->format_key($field_key) . '`)';
+                        //$this->query_sql .= 'FIND_IN_SET(\'' . $field_args['value'] . '\', `' . $this->format_key($field_key) . '`)';
                     } else {
                         if ($field_args['like']) {
+                            $this->add_table_prefix($field_key);
                             $this->query_sql .= '`' . $this->format_key($field_key) . '` LIKE ' . $this->add_param($field_key, '%' . $field_args['value'] . '%');
                         } else {
+                            $this->add_table_prefix($field_key);
                             $this->query_sql .= '`' . $this->format_key($field_key) . '` ' . $field_args['operator'] . ' ' . $this->add_param($field_key, $field_args['value']);
                         }
                     }
@@ -719,6 +758,12 @@ class ipsCore_query
             }*/
 
             $first = false;
+        }
+    }
+
+    public function add_table_prefix($field_key) {
+        if (strpos($field_key, ".") === false) {
+            $this->query_sql .= '`' . $this->query_table . '`.';
         }
     }
 
