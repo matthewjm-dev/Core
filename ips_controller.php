@@ -321,11 +321,11 @@ class ipsCore_controller
                 ->order($args['orderby'], $args['order'])
                 ->limit($args['per_page'], $offset);
 
-            if (!$args['include_unlive']) {
+            if ($args['model']->has_field('live') && !$args['include_unlive']) {
                 $args['model']->where(['live' => 1]);
             }
 
-            if (!$args['include_removed']) {
+            if ($args['model']->has_field('removed') && !$args['include_removed']) {
                 $args['model']->where(['removed' => 0]);
             }
 

@@ -89,6 +89,13 @@ class ipsCore_model
     }
 
     // Methods
+    public function has_field($name) {
+        if (isset($this->fields[$name])) {
+            return true;
+        }
+
+        return false;
+    }
 
     public function add_prefix($text)
     {
