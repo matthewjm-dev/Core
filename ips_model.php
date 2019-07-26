@@ -434,31 +434,61 @@ class ipsCore_model
             $wheres = array_merge($wheres, ['binding' => 'AND']);
         }
         $this->addwheretoquery($wheres);
+
         return $this;
     }
 
     public function or_where() {
         $this->addwheretoquery(['binding' => 'OR', 'fields' => func_get_args()]);
+
         return $this;
     }
 
     public function and_where() {
         $this->addwheretoquery(['binding' => 'AND', 'fields' => func_get_args()]);
+
         return $this;
     }
 
     public function where_in() {
-        $this->addwheretoquery(['operator' => 'IN', 'fields' => func_get_args()]);
+        $args = $this->add_operator('IN', func_get_args());
+        $this->addwheretoquery(['fields' => $args]);
+
+        return $this;
+    }
+
+    public function where_find() {
+        $args = $this->add_operator('FIND', func_get_args());
+        $this->addwheretoquery(['fields' => $args]);
+
         return $this;
     }
 
     public function or_where_in() {
-        $this->addwheretoquery(['binding' => 'OR', 'operator' => 'IN', 'fields' => func_get_args()]);
+        $args = $this->add_operator('IN', func_get_args());
+        $this->addwheretoquery(['binding' => 'OR', 'fields' => $args]);
+
+        return $this;
+    }
+
+    public function or_where_find() {
+        $args = $this->add_operator('FIND', func_get_args());
+        $this->addwheretoquery(['binding' => 'OR', 'fields' => $args]);
+
         return $this;
     }
 
     public function and_where_in() {
-        $this->addwheretoquery(['binding' => 'AND', 'operator' => 'IN', 'fields' => func_get_args()]);
+        $args = $this->add_operator('IN', func_get_args());
+        $this->addwheretoquery(['operator' => 'IN', 'fields' => $args]);
+
+        return $this;
+    }
+
+    public function and_where_find() {
+        $args = $this->add_operator('FIND', func_get_args());
+        $this->addwheretoquery(['binding' => 'AND', 'fields' => $args]);
+
         return $this;
     }
 
@@ -486,6 +516,20 @@ class ipsCore_model
         $this->query_offset = $offset;
 
         return $this;
+    }
+
+    public function add_operator($operator, $args) {
+        foreach ($args as $key => $arg) {
+            $arg_key = key($arg);
+            $arg_value = $arg[$arg_key];
+            if (is_array($arg_value)) {
+                $args[$key][$arg_key] = array_merge($arg[$arg_key], ['operator' => $operator]);
+            } else {
+                $args[$key][$arg_key] = ['value' => $arg[$arg_key], 'operator' => $operator];
+            }
+        }
+
+        return $args;
     }
 
     public function join($args) {

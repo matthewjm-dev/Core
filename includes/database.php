@@ -646,9 +646,7 @@ class ipsCore_query
 
     public function build_where_query($wheres, &$first)
     {
-        foreach ($wheres as /*$where_key => */ $where_value) {
-            //$where_key = key($where_value);
-            //$where_value = $where_value[$where_key];
+        foreach ($wheres as $where_value) {
 
             if (isset($where_value['binding'])) {
                 $this->query_sql .= ' ' . $where_value['binding'] . ' ';
@@ -700,9 +698,8 @@ class ipsCore_query
                             }
                             $this->query_sql .= ') ';
                         }
-                    } elseif ($field_args['operator'] == 'FIND') {
+                    } elseif ($field_args['operator'] === 'FIND') {
                         $this->query_sql .= 'FIND_IN_SET(' . $this->add_param($field_key, $field_args['value']) . ', `' . $this->format_key($field_key) . '`)';
-                        //$this->query_sql .= 'FIND_IN_SET(\'' . $field_args['value'] . '\', `' . $this->format_key($field_key) . '`)';
                     } else {
                         if ($field_args['like']) {
                             $this->add_table_prefix($field_key);
@@ -720,42 +717,6 @@ class ipsCore_query
                     $this->query_sql .= ')';
                 }
             }
-
-            /*if ($where_key === 'where_and_group') {
-                $this->query_sql .= ' AND (';
-                $first = true;
-                $this->build_where_query($where_value, $first);
-                $this->query_sql .= ') ';
-            } elseif ($where_key === 'where_or_group') {
-                $this->query_sql .= ' OR (';
-                $first = true;
-                $this->build_where_query($where_value, $first);
-                $this->query_sql .= ') ';
-            } else {
-                $where_args = [
-                    'value' => '',
-                    'operator' => '=',
-                    'like' => false,
-                    'binding' => 'AND',
-                    'sub' => false,
-                ];
-
-                if (!is_array($where_value)) {
-                    $where_args = array_merge($where_args, ['value' => $where_value]);
-                } else {
-                    $where_args = array_merge($where_args, $where_value);
-                }
-
-                $this->query_sql .= (!$first ? ' ' . $where_args['binding'] . ' ' : ' ');
-                if (strpos($where_key, ".") === false) {
-                    $this->query_sql .= '`' . $this->query_table . '`.';
-                }
-                if ($where_args['like']) {
-                    $this->query_sql .= '`' . $this->format_key($where_key) . '` LIKE ' . $this->add_param($where_key, '%' . $where_args['value'] . '%');
-                } else {
-                    $this->query_sql .= '`' . $this->format_key($where_key) . '` = ' . $this->add_param($where_key, $where_args['value']);
-                }
-            }*/
 
             $first = false;
         }
