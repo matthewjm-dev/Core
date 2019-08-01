@@ -523,7 +523,12 @@ class ipsCore_model
             $arg_key = key($arg);
             $arg_value = $arg[$arg_key];
             if (is_array($arg_value)) {
-                $args[$key][$arg_key] = array_merge($arg[$arg_key], ['operator' => $operator]);
+                if (isset($arg[$arg_key]['value'])) {
+                    $values = $arg[$arg_key];
+                } else {
+                    $values = ['value' => $arg[$arg_key]];
+                }
+                $args[$key][$arg_key] = array_merge($values, ['operator' => $operator]);
             } else {
                 $args[$key][$arg_key] = ['value' => $arg[$arg_key], 'operator' => $operator];
             }

@@ -97,8 +97,8 @@ class ipsCore_router
 
         $uri_variations = [
             ipsCore::$uri,
-            ipsCore::$uri . '/',
-            rtrim(ipsCore::$uri, '/'),
+            //ipsCore::$uri . '/',
+            //rtrim(ipsCore::$uri, '/'),
         ];
 
         // check for matching routes
