@@ -1,6 +1,9 @@
 {
 	"name" : "inphasesolutionsprojects/core-v1.00",
 	"description" : "IPS Core v1.00",
+	"extra": {
+        "installer-name": "core-v1.00"
+    },
 	"authors" : [
 		{
 			"name": "Matthew Murray",
