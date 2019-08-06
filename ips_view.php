@@ -36,11 +36,11 @@ class ips_view {
 		} return false;
 	}
 
-	public function build() {
+	public function build($part_data = false) {
 		ob_start();
 
 		if ( $this->show_in_layout !== true && $this->show_in_layout !== false ) {
-            $this->include_layout($this->show_in_layout);
+            $this->include_layout($this->show_in_layout, $part_data);
         } else {
             if ( $this->show_in_layout ) {
                 ?><!DOCTYPE html>
@@ -53,7 +53,7 @@ class ips_view {
                     ?></div><?php
             }
 
-            $this->include_template($this->template);
+            $this->include_template($this->template, $part_data);
 
             if ( $this->show_in_layout ) {
                 $this->include_template('layout/footer');
@@ -66,22 +66,30 @@ class ips_view {
 		$this->content = ob_get_clean();
 	}
 
-	public function include_template($path) {
+	public function include_template($path, $data = false) {
+	    if (!$data) {
+	        $data = ipsCore::$data;
+        }
+
         $path_extension = ipsCore::get_view_route( $path, $this->type );
         if ( $this->view_exists( $path_extension ) ) {
             if ( $this->is_twig ) {
-                $this->twig_helper->render($path, ipsCore::$data);
+                $this->twig_helper->render($path, $data);
             } else {
-                extract(ipsCore::$data);
+                extract($data);
                 include($path_extension);
             }
         }
     }
 
-    public function include_layout($path) {
+    public function include_layout($path, $data = false) {
+        if (!$data) {
+            $data = ipsCore::$data;
+        }
+
         $path_extension = ipsCore::get_layout_route( $path );
         if ( $this->view_exists( $path_extension ) ) {
-            extract(ipsCore::$data);
+            extract($data);
             include($path_extension);
         }
     }

@@ -316,8 +316,7 @@ class ipsCore
     public static function get_part($name, $data, $type = 'twig')
     {
         $view = new ips_view($name, false, $type);
-        ipsCore::add_data($data);
-        $view->build();
+        $view->build($data);
 
         return $view->display(true);
     }

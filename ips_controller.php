@@ -182,11 +182,15 @@ class ipsCore_controller
     public function add_external_script($scripts)
     {
         if (is_array($scripts)) {
-            foreach ($scripts as $script) {
-                ipsCore::$data['scripts'][] = $script;
+            foreach ($scripts as $script_key => $script) {
+                if (!isset(ipsCore::$data['scripts'][$script_key])) {
+                    ipsCore::$data['scripts'][$script_key] = $script;
+                }
             }
         } else {
-            ipsCore::$data['scripts'][] = $scripts;
+            if (!isset(ipsCore::$data['scripts'][$scripts])) {
+                ipsCore::$data['scripts'][$scripts] = $scripts;
+            }
         }
     }
 
