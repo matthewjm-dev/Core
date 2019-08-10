@@ -129,7 +129,9 @@ class ipsCore_router
                                 $found_route = true;
                                 break;
                             }
-                        }
+                        } else {
+                        	break;
+						}
                     }
                     if ($found_route) {
                         break;
