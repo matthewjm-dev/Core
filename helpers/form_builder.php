@@ -264,7 +264,7 @@ class ipsCore_form_builder
     public function render_text($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="text ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '' ) . '" /></fieldset>');
+        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '' ) . '" /></fieldset>');
     }
 
     /* Int */
@@ -287,7 +287,7 @@ class ipsCore_form_builder
     public function render_int($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="int ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="number" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Price */
@@ -305,7 +305,7 @@ class ipsCore_form_builder
     public function render_price($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="price ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] .  $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="text" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Email Address */
@@ -364,7 +364,7 @@ class ipsCore_form_builder
     public function render_textarea($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="textarea ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . htmlentities($field['value']) . '</textarea></fieldset>');
+        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . htmlentities($field['value']) . '</textarea></fieldset>');
     }
 
     /* WYSIWYG Editor */
@@ -382,7 +382,7 @@ class ipsCore_form_builder
     public function render_editor($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['value'] . '</textarea></fieldset>');
+        $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . $field['value'] . '</textarea></fieldset>');
     }
 
     /* Select Dropdown */
@@ -419,7 +419,7 @@ class ipsCore_form_builder
 
         $this->form_html('<fieldset id="field-' . $field['name'] . ($select_multiple ? '[]' : '') . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options'] || $field['placeholder']) {
-            $this->form_html('<select ' . ($select_multiple ? 'multiple ' : '') . 'id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>');
+            $this->form_html('<select ' . ($select_multiple ? 'multiple ' : '') . 'id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">');
             if ($field['placeholder']) {
                 $this->form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
             }
@@ -494,13 +494,13 @@ class ipsCore_form_builder
         $first = true;
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['placeholder']) {
-            $this->form_html('<label class="radiofield"><input' . $args['field_classes'] . ' type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
+            $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
         }
         if ($field['options']) {
             foreach ($field['options'] as $option) {
                 $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                 $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                $this->form_html('<label class="radiofield"><input' . $args['field_classes'] . ' type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                 $first = false;
             }
         }
@@ -535,7 +535,7 @@ class ipsCore_form_builder
             foreach ($field['options'] as $option) {
                 $option_id = ($first) ? 'id="' . $field['name'] . '"' . '' : '';
                 $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                $this->form_html('<label class="checkfield"><input' . $args['field_classes'] . ' type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                $this->form_html('<label class="checkfield"><input class="' . $args['field_classes'] . '" type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
                 $first = false;
             }
         }
@@ -688,7 +688,7 @@ class ipsCore_form_builder
     public function render_file($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="file ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
             $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
         }
@@ -709,7 +709,7 @@ class ipsCore_form_builder
     public function render_image($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
             $this->form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
         }
@@ -740,7 +740,7 @@ class ipsCore_form_builder
 
     public function render_submit($field, $args)
     {
-        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>' . $field['label'] . '</button></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . $field['label'] . '</button></fieldset>');
     }
 
     public function render_fields()
@@ -763,9 +763,9 @@ class ipsCore_form_builder
                 $field['fieldset_classes'] .= ' required';
             }
 
-            $field_classes = '';
-            if (isset($field['classes'])) {
-                $field_classes = ' class="' . $field['classes'] . '"';
+
+            if (!isset($field['classes'])) {
+                $field_classes = '';
             }
 
             $fieldset_classes = '';
