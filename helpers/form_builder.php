@@ -417,9 +417,9 @@ class ipsCore_form_builder
             $select_multiple = true;
         }
 
-        $this->form_html('<fieldset id="field-' . $field['name'] . ($select_multiple ? '[]' : '') . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options'] || $field['placeholder']) {
-            $this->form_html('<select ' . ($select_multiple ? 'multiple ' : '') . 'id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">');
+            $this->form_html('<select ' . ($select_multiple ? 'multiple ' : '') . 'id="' . $field['name'] . '" name="' . $field['name'] . ($select_multiple ? '[]' : '') . '" class="' . $args['field_classes'] . '">');
             if ($field['placeholder']) {
                 $this->form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
             }
