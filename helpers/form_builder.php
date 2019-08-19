@@ -764,8 +764,9 @@ class ipsCore_form_builder
             }
 
 
-            if (!isset($field['classes'])) {
-                $field_classes = '';
+            $field_classes = '';
+            if (isset($field['classes'])) {
+                $field_classes = $field['classes'];
             }
 
             $fieldset_classes = '';
