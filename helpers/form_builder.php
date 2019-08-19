@@ -19,9 +19,11 @@ class ipsCore_form_builder
         'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
         'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
         'select' => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
+        'selectmulti' => ['title' => 'Select Multi', 'type' => 'text', 'length' => false, 'link' => false],
         'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
         'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
         'linkselect' => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'linkselectmulti' => ['title' => 'Link Select Multi', 'type' => 'text', 'length' => false, 'link' => true],
         'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
         'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
         'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
@@ -410,9 +412,14 @@ class ipsCore_form_builder
             $placeholder_selectable = true;
         }
 
-        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $select_multiple = false;
+        if (isset($args['select_multiple']) && $args['select_multiple']) {
+            $select_multiple = true;
+        }
+
+        $this->form_html('<fieldset id="field-' . $field['name'] . ($select_multiple ? '[]' : '') . '" class="select ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options'] || $field['placeholder']) {
-            $this->form_html('<select id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>');
+            $this->form_html('<select ' . ($select_multiple ? 'multiple ' : '') . 'id="' . $field['name'] . '" name="' . $field['name'] . '"' . $args['field_classes'] . '>');
             if ($field['placeholder']) {
                 $this->form_html('<option selected ' . ($placeholder_selectable ? 'value="0"' : 'disabled="disabled"') . ' >' . $field['placeholder'] . '</option>');
             }
@@ -428,6 +435,38 @@ class ipsCore_form_builder
             $this->form_html('<p>No Options</p>');
         }
         $this->form_html('</fieldset>');
+    }
+
+    /* Select Multi */
+    public function add_selectmulti($name, $label, array $options = [])
+    {
+        if (isset($options['options'])) {
+            if (!is_array($options['options'])) {
+                $options['options'] = [$options['options']];
+            }
+            $this->add_field($name, $label, 'selectmulti', $options);
+        } else {
+            ipsCore::add_error('Options are required for a select multi dropdown');
+        }
+    }
+
+    public function validate_selectmulti($field)
+    {
+        $this->validate_field_options($field);
+
+        return false;
+    }
+
+    public function render_selectmulti($field, $args)
+    {
+        if (!isset($args['fieldset_classes'])) {
+            $args['fieldset_classes'] = '';
+        }
+        $args['fieldset_classes'] .= ' multiple';
+
+        $args['select_multiple'] = true;
+
+        return $this->render_select($field, $args);
     }
 
     /* Radio Buttons */
@@ -526,6 +565,31 @@ class ipsCore_form_builder
     public function render_linkselect($field, $args)
     {
         return $this->render_select($field, $args);
+    }
+
+    /* Select Multi ( LINK field ) */
+    public function add_linkselectmulti($name, $label, array $options = [])
+    {
+        if (isset($options['options'])) {
+            if (!is_array($options['options'])) {
+                $options['options'] = [$options['options']];
+            }
+            $this->add_field($name, $label, 'select', $options);
+        } else {
+            ipsCore::add_error('Options are required for a link select multi dropdown');
+        }
+    }
+
+    public function validate_linkselectmulti($field)
+    {
+        $this->validate_field_options($field);
+
+        return false;
+    }
+
+    public function render_linkselectmulti($field, $args)
+    {
+        return $this->render_selectmulti($field, $args);
     }
 
     /* Radio Buttons ( LINK field ) */
