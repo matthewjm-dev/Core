@@ -120,7 +120,11 @@ class ipsCore_router
 
                                 if (!$route->get_args()) {
                                     $args = ipsCore::$uri_parts;
-                                    unset($args[$route_part_key]);
+                                    if ($route_part === '*') {
+										// TODO: unset parts before this item
+									} else {
+										unset( $args[ $route_part_key ] );
+									}
                                     $this->route->set_args($args);
                                 }
 
