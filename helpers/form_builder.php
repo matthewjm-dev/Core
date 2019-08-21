@@ -12,7 +12,7 @@ class ipsCore_form_builder
 
     public static $field_types = [
         'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
-        'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '4,2'],
+        'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '18,2'],
         'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
         'email' => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
         'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
