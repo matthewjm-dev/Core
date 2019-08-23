@@ -371,58 +371,71 @@ class ipsCore_paypal
         }
     }
 
-    public function setup_billing($title = false, $description = false, $payment_title = false, $frequency = false, $interval = false, $cycles = false, $amount_total = false, $amount_shipping = false, $amount_setupfee = false) {
-        if (!$title) {
+    public function setup_billing($args) {
+        $args = array_merge([
+            'title' => false,
+            'description' => false,
+            'payment_title' => false,
+            'frequency' => false,
+            'interval' => false,
+            'cycles' => false,
+            'amount_total' => false,
+            'amount_shipping' => false,
+            'amount_setupfee' => false
+        ], $args);
+
+        if (!$args['title']) {
             ipsCore::add_error('Billing setup requires a Title (setup_billing)', true);
         }
 
-        if (!$description) {
+        if (!$args['description']) {
             ipsCore::add_error('Billing setup requires a Description (setup_billing)', true);
         }
 
-        if (!$payment_title) { // e.g. "Regular Payments"
+        if (!$args['payment_title']) { // e.g. "Regular Payments"
             ipsCore::add_error('Billing setup requires a Payment Title (setup_billing)', true);
         }
 
-        if (!$frequency) { // e.g. "MONTH"
+        if (!$args['frequency']) { // e.g. "MONTH"
             ipsCore::add_error('Billing setup requires a Frequency (setup_billing)', true);
         }
 
-        if (!$interval) {
+        if (!$args['interval']) {
             ipsCore::add_error('Billing setup requires an Interval (setup_billing)', true);
-        } elseif (!is_number($interval)) {
+        } elseif (!is_number($args['interval'])) {
             ipsCore::add_error('Billing setup Interval must be a number (setup_billing)', true);
         }
 
-        if (!$cycles) {
-            ipsCore::add_error('Billing setup requires a Cycle (setup_billing)', true);
-        } elseif (!is_number($cycles)) {
+        if ($args['cycles'] && !is_number($args['cycles'])) {
             ipsCore::add_error('Billing setup Cycle must be a number (setup_billing)', true);
         }
 
-        if (!$amount_total) {
+        if (!$args['amount_total']) {
             ipsCore::add_error('Billing setup requires a Amount Total (setup_billing)', true);
-        } elseif (!is_number($amount_total)) {
+        } elseif (!is_number($args['amount_total'])) {
             ipsCore::add_error('Billing setup Amount Total must be a number (setup_billing)', true);
         }
 
         // Create a new billing plan
         $plan = new Plan();
-        $plan->setName($title)->setDescription($description)->setType('fixed');
+        $plan->setName($args['title'])->setDescription($args['description'])->setType('fixed');
 
         // Set billing plan definitions
         $paymentDefinition = new PaymentDefinition();
-        $paymentDefinition->setName($payment_title)
+        $paymentDefinition->setName($args['payment_title'])
             ->setType('REGULAR')
-            ->setFrequency($frequency)
-            ->setFrequencyInterval($interval)
-            ->setCycles($cycles)
-            ->setAmount(new Currency(['value' => $amount_total, 'currency' => $this->currency]));
+            ->setFrequency($args['frequency'])
+            ->setFrequencyInterval($args['interval'])
+            ->setAmount(new Currency(['value' => $args['amount_total'], 'currency' => $this->currency]));
 
-        if ($amount_shipping) {
+        if ($args['cycles']) {
+            $paymentDefinition->setCycles($args['cycles']);
+        }
+
+        if ($args['amount_shipping']) {
             // Set charge models
             $chargeModel = new ChargeModel();
-            $chargeModel->setType('SHIPPING')->setAmount(new Currency(['value' => $amount_shipping, 'currency' => $this->currency]));
+            $chargeModel->setType('SHIPPING')->setAmount(new Currency(['value' => $args['amount_shipping'], 'currency' => $this->currency]));
             $paymentDefinition->setChargeModels([$chargeModel]);
         }
 
@@ -431,8 +444,8 @@ class ipsCore_paypal
         $merchantPreferences->setReturnUrl($this->url_return)->setCancelUrl($this->url_cancel)
             ->setAutoBillAmount('yes')->setInitialFailAmountAction('CONTINUE')->setMaxFailAttempts('0');
 
-        if ($amount_setupfee) {
-            $merchantPreferences->setSetupFee(new Currency(['value' => $amount_setupfee, 'currency' => $this->currency]));
+        if ($args['amount_setupfee']) {
+            $merchantPreferences->setSetupFee(new Currency(['value' => $args['amount_setupfee'], 'currency' => $this->currency]));
         }
 
         $plan->setPaymentDefinitions([$paymentDefinition]);
