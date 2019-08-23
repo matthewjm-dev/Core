@@ -34,4 +34,17 @@ class ipsCore_functions {
 
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
+
+    public function random_string($length = 64, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'): string {
+        if ($length < 1) {
+            //throw new \RangeException("Length must be a positive integer");
+            ipsCore::add_error('Length must be a positive integer', true);
+        }
+        $pieces = [];
+        $max = mb_strlen($keyspace, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces []= $keyspace[random_int(0, $max)];
+        }
+        return implode('', $pieces);
+    }
 }
