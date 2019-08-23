@@ -57,7 +57,7 @@ class ipsCore_paypal
             if (!$args['urls']) {
                 $args['urls'] = [
                     'return' => ipsCore::$app->get_uri_slashed() . '/paypal/response_return/',
-                    'cancel' => ipsCore::$app->get_uri_slashed() . '/paypal/response_canel/',
+                    'cancel' => ipsCore::$app->get_uri_slashed() . '/paypal/response_cancel/',
                     'notify' => ipsCore::$app->get_uri_slashed() . '/paypal/response_notify/',
                 ];
             }
