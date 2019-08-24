@@ -124,7 +124,7 @@ class ipsCore_paypal
         $this->webhook->setEventTypes($event_types);
 
         try {
-            $output = $this->webhook->create($this->api_ontext);
+            $output = $this->webhook->create($this->api_context);
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
             echo $ex->getCode();
             echo $ex->getData();
