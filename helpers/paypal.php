@@ -30,6 +30,10 @@ use PayPal\Common\PayPalModel;
 use PayPal\Api\Agreement;
 use PayPal\Api\ShippingAddress;
 
+/*
+ * TODO: all webhook URLs MUST be https
+ */
+
 class ipsCore_paypal
 {
     protected $sandbox = false; // Indicates if the sandbox endpoint is used.
@@ -124,7 +128,7 @@ class ipsCore_paypal
         $this->webhook->setEventTypes($event_types);
 
         try {
-            $output = $this->webhook->create($this->api_context); // Fixed this
+            $output = $this->webhook->create($this->api_context);
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
             echo $ex->getCode();
             echo $ex->getData();
