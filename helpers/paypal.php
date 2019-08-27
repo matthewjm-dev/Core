@@ -546,11 +546,14 @@ class ipsCore_paypal
     }
 
     public function execute_billing($plan_id) { // TODO: This function needs work
+        // Get start time
+        $start_time = date(DATE_ISO8601, strtotime('+5 minute')); // ISO 8601
+
         // Create new agreement
         $agreement = new Agreement();
         $agreement->setName('Base Agreement')
             ->setDescription('Basic Agreement')
-            ->setStartDate("Y-m-d\TH:i:s\Z", strtotime('+2 minute')); // 2 mins from now
+            ->setStartDate($start_time);
 
         // Set plan id
         $plan = new Plan();
