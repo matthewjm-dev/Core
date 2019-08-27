@@ -130,8 +130,10 @@ class ipsCore_paypal
         try {
             $output = $this->webhook->create($this->api_context);
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            if ($ex->getData()['name'] != 'WEBHOOK_URL_ALREADY_EXISTS') {
+            if ($ex->getData() && $ex->getData()->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
                 ipsCore::add_error($ex, true);
+            } else {
+                ipsCore::add_error($ex->getMessage(), true);
             }
         } catch (Exception $ex) {
             ipsCore::add_error($ex, true);
