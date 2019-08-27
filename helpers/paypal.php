@@ -127,19 +127,20 @@ class ipsCore_paypal
 
         $this->webhook->setEventTypes($event_types);
 
-        try {
+        /*try {
             $output = $this->webhook->create($this->api_context);
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
             if ($ex->getData() !== null) {
-                if ($ex->getData()->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
-                    ipsCore::add_error($ex, true);
+                $error = json_decode($ex->getData());
+                if ($error->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
+                    ipsCore::add_error($error->message, true);
                 }
             } else {
                 ipsCore::add_error($ex->getMessage(), true);
             }
         } catch (Exception $ex) {
             ipsCore::add_error($ex, true);
-        }
+        }*/
 
         return true;
     }
