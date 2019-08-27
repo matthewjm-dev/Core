@@ -36,6 +36,8 @@ use PayPal\Api\ShippingAddress;
 
 class ipsCore_paypal
 {
+
+    protected $debug = false;
     protected $sandbox = false; // Indicates if the sandbox endpoint is used.
     protected $currency = 'GBP';
 
@@ -55,8 +57,16 @@ class ipsCore_paypal
     protected $url_webhook;
     protected $webhook;
 
+    public function set_debug() {
+        $this->debug = true;
+    }
+
     public function __construct($args)
     {
+        if (isset($args['debug']) && $args['debug'] == true) {
+            $this->set_debug();
+        }
+
         if (isset($args['urls'])) {
             if (!$args['urls']) {
                 $args['urls'] = [
@@ -127,20 +137,22 @@ class ipsCore_paypal
 
         $this->webhook->setEventTypes($event_types);
 
-        /*try {
-            $output = $this->webhook->create($this->api_context);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            if ($ex->getData() !== null) {
-                $error = json_decode($ex->getData());
-                if ($error->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
-                    ipsCore::add_error($error->message, true);
+        if (!$this->debug) {
+            try {
+                $output = $this->webhook->create($this->api_context);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                if ($ex->getData() !== null) {
+                    $error = json_decode($ex->getData());
+                    if ($error->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
+                        ipsCore::add_error($error->message, true);
+                    }
+                } else {
+                    ipsCore::add_error($ex->getMessage(), true);
                 }
-            } else {
-                ipsCore::add_error($ex->getMessage(), true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
             }
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
-        }*/
+        }
 
         return true;
     }
@@ -185,22 +197,26 @@ class ipsCore_paypal
         $payment = new Payment();
         $payment->setIntent('sale')->setPayer($payer)->setRedirectUrls($redirectUrls)->setTransactions([$transaction]);
 
-        // Create payment with valid API context
-        try {
-            $payment->create($this->api_context);
+        if (!$this->debug) {
+            // Create payment with valid API context
+            try {
+                $payment->create($this->api_context);
 
-            // Get PayPal redirect URL and redirect the customer
-            $approval_url = $payment->getApprovalLink();
+                // Get PayPal redirect URL and redirect the customer
+                $approval_url = $payment->getApprovalLink();
 
-            // Redirect to PayPal
-            $this->redirect_to_paypal($approval_url);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
+                // Redirect to PayPal
+                $this->redirect_to_paypal($approval_url);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                ipsCore::add_error($ex, true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
+            }
         }
+
+        return true;
     }
 
     public function execute_payment($payment_id = false, $payer_id = false) {
@@ -219,17 +235,21 @@ class ipsCore_paypal
         $execution = new PaymentExecution();
         $execution->setPayerId($payer_id);
 
-        try {
-            // Execute payment
-            $result = $payment->execute($execution, $this->api_context);
-            return($result);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
+        if (!$this->debug) {
+            try {
+                // Execute payment
+                $result = $payment->execute($execution, $this->api_context);
+                return($result);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                ipsCore::add_error($ex, true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
+            }
         }
+
+        return true;
     }
 
     public function setup_order(array $items = [], $amount_total = false, $amount_shipping = false, $tax_rate = false, $amount_subtotal = false) {
@@ -294,22 +314,26 @@ class ipsCore_paypal
         $payment = new Payment();
         $payment->setIntent("order")->setPayer($payer)->setRedirectUrls($redirectUrls)->setTransactions([$transaction]);
 
-        // Create payment with valid API context
-        try {
-            $payment->create($this->api_context);
+        if (!$this->debug) {
+            // Create payment with valid API context
+            try {
+                $payment->create($this->api_context);
 
-            // Get paypal redirect URL and redirect user
-            $approval_url = $payment->getApprovalLink();
+                // Get paypal redirect URL and redirect user
+                $approval_url = $payment->getApprovalLink();
 
-            // Redirect to PayPal
-            $this->redirect_to_paypal($approval_url);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
+                // Redirect to PayPal
+                $this->redirect_to_paypal($approval_url);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                ipsCore::add_error($ex, true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
+            }
         }
+
+        return true;
     }
 
     public function execute_order($payment_id = false, $payer_id = false, $amount_total = false) {
@@ -323,7 +347,7 @@ class ipsCore_paypal
 
         if (!$amount_total) {
             ipsCore::add_error('Order Amount Total is required (execute_order)', true);
-        } elseif (!is_number($amount_total)) {
+        } elseif (!is_numeric($amount_total)) {
             ipsCore::add_error('Order Amount Total must be a number (execute_order)', true);
         }
 
@@ -334,21 +358,25 @@ class ipsCore_paypal
         $execution = new PaymentExecution();
         $execution->setPayerId($payer_id);
 
-        try {
-            // Execute payment
-            $result = $payment->execute($execution, $this->api_context);
+        if (!$this->debug) {
+            try {
+                // Execute payment
+                $result = $payment->execute($execution, $this->api_context);
 
-            // Extract order
-            $order = $payment->transactions[0]->related_resources[0]->order;
+                // Extract order
+                $order = $payment->transactions[0]->related_resources[0]->order;
 
-            $this->capture_order($order, $amount_total);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
+                $this->capture_order($order, $amount_total);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                ipsCore::add_error($ex, true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
+            }
         }
+
+        return true;
     }
 
     public function capture_order($order = false, $amount_total = false) {
@@ -358,7 +386,7 @@ class ipsCore_paypal
 
         if (!$amount_total) {
             ipsCore::add_error('Order Amount Total is required (capture_order)', true);
-        } elseif (!is_number($amount_total)) {
+        } elseif (!is_numeric($amount_total)) {
             ipsCore::add_error('Order Amount Total must be a number (setup_billing)', true);
         }
 
@@ -369,17 +397,21 @@ class ipsCore_paypal
         $captureDetails = new Authorization();
         $captureDetails->setAmount($amount);
 
-        try {
-            $result = $order->capture($captureDetails, $this->api_context);
-            print_r($result);
-            // TODO: Do something here
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
+        if (!$this->debug) {
+            try {
+                $result = $order->capture($captureDetails, $this->api_context);
+                print_r($result);
+                // TODO: Do something here
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                ipsCore::add_error($ex, true);
+            } catch (Exception $ex) {
+                ipsCore::add_error($ex, true);
+            }
         }
+
+        return true;
     }
 
     public function setup_billing($args) {
@@ -413,23 +445,25 @@ class ipsCore_paypal
 
         if (!$args['interval']) {
             ipsCore::add_error('Billing setup requires an Interval (setup_billing)', true);
-        } elseif (!is_number($args['interval'])) {
+        } elseif (!is_numeric($args['interval'])) {
             ipsCore::add_error('Billing setup Interval must be a number (setup_billing)', true);
         }
 
-        if ($args['cycles'] && !is_number($args['cycles'])) {
+        if ($args['cycles'] && !is_numeric($args['cycles'])) {
             ipsCore::add_error('Billing setup Cycle must be a number (setup_billing)', true);
         }
 
         if (!$args['amount_total']) {
             ipsCore::add_error('Billing setup requires a Amount Total (setup_billing)', true);
-        } elseif (!is_number($args['amount_total'])) {
+        } elseif (!is_numeric($args['amount_total'])) {
             ipsCore::add_error('Billing setup Amount Total must be a number (setup_billing)', true);
         }
 
         // Create a new billing plan
         $plan = new Plan();
-        $plan->setName($args['title'])->setDescription($args['description'])->setType('fixed');
+        $plan->setName($args['title'])
+            ->setDescription($args['description'])
+            ->setType('fixed');
 
         // Set billing plan definitions
         $paymentDefinition = new PaymentDefinition();
@@ -446,41 +480,59 @@ class ipsCore_paypal
         if ($args['amount_shipping']) {
             // Set charge models
             $chargeModel = new ChargeModel();
-            $chargeModel->setType('SHIPPING')->setAmount(new Currency(['value' => $args['amount_shipping'], 'currency' => $this->currency]));
+            $chargeModel->setType('SHIPPING')
+                ->setAmount(new Currency([
+                    'value' => $args['amount_shipping'],
+                    'currency' => $this->currency
+                ]));
             $paymentDefinition->setChargeModels([$chargeModel]);
         }
 
         // Set merchant preferences
         $merchantPreferences = new MerchantPreferences();
-        $merchantPreferences->setReturnUrl($this->url_return)->setCancelUrl($this->url_cancel)
-            ->setAutoBillAmount('yes')->setInitialFailAmountAction('CONTINUE')->setMaxFailAttempts('0');
+        $merchantPreferences->setReturnUrl($this->url_return)
+            ->setCancelUrl($this->url_cancel)
+            ->setAutoBillAmount('yes')
+            ->setInitialFailAmountAction('CONTINUE')
+            ->setMaxFailAttempts('0');
 
         if ($args['amount_setupfee']) {
-            $merchantPreferences->setSetupFee(new Currency(['value' => $args['amount_setupfee'], 'currency' => $this->currency]));
+            $merchantPreferences->setSetupFee(new Currency([
+                'value' => $args['amount_setupfee'],
+                'currency' => $this->currency
+            ]));
         }
 
         $plan->setPaymentDefinitions([$paymentDefinition]);
         $plan->setMerchantPreferences($merchantPreferences);
 
-        //create plan
-        try {
-            $createdPlan = $plan->create($this->api_context);
-
+        if (!$this->debug) {
+            //create plan
             try {
-                $patch = new Patch();
-                $value = new PayPalModel('{"state":"ACTIVE"}');
-                $patch->setOp('replace')
-                    ->setPath('/')
-                    ->setValue($value);
-                $patchRequest = new PatchRequest();
-                $patchRequest->addPatch($patch);
-                $createdPlan->update($patchRequest, $this->api_context);
-                $plan = Plan::get($createdPlan->getId(), $this->api_context);
+                $createdPlan = $plan->create($this->api_context);
 
-                // Output plan id
-                echo $plan->getId();
+                try {
+                    $patch = new Patch();
+                    $value = new PayPalModel('{"state":"ACTIVE"}');
+                    $patch->setOp('replace')
+                        ->setPath('/')
+                        ->setValue($value);
+                    $patchRequest = new PatchRequest();
+                    $patchRequest->addPatch($patch);
+                    $createdPlan->update($patchRequest, $this->api_context);
+                    $plan = Plan::get($createdPlan->getId(), $this->api_context);
+
+                    // Output plan id
+                    return $plan->getId();
 
 
+                } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                    echo $ex->getCode();
+                    echo $ex->getData();
+                    ipsCore::add_error($ex, true);
+                } catch (Exception $ex) {
+                    ipsCore::add_error($ex, true);
+                }
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
                 echo $ex->getCode();
                 echo $ex->getData();
@@ -488,25 +540,21 @@ class ipsCore_paypal
             } catch (Exception $ex) {
                 ipsCore::add_error($ex, true);
             }
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            ipsCore::add_error($ex, true);
-        } catch (Exception $ex) {
-            ipsCore::add_error($ex, true);
         }
+
+        return true;
     }
 
-    public function execute_billing() { // TODO: This function needs work
+    public function execute_billing($plan_id) { // TODO: This function needs work
         // Create new agreement
         $agreement = new Agreement();
         $agreement->setName('Base Agreement')
             ->setDescription('Basic Agreement')
-            ->setStartDate('2019-06-17T9:45:04Z');
+            ->setStartDate("Y-m-d\TH:i:s\Z", strtotime('+2 minute')); // 2 mins from now
 
         // Set plan id
         $plan = new Plan();
-        $plan->setId('P-1WJ68935LL406420PUTENA2I');
+        $plan->setId($plan_id);
         $agreement->setPlan($plan);
 
         // Add payer type
@@ -515,30 +563,36 @@ class ipsCore_paypal
         $agreement->setPayer($payer);
 
         // Adding shipping details
-        $shippingAddress = new ShippingAddress();
+        /*$shippingAddress = new ShippingAddress();
         $shippingAddress->setLine1('111 First Street')
             ->setCity('Saratoga')
             ->setState('CA')
             ->setPostalCode('95070')
             ->setCountryCode('US');
-        $agreement->setShippingAddress($shippingAddress);
+        $agreement->setShippingAddress($shippingAddress);*/
 
-        try {
-            // Create agreement
-            $agreement = $agreement->create($this->api_context);
+        if (!$this->debug) {
+            try {
+                // Create agreement
+                $agreement = $agreement->create($this->api_context);
 
-            // Extract approval URL to redirect user
-            $approval_url = $agreement->getApprovalLink();
+                // Extract approval URL to redirect user
+                $approval_url = $agreement->getApprovalLink();
 
-            // Redirect to PayPal
-            $this->redirect_to_paypal($approval_url);
-        } catch (PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            die($ex);
-        } catch (Exception $ex) {
-            die($ex);
+                // Redirect to PayPal
+                $this->redirect_to_paypal($approval_url);
+            } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                echo $ex->getCode();
+                echo $ex->getData();
+                die($ex);
+            } catch (Exception $ex) {
+                die($ex);
+            }
+        } else {
+            return true;
         }
+
+        return false; // return false as user wasn't redirected to paypal
     }
 
 }
