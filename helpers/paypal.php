@@ -449,7 +449,7 @@ class ipsCore_paypal
             ipsCore::add_error('Billing setup Interval must be a number (setup_billing)', true);
         }
 
-        if ($args['cycles'] && !is_numeric($args['cycles'])) {
+        if (!$args['cycles'] || !is_numeric($args['cycles'])) {
             ipsCore::add_error('Billing setup Cycle must be a number (setup_billing)', true);
         }
 
