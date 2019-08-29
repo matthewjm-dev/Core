@@ -583,19 +583,39 @@ class ipsCore_paypal
         return true;
     }
 
-    public function execute_billing($plan_id, &$errors = []) { // TODO: This function needs work
-        // Get start time
-        $start_time = date(DATE_ISO8601, strtotime('+1 day')); // ISO 8601
+    public function execute_billing($args, &$errors = []) {
+        $args = array_merge([
+            'plan_id' => false,
+            'start_time' => date(DATE_ISO8601, strtotime('+1 day')), // ISO 8601
+            'title' => false,
+            'description' => false,
+            'shipping_address' => false,
+        ], $args);
+
+        if (!isset($args['plan_id'])) {
+            $error = 'Plan ID is required';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
+        }
+
+        if (!isset($args['title'])) {
+            $error = 'Title is required';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
+        }
 
         // Create new agreement
         $agreement = new Agreement();
-        $agreement->setName('Base Agreement')
-            ->setDescription('Basic Agreement')
-            ->setStartDate($start_time);
+        $agreement->setName($args['title'])
+            ->setStartDate($args['start_time']);
+
+        if ($args['description']) {
+            $agreement->setDescription($args['description']);
+        }
 
         // Set plan id
         $plan = new Plan();
-        $plan->setId($plan_id);
+        $plan->setId($args['plan_id']);
         $agreement->setPlan($plan);
 
         // Add payer type
@@ -603,14 +623,15 @@ class ipsCore_paypal
         $payer->setPaymentMethod('paypal');
         $agreement->setPayer($payer);
 
-        // Adding shipping details
-        /*$shippingAddress = new ShippingAddress();
-        $shippingAddress->setLine1('111 First Street')
-            ->setCity('Saratoga')
-            ->setState('CA')
-            ->setPostalCode('95070')
-            ->setCountryCode('US');
-        $agreement->setShippingAddress($shippingAddress);*/
+        if ($args['shipping_address']) { // Adding shipping details
+            $shippingAddress = new ShippingAddress();
+            $shippingAddress->setLine1($args['shipping_address']['line1'])
+                ->setCity($args['shipping_address']['city'])
+                ->setState($args['shipping_address']['state'])
+                ->setPostalCode($args['shipping_address']['postcode'])
+                ->setCountryCode($args['shipping_address']['countrycode']);
+            $agreement->setShippingAddress($shippingAddress);
+        }
 
         if (!$this->debug) {
             try {
