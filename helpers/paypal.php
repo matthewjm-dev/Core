@@ -38,6 +38,8 @@ class ipsCore_paypal
 {
 
     protected $debug = false;
+    protected $return_redirect = false;
+
     protected $sandbox = false; // Indicates if the sandbox endpoint is used.
     protected $currency = 'GBP';
 
@@ -47,7 +49,7 @@ class ipsCore_paypal
     protected $url_return;
     protected $url_cancel;
     protected $url_notify;
-    
+
     protected $url_request_live = 'https://www.paypal.com/cgi-bin/webscr';
     protected $url_request_sandbox = 'https://www.sandbox.paypal.com/cgi-bin/webscr';
 
@@ -57,14 +59,23 @@ class ipsCore_paypal
     protected $url_webhook;
     protected $webhook;
 
+
     public function set_debug() {
         $this->debug = true;
+    }
+
+    public function set_return_redirect($set = true) {
+        $this->return_redirect = $set;
     }
 
     public function __construct($args)
     {
         if (isset($args['debug']) && $args['debug'] == true) {
             $this->set_debug();
+        }
+
+        if (isset($args['return_redirect'])) {
+            $this->set_return_redirect($args['return_redirect']);
         }
 
         if (isset($args['urls'])) {
@@ -158,8 +169,12 @@ class ipsCore_paypal
     }
 
     public function redirect_to_paypal($url) {
-        header('Location: ' . $url);
-        exit();
+        if ($this->return_redirect) {
+            return $url;
+        } else {
+            header('Location: ' . $url);
+            exit();
+        }
     }
 
     public function setup_payment($amount = false, $description = false, $amount_total) {
