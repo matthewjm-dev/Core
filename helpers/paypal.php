@@ -429,7 +429,7 @@ class ipsCore_paypal
         return true;
     }
 
-    public function setup_billing($args) {
+    public function setup_billing($args, &$errors = []) {
         $args = array_merge([
             'title' => false,
             'description' => false,
@@ -443,35 +443,53 @@ class ipsCore_paypal
         ], $args);
 
         if (!$args['title']) {
-            ipsCore::add_error('Billing setup requires a Title (setup_billing)', true);
+            $error = 'Billing setup requires a Title (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['description']) {
-            ipsCore::add_error('Billing setup requires a Description (setup_billing)', true);
+            $error = 'Billing setup requires a Description (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['payment_title']) { // e.g. "Regular Payments"
-            ipsCore::add_error('Billing setup requires a Payment Title (setup_billing)', true);
+            $error = 'Billing setup requires a Payment Title (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['frequency']) { // e.g. "MONTH"
-            ipsCore::add_error('Billing setup requires a Frequency (setup_billing)', true);
+            $error = 'Billing setup requires a Frequency (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['interval']) {
-            ipsCore::add_error('Billing setup requires an Interval (setup_billing)', true);
+            $error = 'Billing setup requires an Interval (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         } elseif (!is_numeric($args['interval'])) {
-            ipsCore::add_error('Billing setup Interval must be a number (setup_billing)', true);
+            $error = 'Billing setup Interval must be a number (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['cycles'] || !is_numeric($args['cycles'])) {
-            ipsCore::add_error('Billing setup Cycle must be a number (setup_billing)', true);
+            $error = 'Billing setup Cycle must be a number (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         if (!$args['amount_total']) {
-            ipsCore::add_error('Billing setup requires a Amount Total (setup_billing)', true);
+            $error = 'Billing setup requires a Amount Total (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         } elseif (!is_numeric($args['amount_total'])) {
-            ipsCore::add_error('Billing setup Amount Total must be a number (setup_billing)', true);
+            $error = 'Billing setup Amount Total must be a number (setup_billing)';
+            $errors[] = $error;
+            ipsCore::add_error($error, true);
         }
 
         // Create a new billing plan
@@ -560,7 +578,7 @@ class ipsCore_paypal
         return true;
     }
 
-    public function execute_billing($plan_id) { // TODO: This function needs work
+    public function execute_billing($plan_id, &$errors = []) { // TODO: This function needs work
         // Get start time
         $start_time = date(DATE_ISO8601, strtotime('+1 day')); // ISO 8601
 
@@ -600,11 +618,10 @@ class ipsCore_paypal
                 // Redirect to PayPal
                 $this->redirect_to_paypal($approval_url);
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                echo $ex->getCode();
-                echo $ex->getData();
-                die($ex);
+                $errors['paypal_exception_code'] = $ex->getCode();
+                $errors['paypal_exception_data'] = $ex->getData();
             } catch (Exception $ex) {
-                die($ex);
+                $errors['exception'] = $ex;
             }
         } else {
             return true;
