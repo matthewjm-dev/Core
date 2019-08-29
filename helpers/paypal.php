@@ -168,28 +168,30 @@ class ipsCore_paypal
         return true;
     }
 
-    public function redirect_to_paypal($url) {
+    public function redirect_to_paypal($url = false) {
         if ($this->return_redirect) {
-            return $url;
+            return true;
         } else {
             header('Location: ' . $url);
             exit();
+            return false;
         }
     }
 
-    public function setup_payment($amount = false, $description = false, $amount_total) {
-        if (!$amount) {
-            ipsCore::add_error('Payment requires an amount (setup_payment)', true);
-        }
+    public function setup_payment($args, &$errors = []) {
+        $args = array_merge([
+            'description' => false,
+            'amount_total' => false,
+        ], $args);
 
-        if (!$description) {
+        if (!$args['description']) {
             ipsCore::add_error('Payment requires a description (setup_payment)', true);
         }
 
-        if (!$amount_total) {
-            ipsCore::add_error('A Payment requires an Amount Total (setup_payment)', true);
-        } elseif (!is_number($amount_total)) {
-            ipsCore::add_error('Payment Amount Total must be a number (setup_payment)', true);
+        if (!$args['total']) {
+            ipsCore::add_error('A Payment requires a Total (setup_payment)', true);
+        } elseif (!is_number($args['total'])) {
+            ipsCore::add_error('Payment Total must be a number (setup_payment)', true);
         }
 
         // Create new payer and method
@@ -202,11 +204,11 @@ class ipsCore_paypal
 
         // Set payment amount
         $amount = new Amount();
-        $amount->setCurrency($this->currency)->setTotal($amount_total);
+        $amount->setCurrency($this->currency)->setTotal($args['total']);
 
         // Set transaction object
         $transaction = new Transaction();
-        $transaction->setAmount($amount)->setDescription($description);
+        $transaction->setAmount($amount)->setDescription($args['description']);
 
         // Create the full payment object
         $payment = new Payment();
@@ -221,13 +223,14 @@ class ipsCore_paypal
                 $approval_url = $payment->getApprovalLink();
 
                 // Redirect to PayPal
-                $this->redirect_to_paypal($approval_url);
+                if ($this->redirect_to_paypal($approval_url)) {
+                    return $approval_url;
+                }
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                echo $ex->getCode();
-                echo $ex->getData();
-                ipsCore::add_error($ex, true);
+                $errors['paypal_exception_code'] = $ex->getCode();
+                $errors['paypal_exception_data'] = $ex->getData();
             } catch (Exception $ex) {
-                ipsCore::add_error($ex, true);
+                $errors['exception'] = $ex;
             }
         }
 
@@ -338,7 +341,9 @@ class ipsCore_paypal
                 $approval_url = $payment->getApprovalLink();
 
                 // Redirect to PayPal
-                $this->redirect_to_paypal($approval_url);
+                if ($this->redirect_to_paypal($approval_url)) {
+                    return $approval_url;
+                }
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
                 echo $ex->getCode();
                 echo $ex->getData();
@@ -616,7 +621,9 @@ class ipsCore_paypal
                 $approval_url = $agreement->getApprovalLink();
 
                 // Redirect to PayPal
-                $this->redirect_to_paypal($approval_url);
+                if ($this->redirect_to_paypal($approval_url)) {
+                    return $approval_url;
+                }
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
                 $errors['paypal_exception_code'] = $ex->getCode();
                 $errors['paypal_exception_data'] = $ex->getData();
