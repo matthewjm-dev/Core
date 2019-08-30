@@ -1,17 +1,22 @@
 <?php
 
-class PaypalIPN
+class ipsCore_paypal_ipn
 {
     /** @var bool Indicates if the sandbox endpoint is used. */
     private $use_sandbox = false;
+    
     /** @var bool Indicates if the local certificates are used. */
     private $use_local_certs = true;
+    
     /** Production Postback URL */
     const VERIFY_URI = 'https://ipnpb.paypal.com/cgi-bin/webscr';
+    
     /** Sandbox Postback URL */
     const SANDBOX_VERIFY_URI = 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr';
+    
     /** Response from PayPal indicating validation was successful */
     const VALID = 'VERIFIED';
+    
     /** Response from PayPal indicating validation failed */
     const INVALID = 'INVALID';
     /**
@@ -19,16 +24,16 @@ class PaypalIPN
      * should not be enabled in production).
      * @return void
      */
-    public function useSandbox()
+    public function set_sandbox($arg = true)
     {
-        $this->use_sandbox = true;
+        $this->use_sandbox = $arg;
     }
     /**
      * Sets curl to use php curl's built in certs (may be required in some
      * environments).
      * @return void
      */
-    public function usePHPCerts()
+    public function set_use_php_certs()
     {
         $this->use_local_certs = false;
     }
@@ -37,7 +42,7 @@ class PaypalIPN
      *
      * @return string
      */
-    public function getPaypalUri()
+    public function get_paypal_uri()
     {
         if ($this->use_sandbox) {
             return self::SANDBOX_VERIFY_URI;
@@ -52,14 +57,18 @@ class PaypalIPN
      * @return bool
      * @throws Exception
      */
-    public function verifyIPN()
+    public function verify_response(&$errors = [])
     {
-        if ( ! count($_POST)) {
-            throw new Exception("Missing POST Data");
+        if (!count($_POST)) {
+            //throw new Exception("Missing POST Data");
+            $errors[] = 'Missing POST Data';
+            return false;
         }
+
         $raw_post_data = file_get_contents('php://input');
         $raw_post_array = explode('&', $raw_post_data);
-        $myPost = array();
+        $myPost = [];
+        
         foreach ($raw_post_array as $keyval) {
             $keyval = explode('=', $keyval);
             if (count($keyval) == 2) {
@@ -72,12 +81,14 @@ class PaypalIPN
                 $myPost[$keyval[0]] = urldecode($keyval[1]);
             }
         }
+        
         // Build the body of the verification post request, adding the _notify-validate command.
         $req = 'cmd=_notify-validate';
         $get_magic_quotes_exists = false;
         if (function_exists('get_magic_quotes_gpc')) {
             $get_magic_quotes_exists = true;
         }
+
         foreach ($myPost as $key => $value) {
             if ($get_magic_quotes_exists == true && get_magic_quotes_gpc() == 1) {
                 $value = urlencode(stripslashes($value));
@@ -86,8 +97,9 @@ class PaypalIPN
             }
             $req .= "&$key=$value";
         }
+
         // Post the data back to PayPal, using curl. Throw exceptions if errors occur.
-        $ch = curl_init($this->getPaypalUri());
+        $ch = curl_init($this->get_paypal_uri());
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -95,33 +107,43 @@ class PaypalIPN
         curl_setopt($ch, CURLOPT_SSLVERSION, 6);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        
         // This is often required if the server is missing a global cert bundle, or is using an outdated one.
         if ($this->use_local_certs) {
             curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/cert/cacert.pem");
         }
         curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'User-Agent: PHP-IPN-Verification-Script',
             'Connection: Close',
-        ));
+        ]);
+
         $res = curl_exec($ch);
         if ( ! ($res)) {
             $errno = curl_errno($ch);
             $errstr = curl_error($ch);
             curl_close($ch);
-            throw new Exception("cURL error: [$errno] $errstr");
+            //throw new Exception("cURL error: [$errno] $errstr");
+            $errors[] = "cURL error: [$errno] $errstr";
+            return false;
         }
+
         $info = curl_getinfo($ch);
         $http_code = $info['http_code'];
         if ($http_code != 200) {
-            throw new Exception("PayPal responded with http code $http_code");
+            //throw new Exception("PayPal responded with http code $http_code");
+            $errors[] = 'PayPal responded with http code ' . $http_code;
+            return false;
         }
+
         curl_close($ch);
+
         // Check if PayPal verifies the IPN data, and if so, return true.
         if ($res == self::VALID) {
             return true;
         } else {
+            $errors[] = 'Invalid IPN response';
             return false;
         }
     }
