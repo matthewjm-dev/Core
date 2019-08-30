@@ -56,6 +56,8 @@ class ipsCore_session {
 		}
 
 		session_write_close();
+
+		return true;
 	}
 
 	public function check( $name ) {
