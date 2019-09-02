@@ -136,7 +136,7 @@ class ipsCore_paypal
         $this->webhook->setUrl($this->url_notify);
 
         // Set webhooks to subscribe to
-        /*$event_types = [];
+        $event_types = [];
 
         $event_types[] = new WebhookEventType('{
             "name":"PAYMENT.SALE.COMPLETED"
@@ -144,8 +144,8 @@ class ipsCore_paypal
 
         $event_types[] = new WebhookEventType('{
             "name":"PAYMENT.SALE.DENIED"
-        }');*/
-        $event_types = '*';
+        }');
+        //$event_types = '*'; TODO: Subscribe to all events somehow?
 
         $this->webhook->setEventTypes($event_types);
 
