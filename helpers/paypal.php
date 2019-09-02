@@ -451,51 +451,42 @@ class ipsCore_paypal
         if (!$args['title']) {
             $error = 'Billing setup requires a Title (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['description']) {
             $error = 'Billing setup requires a Description (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['payment_title']) { // e.g. "Regular Payments"
             $error = 'Billing setup requires a Payment Title (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['frequency']) { // e.g. "MONTH"
             $error = 'Billing setup requires a Frequency (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['interval']) {
             $error = 'Billing setup requires an Interval (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         } elseif (!is_numeric($args['interval'])) {
             $error = 'Billing setup Interval must be a number (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['cycles'] || !is_numeric($args['cycles'])) {
             $error = 'Billing setup Cycle must be a number (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!$args['amount_total']) {
             $error = 'Billing setup requires a Amount Total (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         } elseif (!is_numeric($args['amount_total'])) {
             $error = 'Billing setup Amount Total must be a number (setup_billing)';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         // Create a new billing plan
@@ -545,40 +536,45 @@ class ipsCore_paypal
         $plan->setPaymentDefinitions([$paymentDefinition]);
         $plan->setMerchantPreferences($merchantPreferences);
 
-        if (!$this->debug) {
-            //create plan
-            try {
-                $createdPlan = $plan->create($this->api_context);
-
+        if (empty($errors)) {
+            if (!$this->debug) {
+                //create plan
                 try {
-                    $patch = new Patch();
-                    $value = new PayPalModel('{"state":"ACTIVE"}');
-                    $patch->setOp('replace')
-                        ->setPath('/')
-                        ->setValue($value);
-                    $patchRequest = new PatchRequest();
-                    $patchRequest->addPatch($patch);
-                    $createdPlan->update($patchRequest, $this->api_context);
-                    $plan = Plan::get($createdPlan->getId(), $this->api_context);
+                    $createdPlan = $plan->create($this->api_context);
 
-                    // Output plan id
-                    return $plan->getId();
+                    try {
+                        $patch = new Patch();
+                        $value = new PayPalModel('{"state":"ACTIVE"}');
+                        $patch->setOp('replace')
+                            ->setPath('/')
+                            ->setValue($value);
+                        $patchRequest = new PatchRequest();
+                        $patchRequest->addPatch($patch);
+                        $createdPlan->update($patchRequest, $this->api_context);
+                        $plan = Plan::get($createdPlan->getId(), $this->api_context);
 
+                        // Output plan id
+                        return $plan->getId();
 
+                    } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                        $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
+                        $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
+                        return false;
+                    } catch (Exception $ex) {
+                        $errors[] = 'Exception Error: ' . json_encode($ex);
+                        return false;
+                    }
                 } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                    echo $ex->getCode();
-                    echo $ex->getData();
-                    ipsCore::add_error($ex, true);
+                    $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
+                    $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
+                    return false;
                 } catch (Exception $ex) {
-                    ipsCore::add_error($ex, true);
+                    $errors[] = 'Exception Error: ' . json_encode($ex);
+                    return false;
                 }
-            } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                echo $ex->getCode();
-                echo $ex->getData();
-                ipsCore::add_error($ex, true);
-            } catch (Exception $ex) {
-                ipsCore::add_error($ex, true);
             }
+        } else {
+            return false;
         }
 
         return true;
@@ -596,13 +592,11 @@ class ipsCore_paypal
         if (!isset($args['plan_id'])) {
             $error = 'Plan ID is required';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         if (!isset($args['title'])) {
             $error = 'Title is required';
             $errors[] = $error;
-            ipsCore::add_error($error, true);
         }
 
         // Create new agreement
@@ -634,29 +628,33 @@ class ipsCore_paypal
             $agreement->setShippingAddress($shippingAddress);
         }
 
-        if (!$this->debug) {
-            try {
-                // Create agreement
-                $agreement = $agreement->create($this->api_context);
+        if (empty($errors)) {
+            if (!$this->debug) {
+                try {
+                    // Create agreement
+                    $agreement = $agreement->create($this->api_context);
 
-                // Extract approval URL to redirect user
-                $approval_url = $agreement->getApprovalLink();
+                    // Extract approval URL to redirect user
+                    $approval_url = $agreement->getApprovalLink();
 
-                // Redirect to PayPal
-                if ($this->redirect_to_paypal($approval_url)) {
-                    return $approval_url;
+                    // Redirect to PayPal
+                    if ($this->redirect_to_paypal($approval_url)) {
+                        return $approval_url;
+                    }
+                } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                    $errors['paypal_exception_code'] = $ex->getCode();
+                    $errors['paypal_exception_data'] = $ex->getData();
+                    return false;
+                } catch (Exception $ex) {
+                    $errors['exception'] = $ex;
+                    return false;
                 }
-            } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                $errors['paypal_exception_code'] = $ex->getCode();
-                $errors['paypal_exception_data'] = $ex->getData();
-            } catch (Exception $ex) {
-                $errors['exception'] = $ex;
             }
         } else {
-            return true;
+            return false;
         }
 
-        return false; // return false as user wasn't redirected to paypal
+        return true;
     }
 
 }
