@@ -494,7 +494,7 @@ class ipsCore_form_builder
         $first = true;
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="radio ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['placeholder']) {
-            $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" name="' . $field['name'] . '[]" value="0" />' . $field['placeholder'] . '</label>');
+            $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" name="' . $field['name'] . '" value="0" />' . $field['placeholder'] . '</label>');
         }
         if ($field['options']) {
             foreach ($field['options'] as $option) {
