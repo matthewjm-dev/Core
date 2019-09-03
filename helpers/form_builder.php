@@ -381,7 +381,7 @@ class ipsCore_form_builder
 
     public function render_editor($field, $args)
     {
-        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="editor ' . $args['fieldset_classes'] . '" data-name="' . $field['name'] . '">' . $args['field_label'] . $args['field_comment']);
         $this->form_html('<textarea id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . $field['value'] . '</textarea></fieldset>');
     }
 
