@@ -123,31 +123,134 @@ class ipsCore_paypal
             $this->api_auth = new OAuthTokenCredential($this->client_id, $this->client_secret);
 
             $this->api_context = new ApiContext($this->api_auth);
-
-            $this->setup_webhook();
         } else {
             ipsCore::add_error('Paypal Client ID or Secret missing', true);
         }
     }
 
-    public function setup_webhook() {
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#connect-with-paypal
+    public function webhook_connected() {
+        $this->setup_webhook([
+            'IDENTITY.AUTHORIZATION-CONSENT.REVOKED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#payment-orders
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#orders
+    public function webhook_order() {
+        $this->setup_webhook([
+            'PAYMENT.ORDER.CANCELLED',
+            'PAYMENT.ORDER.CREATED',
+            'CHECKOUT.ORDER.COMPLETED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#checkout-buyer-approval
+    public function webhook_checkout_buyer_approval() {
+        $this->setup_webhook([
+            'PAYMENTS.PAYMENT.CREATED',
+            'CHECKOUT.ORDER.APPROVED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#authorized-and-captured-payments
+    public function webhook_payment() {
+        $this->setup_webhook([
+            'PAYMENT.AUTHORIZATION.CREATED',
+            'PAYMENT.AUTHORIZATION.VOIDED',
+            'PAYMENT.CAPTURE.COMPLETED',
+            'PAYMENT.CAPTURE.DENIED',
+            'PAYMENT.CAPTURE.PENDING',
+            'PAYMENT.CAPTURE.REFUNDED',
+            'PAYMENT.CAPTURE.REVERSED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#sales
+    public function webhook_sale() {
+        $this->setup_webhook([
+            'PAYMENT.SALE.COMPLETED',
+            'PAYMENT.SALE.DENIED',
+            'PAYMENT.SALE.PENDING',
+            'PAYMENT.SALE.REFUNDED',
+            'PAYMENT.SALE.REVERSED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#batch-payouts
+    public function webhook_batch() {
+        $this->setup_webhook([
+            'PAYMENT.PAYOUTSBATCH.DENIED',
+            'PAYMENT.PAYOUTSBATCH.PROCESSING',
+            'PAYMENT.PAYOUTSBATCH.SUCCESS',
+            'PAYMENT.PAYOUTS-ITEM.BLOCKED',
+            'PAYMENT.PAYOUTS-ITEM.CANCELED',
+            'PAYMENT.PAYOUTS-ITEM.DENIED',
+            'PAYMENT.PAYOUTS-ITEM.FAILED',
+            'PAYMENT.PAYOUTS-ITEM.HELD',
+            'PAYMENT.PAYOUTS-ITEM.REFUNDED',
+            'PAYMENT.PAYOUTS-ITEM.RETURNED',
+            'PAYMENT.PAYOUTS-ITEM.SUCCEEDED',
+            'PAYMENT.PAYOUTS-ITEM.UNCLAIMED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#billing-plans-and-agreements
+    public function webhook_billing() {
+        $this->setup_webhook([
+            'BILLING_AGREEMENTS.AGREEMENT.CREATED',
+            'BILLING_AGREEMENTS.AGREEMENT.CANCELLED',
+            'BILLING.PLAN.CREATED',
+            'BILLING.PLAN.UPDATED',
+            'BILLING.SUBSCRIPTION.CANCELLED',
+            'BILLING.SUBSCRIPTION.CREATED',
+            'BILLING.SUBSCRIPTION.RE-ACTIVATED',
+            'BILLING.SUBSCRIPTION.SUSPENDED',
+            'BILLING.SUBSCRIPTION.UPDATED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#invoicing
+    public function webhook_invoice() {
+        $this->setup_webhook([
+            'INVOICING.INVOICE.CANCELLED',
+            'INVOICING.INVOICE.CREATED',
+            'INVOICING.INVOICE.PAID',
+            'INVOICING.INVOICE.REFUNDED',
+            'INVOICING.INVOICE.SCHEDULED',
+            'INVOICING.INVOICE.UPDATED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#disputes
+    public function webhook_dispute() {
+        $this->setup_webhook([
+            'CUSTOMER.DISPUTE.CREATED',
+            'CUSTOMER.DISPUTE.RESOLVED',
+            'CUSTOMER.DISPUTE.UPDATED',
+            'RISK.DISPUTE.CREATED',
+        ]);
+    }
+
+    // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#merchant-onboarding
+    public function webhook_merchant() {
+        $this->setup_webhook([
+            'MERCHANT.ONBOARDING.COMPLETED',
+            'MERCHANT.PARTNER-CONSENT.REVOKED',
+        ]);
+    }
+
+    private function setup_webhook($hooks = []) {
         $this->webhook = new Webhook();
 
         $this->webhook->setUrl($this->url_notify);
 
-        // Set webhooks to subscribe to
-        $event_types = [];
+        $events = [];
+        foreach ($hooks as $hook) {
+            $events[] = new WebhookEventType('{"name":"' . $hook . '"}');
+        }
 
-        $event_types[] = new WebhookEventType('{
-            "name":"PAYMENT.SALE.COMPLETED"
-        }');
-
-        $event_types[] = new WebhookEventType('{
-            "name":"PAYMENT.SALE.DENIED"
-        }');
-        //$event_types = '*'; TODO: Subscribe to all events somehow?
-
-        $this->webhook->setEventTypes($event_types);
+        $this->webhook->setEventTypes($events);
 
         if (!$this->debug) {
             try {
@@ -180,6 +283,8 @@ class ipsCore_paypal
     }
 
     public function setup_payment($args, &$errors = []) {
+        $this->webhook_payment();
+
         $args = array_merge([
             'description' => false,
             'amount_total' => false,
@@ -436,6 +541,8 @@ class ipsCore_paypal
     }
 
     public function setup_billing($args, &$errors = []) {
+        $this->webhook_billing();
+
         $args = array_merge([
             'title' => false,
             'description' => false,
