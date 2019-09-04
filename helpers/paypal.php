@@ -756,12 +756,12 @@ class ipsCore_paypal
                     $errors['exception'] = $ex;
                     return false;
                 }
+            } else {
+                return $this->url_return;
             }
-        } else {
-            return false;
         }
 
-        return true;
+        return false;
     }
 
 }
