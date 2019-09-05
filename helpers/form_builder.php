@@ -36,6 +36,18 @@ class ipsCore_form_builder
     public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$^';
     public static $password_message = 'Passwords must be at least 6 characters long, contain at least one Uppercase and Lowercase characters and at least one number.';
 
+    public static $title_options = [
+        ['text' => 'Mr', 'value' => 'Mr'],
+        ['text' => 'Mrs', 'value' => 'Mrs'],
+        ['text' => 'Miss', 'value' => 'Miss'],
+        ['text' => 'Ms', 'value' => 'Ms'],
+        ['text' => 'Mx', 'value' => 'Mx'],
+        ['text' => 'Sir', 'value' => 'Sir'],
+        ['text' => 'Dr', 'value' => 'Dr'],
+        ['text' => 'Lady', 'value' => 'Lady'],
+        ['text' => 'Lord', 'value' => 'Lord'],
+    ];
+
     // Getters
     public function get_name()
     {
