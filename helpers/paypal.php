@@ -779,36 +779,43 @@ class ipsCore_paypal
         /** @var String $bodyReceived */
         $requestBody = file_get_contents('php://input');
 
-        /**
-         * Receive HTTP headers received from PayPal webhook.
-         */
-        /** @var Array $headers */
-        $headers = getallheaders();
+        if (!empty($requestBody)) {
 
-        /**
-         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
-         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
-         */
-        $headers = array_change_key_case($headers, CASE_UPPER);
+            /**
+             * Receive HTTP headers received from PayPal webhook.
+             * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
+             * All header keys as UPPERCASE, but recieve the header key as the example array, First letter as UPPERCASE
+             */
+            /** @var Array $headers */
+            $headers = array_change_key_case(getallheaders(), CASE_UPPER);
 
-        $signatureVerification = new VerifyWebhookSignature();
-        $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
-        $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
-        $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-        $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
-        $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
-        $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
+            if ($headers) {
+                $signatureVerification = new VerifyWebhookSignature();
+                $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
+                $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
+                $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
+                $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
+                $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
+                $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
 
-        $signatureVerification->setRequestBody($requestBody);
-        $request = clone $signatureVerification;
+                $signatureVerification->setRequestBody($requestBody);
+                $request = clone $signatureVerification;
 
-        try {
-            /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
-            $output = $signatureVerification->post($this->api_context);
-        } catch (Exception $ex) {
+                try {
+                    /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
+                    $output = $signatureVerification->post($this->api_context);
+                } catch (Exception $ex) {
 
-            $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
-            $output = false;
+                    $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
+                    $output = false;
+                }
+            } else {
+                $errors[] = 'Didnt catch PayPal Headers';
+                return false;
+            }
+        } else {
+            $errors[] = 'Request was empty';
+            return false;
         }
 
         //$errors[] = 'Error: Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'Status:' . "\r\n" . $output->getVerificationStatus() . "\r\n\r\n" . 'output:' . "\r\n" . json_encode($output);
