@@ -246,6 +246,8 @@ class ipsCore_paypal
     }
 
     private function setup_webhook($hooks = []) {
+        $output = false;
+
         $this->webhook = new Webhook();
 
         $this->webhook->setUrl($this->url_notify);
@@ -263,7 +265,9 @@ class ipsCore_paypal
             } catch (PayPal\Exception\PayPalConnectionException $ex) {
                 if ($ex->getData() !== null) {
                     $error = json_decode($ex->getData());
-                    if ($error->name != 'WEBHOOK_URL_ALREADY_EXISTS') {
+                    if ($error->name == 'WEBHOOK_URL_ALREADY_EXISTS') {
+                        $output = $error;
+                    } else {
                         ipsCore::add_error($error->message, true);
                     }
                 } else {
