@@ -59,7 +59,7 @@ class ipsCore_paypal_ipn
      */
     public function verify_response(&$errors = [])
     {
-        if (!count($_POST)) {
+        if (!isset($_POST) || !count($_POST)) {
             //throw new Exception("Missing POST Data");
             $errors[] = 'Missing POST Data';
             return false;
