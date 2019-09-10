@@ -1,9 +1,11 @@
 <?php // PayPal Instant Payment Notification
 
 use PayPal\Api\Webhook;
+use \PayPal\Api\WebhookEvent;
 use PayPal\Api\WebhookEventType;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
+use \PayPal\Api\VerifyWebhookSignature;
 
 use PayPal\Api\Amount;
 use PayPal\Api\Details;
@@ -59,9 +61,12 @@ class ipsCore_paypal
     protected $url_webhook;
     protected $webhook;
 
+    public function set_debug($set = true) {
+        $this->debug = $set;
+    }
 
-    public function set_debug() {
-        $this->debug = true;
+    public function set_sandbox($set = true) {
+        $this->sandbox = $set;
     }
 
     public function set_return_redirect($set = true) {
@@ -269,7 +274,10 @@ class ipsCore_paypal
             }
         }
 
-        return true;
+        if ($output) {
+            return $output;
+        }
+        return false;
     }
 
     public function redirect_to_paypal($url = false) {
@@ -761,6 +769,52 @@ class ipsCore_paypal
             }
         }
 
+        return false;
+    }
+
+    public function verify_response(&$errors = []) {
+        /**
+         * Receive the entire body received from PayPal webhook.
+         */
+        /** @var String $bodyReceived */
+        $requestBody = file_get_contents('php://input');
+
+        /**
+         * Receive HTTP headers received from PayPal webhook.
+         */
+        /** @var Array $headers */
+        $headers = getallheaders();
+
+        /**
+         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
+         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
+         */
+        $headers = array_change_key_case($headers, CASE_UPPER);
+
+        $signatureVerification = new VerifyWebhookSignature();
+        $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
+        $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
+        $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
+        $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
+        $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
+        $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
+
+        $signatureVerification->setRequestBody($requestBody);
+        $request = clone $signatureVerification;
+
+        try {
+            /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
+            $output = $signatureVerification->post($this->api_context);
+        } catch (Exception $ex) {
+
+            $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
+            $output = false;
+        }
+
+        //$errors[] = 'Error: Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'Status:' . "\r\n" . $output->getVerificationStatus() . "\r\n\r\n" . 'output:' . "\r\n" . json_encode($output);
+        if ($output) {
+            return $output;
+        }
         return false;
     }
 
