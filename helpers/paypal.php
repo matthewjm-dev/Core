@@ -776,12 +776,16 @@ class ipsCore_paypal
         return false;
     }
 
-    public function verify_response(&$errors = []) {
+    public function verify_response(&$errors = [], $body = false) {
         /**
          * Receive the entire body received from PayPal webhook.
          */
         /** @var String $bodyReceived */
-        $requestBody = file_get_contents('php://input');
+        if ($body) {
+            $requestBody = $body;
+        } else {
+            $requestBody = file_get_contents('php://input');
+        }
 
         if (!empty($requestBody)) {
 
