@@ -798,24 +798,34 @@ class ipsCore_paypal
             $headers = array_change_key_case(getallheaders(), CASE_UPPER);
 
             if ($headers) {
-                $signatureVerification = new VerifyWebhookSignature();
-                $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
-                $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
-                $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-                $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
-                $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
-                $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
+                $headers_test = ['PAYPAL-AUTH-ALGO', 'PAYPAL-TRANSMISSION-ID', 'PAYPAL-CERT-URL', 'PAYPAL-TRANSMISSION-SIG', 'PAYPAL-TRANSMISSION-TIME'];
 
-                $signatureVerification->setRequestBody($requestBody);
-                $request = clone $signatureVerification;
+                foreach ($headers_test as $header_test) {
+                    if (!isset($headers_test[$header_test])) {
+                        $errors[] = 'Header not found: ' . $header_test;
+                    }
+                }
 
-                try {
-                    /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
-                    $output = $signatureVerification->post($this->api_context);
-                } catch (Exception $ex) {
+                if (empty($errors)) {
+                    $signatureVerification = new VerifyWebhookSignature();
+                    $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
+                    $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
+                    $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
+                    $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
+                    $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
+                    $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
 
-                    $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
-                    $output = false;
+                    $signatureVerification->setRequestBody($requestBody);
+                    $request = clone $signatureVerification;
+
+                    try {
+                        /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
+                        $output = $signatureVerification->post($this->api_context);
+                    } catch (Exception $ex) {
+
+                        $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
+                        $output = false;
+                    }
                 }
             } else {
                 $errors[] = 'Didnt catch PayPal Headers';
