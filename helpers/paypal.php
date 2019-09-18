@@ -135,7 +135,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#connect-with-paypal
     public function webhook_connected() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'IDENTITY.AUTHORIZATION-CONSENT.REVOKED',
         ]);
     }
@@ -143,7 +143,7 @@ class ipsCore_paypal
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#payment-orders
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#orders
     public function webhook_order() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'PAYMENT.ORDER.CANCELLED',
             'PAYMENT.ORDER.CREATED',
             'CHECKOUT.ORDER.COMPLETED',
@@ -152,7 +152,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#checkout-buyer-approval
     public function webhook_checkout_buyer_approval() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'PAYMENTS.PAYMENT.CREATED',
             'CHECKOUT.ORDER.APPROVED',
         ]);
@@ -160,7 +160,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#authorized-and-captured-payments
     public function webhook_payment() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'PAYMENT.AUTHORIZATION.CREATED',
             'PAYMENT.AUTHORIZATION.VOIDED',
             'PAYMENT.CAPTURE.COMPLETED',
@@ -173,7 +173,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#sales
     public function webhook_sale() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'PAYMENT.SALE.COMPLETED',
             'PAYMENT.SALE.DENIED',
             'PAYMENT.SALE.PENDING',
@@ -184,7 +184,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#batch-payouts
     public function webhook_batch() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'PAYMENT.PAYOUTSBATCH.DENIED',
             'PAYMENT.PAYOUTSBATCH.PROCESSING',
             'PAYMENT.PAYOUTSBATCH.SUCCESS',
@@ -202,7 +202,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#billing-plans-and-agreements
     public function webhook_billing() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'BILLING_AGREEMENTS.AGREEMENT.CREATED',
             'BILLING_AGREEMENTS.AGREEMENT.CANCELLED',
             'BILLING.PLAN.CREATED',
@@ -217,7 +217,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#invoicing
     public function webhook_invoice() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'INVOICING.INVOICE.CANCELLED',
             'INVOICING.INVOICE.CREATED',
             'INVOICING.INVOICE.PAID',
@@ -229,7 +229,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#disputes
     public function webhook_dispute() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'CUSTOMER.DISPUTE.CREATED',
             'CUSTOMER.DISPUTE.RESOLVED',
             'CUSTOMER.DISPUTE.UPDATED',
@@ -239,7 +239,7 @@ class ipsCore_paypal
 
     // SOURCE: https://developer.paypal.com/docs/integration/direct/webhooks/event-names/#merchant-onboarding
     public function webhook_merchant() {
-        $this->setup_webhook([
+        return $this->setup_webhook([
             'MERCHANT.ONBOARDING.COMPLETED',
             'MERCHANT.PARTNER-CONSENT.REVOKED',
         ]);
@@ -799,7 +799,13 @@ class ipsCore_paypal
             /** @var Array $headers */
             $headers = array_change_key_case(getallheaders(), CASE_UPPER);
 
-            if ($headers) {
+            if ($headers && !empty($headers)) {
+                foreach ($headers as $key => $header) {
+                    if (is_array($header)) {
+                        $headers[$key] = $header[0];
+                    }
+                }
+
                 $headers_test = ['PAYPAL-AUTH-ALGO', 'PAYPAL-TRANSMISSION-ID', 'PAYPAL-CERT-URL', 'PAYPAL-TRANSMISSION-SIG', 'PAYPAL-TRANSMISSION-TIME'];
 
                 foreach ($headers_test as $header_test) {
@@ -830,7 +836,7 @@ class ipsCore_paypal
                     }
                 }
             } else {
-                $errors[] = 'Didnt catch PayPal Headers';
+                $errors[] = 'Didnt catch PayPal Headers: ' . "\r\n" . json_encode($headers);
                 return false;
             }
         } else {
