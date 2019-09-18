@@ -777,6 +777,8 @@ class ipsCore_paypal
     }
 
     public function verify_response(&$errors = [], $body = false) {
+        $output = false;
+
         /**
          * Receive the entire body received from PayPal webhook.
          */
@@ -837,10 +839,7 @@ class ipsCore_paypal
         }
 
         //$errors[] = 'Error: Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'Status:' . "\r\n" . $output->getVerificationStatus() . "\r\n\r\n" . 'output:' . "\r\n" . json_encode($output);
-        if ($output) {
-            return $output;
-        }
-        return false;
+        return $output;
     }
 
 }
