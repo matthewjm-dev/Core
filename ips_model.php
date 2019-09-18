@@ -24,6 +24,8 @@ class ipsCore_model
 
     protected $current_page = 0;
 
+    public $default_fields = [];
+
     // Getters
     public function get_model_name()
     {
@@ -86,6 +88,8 @@ class ipsCore_model
             $this->model_table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
             $this->set_schema();
         }
+
+        $this->sync_fields();
     }
 
     // Methods
@@ -215,7 +219,7 @@ class ipsCore_model
         }
     }
 
-    private function get_pkey_args()
+    public function get_pkey_args()
     {
         return ['type' => 'int', 'length' => 11, 'extra' => ['NOT NULL', 'AUTO_INCREMENT', 'PRIMARY KEY']];
     }
@@ -223,16 +227,14 @@ class ipsCore_model
     public function create_table($table, $id = 'id')
     {
         $table = $this->add_prefix($table);
+
         $fields = [
             $id => $this->get_pkey_args(),
-            'created' => ['type' => 'int', 'length' => 11],
-            'modified' => ['type' => 'int', 'length' => 11],
-            'live' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
-            'removed' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
-            'locked' => ['type' => 'tinyint', 'length' => 1, 'default' => '0'],
-            'position' => ['type' => 'int', 'length' => 11, 'default' => '0'],
-            'title' => ['type' => 'text', 'length' => 255],
         ];
+
+        if ($this->default_fields && !empty($this->default_fields)) {
+            $fields = array_merge($fields, $this->default_fields);
+        }
 
         if (ipsCore::$database->create_table($table, $fields)) {
             return true;
@@ -748,6 +750,19 @@ class ipsCore_model
             }
         }
         return false;
+    }
+
+    public function sync_fields() {
+        if (isset($this->default_fields) && $this->default_fields && !empty($this->default_fields)) {
+            foreach($this->default_fields as $default_field_key => $default_field) {
+                if (!array_key_exists($default_field_key, $this->fields)) {
+                    $length = (isset($default_field['length']) ? $default_field['length'] : false);
+                    $default = (isset($default_field['default']) ? $default_field['default'] : false);
+                    $extra = (isset($default_field['extra']) ? $default_field['extra'] : false);
+                    $this->create_column($default_field_key, $default_field['type'], $length, $default, $extra);
+                }
+            }
+        }
     }
 
 }
