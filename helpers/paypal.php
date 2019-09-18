@@ -776,6 +776,18 @@ class ipsCore_paypal
         return false;
     }
 
+    public function get_webhooks(&$errors = []) {
+        $output = false;
+
+        try {
+            $output = PayPal\Api\Webhook::getAll($this->api_context);
+        } catch (Exception $ex) {
+            $errors[] = "Retrieve webhook list failed: " . json_encode($ex);
+        }
+
+        return $output;
+    }
+
     public function verify_response(&$errors = [], $body = false) {
         $output = false;
 
