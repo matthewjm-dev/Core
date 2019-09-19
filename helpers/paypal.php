@@ -780,7 +780,7 @@ class ipsCore_paypal
         $output = false;
 
         try {
-            $output = PayPal\Api\Webhook::getAll($this->api_context)['webhooks'];
+            $output = PayPal\Api\Webhook::getAll($this->api_context)->webhooks;
         } catch (Exception $ex) {
             $errors[] = "Retrieve webhook list failed: " . json_encode($ex);
         }
@@ -790,10 +790,11 @@ class ipsCore_paypal
 
     public function get_webhook_from_url($url, &$errors = []) {
         if ($webhooks = $this->get_webhooks($errors)) {
-            $webhooks = $webhooks->webhooks;
             if (!empty($webhooks)) {
                 foreach ($webhooks as $webhook) {
-                    if ($webhook->url == $url) {
+                    $url_parts = parse_url($webhook->url);
+                    $url_check = (isset($url_parts['path']) ? $url_parts['path'] : '') . (isset($url_parts['query']) ? $url_parts['query'] : '');
+                    if ($url == $url_check) {
                         return $webhook;
                     }
                 }
