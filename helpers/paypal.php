@@ -839,7 +839,7 @@ class ipsCore_paypal
                 $headers_test = ['PAYPAL-AUTH-ALGO', 'PAYPAL-TRANSMISSION-ID', 'PAYPAL-CERT-URL', 'PAYPAL-TRANSMISSION-SIG', 'PAYPAL-TRANSMISSION-TIME'];
 
                 foreach ($headers_test as $header_test) {
-                    if (!isset($headers_test[$header_test])) {
+                    if (!isset($headers[$header_test])) {
                         $errors[] = 'Header not found: ' . $header_test;
                     }
                 }
