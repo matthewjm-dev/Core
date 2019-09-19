@@ -804,7 +804,7 @@ class ipsCore_paypal
         return false;
     }
 
-    public function verify_response($webhook_id, &$errors = [], $body = false) {
+    public function verify_response($webhook_id, &$errors = [], $body = false, $headers = false) {
         $output = false;
 
         /**
@@ -825,7 +825,9 @@ class ipsCore_paypal
              * All header keys as UPPERCASE, but recieve the header key as the example array, First letter as UPPERCASE
              */
             /** @var Array $headers */
-            $headers = array_change_key_case(getallheaders(), CASE_UPPER);
+            if (!$headers) {
+                $headers = array_change_key_case(getallheaders(), CASE_UPPER);
+            }
 
             if ($headers && !empty($headers)) {
                 foreach ($headers as $key => $header) {
