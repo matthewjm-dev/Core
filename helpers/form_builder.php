@@ -222,8 +222,16 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function start_section($name)
+    public function start_section($name, $wrapper = false)
     {
+    	if ($wrapper) {
+			$this->fields['section_start_wrapper_' . $name] = [
+				'name' => $name . '_wrapper',
+				'placeholder' => '<div id="' . $name . '-wrapper" class="form-section-wrapper">',
+				'type' => 'html',
+			];
+		}
+
         $this->fields['section_start_' . $name] = [
             'name' => $name,
             'type' => 'section_start',
@@ -236,11 +244,19 @@ class ipsCore_form_builder
     }
 
     public function end_section($name)
-    {
+    {    	
         $this->fields['section_end_' . $name] = [
             'name' => $name,
             'type' => 'section_end',
         ];
+
+		if (isset($this->fields['section_start_wrapper_' . $name])) {
+			$this->fields['section_end_wrapper_' . $name] = [
+				'name' => $name . '_wrapper',
+				'placeholder' => '</div>',
+				'type' => 'html',
+			];
+		}
     }
 
     public function render_section_end($field, $args)
