@@ -227,7 +227,7 @@ class ipsCore_form_builder
     	if ($wrapper) {
 			$this->fields['section_start_wrapper_' . $name] = [
 				'name' => $name . '_wrapper',
-				'placeholder' => '<div id="' . $name . '-wrapper" class="form-section-wrapper">',
+				'placeholder' => '<div id="' . $name . '-wrapper" class="form-section-wrapper"><div>',
 				'type' => 'html',
 			];
 		}
@@ -253,7 +253,7 @@ class ipsCore_form_builder
 		if (isset($this->fields['section_start_wrapper_' . $name])) {
 			$this->fields['section_end_wrapper_' . $name] = [
 				'name' => $name . '_wrapper',
-				'placeholder' => '</div>',
+				'placeholder' => '</div></div><div id="' . $name . '-shadow" class="form-section-shadow"></div>',
 				'type' => 'html',
 			];
 		}
