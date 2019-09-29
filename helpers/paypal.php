@@ -859,10 +859,9 @@ class ipsCore_paypal
                     try {
                         /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
                         $output = $signatureVerification->post($this->api_context);
-                    } catch (Exception $ex) {
 
+                    } catch (Exception $ex) {
                         $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
-                        $output = false;
                     }
                 }
             } else {
@@ -873,6 +872,10 @@ class ipsCore_paypal
             $errors[] = 'Request was empty';
             return false;
         }
+
+        if ($output !== false) {
+        	return $output->getVerificationStatus();
+		}
 
         //$errors[] = 'Error: Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'Status:' . "\r\n" . $output->getVerificationStatus() . "\r\n\r\n" . 'output:' . "\r\n" . json_encode($output);
         return $output;
