@@ -849,7 +849,7 @@ class ipsCore_paypal
                     $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
                     $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
                     $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-                    $signatureVerification->setWebhookId("9XL90610J3647323C"); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
+                    $signatureVerification->setWebhookId($webhook_id); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
                     $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
                     $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
 
@@ -859,10 +859,9 @@ class ipsCore_paypal
                     try {
                         /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
                         $output = $signatureVerification->post($this->api_context);
+						$errors[] = $output;
                     } catch (Exception $ex) {
-
                         $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
-                        $output = false;
                     }
                 }
             } else {
@@ -873,6 +872,10 @@ class ipsCore_paypal
             $errors[] = 'Request was empty';
             return false;
         }
+
+        if ($output !== false) {
+        	return $output->getVerificationStatus();
+		}
 
         //$errors[] = 'Error: Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'Status:' . "\r\n" . $output->getVerificationStatus() . "\r\n\r\n" . 'output:' . "\r\n" . json_encode($output);
         return $output;
