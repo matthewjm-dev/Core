@@ -755,7 +755,7 @@ class ipsCore_model
     public function sync_fields() {
         if (isset($this->default_fields) && $this->default_fields && !empty($this->default_fields)) {
             foreach($this->default_fields as $default_field_key => $default_field) {
-                if (!array_key_exists($default_field_key, $this->fields)) {
+                if (isset($this->fields) && !array_key_exists($default_field_key, $this->fields)) {
                     $length = (isset($default_field['length']) ? $default_field['length'] : false);
                     $default = (isset($default_field['default']) ? $default_field['default'] : false);
                     $extra = (isset($default_field['extra']) ? $default_field['extra'] : false);
