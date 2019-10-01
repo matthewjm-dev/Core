@@ -1,4 +1,6 @@
-<?php // IPS-CORE Controller
+<?php /**
+ * IPS-CORE Controller
+ */
 
 class ipsCore_controller
 {
