@@ -859,7 +859,6 @@ class ipsCore_paypal
                     try {
                         /** @var \PayPal\Api\VerifyWebhookSignatureResponse $output */
                         $output = $signatureVerification->post($this->api_context);
-						$errors[] = $output;
                     } catch (Exception $ex) {
                         $errors[] = 'Validate Received Webhook Event' . "\r\n\r\n" . 'Request JSON:' . "\r\n" . $request->toJSON() . "\r\n\r\n" . 'ex:' . "\r\n" . json_encode($ex);
                     }
