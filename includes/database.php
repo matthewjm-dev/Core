@@ -118,13 +118,13 @@ class ipsCore_database
 
     public function does_table_exist($table)
     {
-        $sql = 'SELECT 1 FROM ' . $this->validate($table) . ' LIMIT 1';
+        $sql = "SHOW TABLES LIKE '" . $this->validate($table) . "'";
 
-        if ($this->query($sql) !== false) {
-            return true;
+        if (empty($this->query($sql, [], true))) {
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     public function get_table_schema($table)

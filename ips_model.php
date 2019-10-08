@@ -192,28 +192,35 @@ class ipsCore_model
         return $this->query_where;
     }
 
-    public function set_schema()
+    public function set_schema($attempted = false)
     {
         $this->fields = [];
 
-        if ($this->model_table && ipsCore::$database->does_table_exist($this->model_table)) {
-            $fields = ipsCore::$database->get_table_schema($this->get_model_table());
+        if ($this->model_table) {
+            if (ipsCore::$database->does_table_exist($this->model_table)) {
+                $fields = ipsCore::$database->get_table_schema($this->get_model_table());
 
-            foreach ($fields as $field) {
-                $name = $field['Field'];
-                $type = $field['Type'];
-                $default = $field['Default'];
-                $extra = $field['Extra'];
+                foreach ($fields as $field) {
+                    $name = $field['Field'];
+                    $type = $field['Type'];
+                    $default = $field['Default'];
+                    $extra = $field['Extra'];
 
-                $this->$name = $default;
-                $this->fields[$name] = [
-                    'type' => $type,
-                    'default' => $default,
-                    'extra' => $extra
-                ];
+                    $this->$name = $default;
+                    $this->fields[$name] = [
+                        'type' => $type,
+                        'default' => $default,
+                        'extra' => $extra
+                    ];
 
-                if ($field['Key'] == 'PRI') {
-                    $this->set_pkey($field['Field']);
+                    if ($field['Key'] == 'PRI') {
+                        $this->set_pkey($field['Field']);
+                    }
+                }
+            } else {
+                if (!empty($this->model_pkey) && !$attempted) {
+                    $this->create_table($this->model_table, $this->model_pkey);
+                    $this->set_schema(true); // Prevent infinite loop if it fails to create table
                 }
             }
         }
@@ -308,102 +315,6 @@ class ipsCore_model
         }
         return false;
     }
-
-    /*public function get_all_data($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
-    {
-        $items = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'order' => $order, 'limit' => $limit, 'join' => $this->prefix_join($join)]);
-
-        if (!empty($items)) {
-            return $items;
-        }
-        return false;
-    }*/
-
-    /*public function get_all($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
-    {
-        $items = $this->get_all_data($where, $order, $limit, $join);
-        $model = get_class($this);
-        $objects = [];
-
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $object = new $model($this->get_model_name(), $this->get_model_table());
-                foreach ($item as $item_data_key => $item_data) {
-                    $object->{$item_data_key} = $item_data;
-                }
-                $objects[] = $object;
-            }
-        }
-
-        if (!empty($objects)) {
-            return $objects;
-        }
-        return false;
-    }*/
-
-    /*public function get_all_array($where = false, $order = false, $limit = false, $join = false) // TODO: remove old method
-    {
-        $items = $this->get_all_data($where, $order, $limit, $join);
-        $arrays = [];
-
-        if (!empty($items)) {
-            foreach ($items as $item) {
-                $array = [];
-                foreach ($item as $item_data_key => $item_data) {
-                    $array[$item_data_key] = $item_data;
-                }
-                $arrays[] = $array;
-            }
-        }
-
-        if (!empty($arrays)) {
-            return $arrays;
-        }
-        return [];
-    }*/
-
-    /*public function get($where) // TODO: remove old method
-    {
-        if (!is_array($where)) {
-            $where = [$this->get_pkey() => $where];
-        }
-
-        $item = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'limit' => 1]);
-
-        if (!empty($item)) {
-            $item = $item[0];
-            $model = get_class($this);
-
-            $object = new $model($this->get_model_name(), $this->get_model_table());
-            foreach ($item as $item_data_key => $item_data) {
-                $object->{$item_data_key} = $item_data;
-            }
-
-            return $object;
-        }
-        return false;
-    }*/
-
-    /*public function retrieve($where, $order = false, $join = false) // TODO: remove old method
-    {
-        if (!is_array($where)) {
-            $where = [$this->get_pkey() => $where];
-        }
-
-        if (isset($join['table'])) {
-            $join['table'] = $this->add_prefix($join['table']);
-        }
-
-        $item = ipsCore::$database->select($this->get_model_table(), ['where' => $this->prefix_where($where), 'order' => $order, 'join' => $join])[0];
-
-        if ($item) {
-            foreach ($item as $item_data_key => $item_data) {
-                $this->{$item_data_key} = $item_data;
-            }
-            return true;
-        }
-        return false;
-    }*/
 
     /* Query Functions */
 
@@ -672,17 +583,6 @@ class ipsCore_model
         }
         return false;
     }
-
-    /*public function count($where = false, $join = false)
-    {
-        $count_str = 'COUNT(*)';
-        $count = ipsCore::$database->select($this->get_model_table(), ['fields' => $count_str, 'where' => $this->prefix_where($where), 'join' => $this->prefix_join($join)]);
-
-        if (!empty( $count ) ) {
-            return $count[0][$count_str];
-        }
-        return false;
-    }*/
 
     public function count()
     {
