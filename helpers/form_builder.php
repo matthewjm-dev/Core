@@ -398,7 +398,9 @@ class ipsCore_form_builder
     /* WYSIWYG Editor */
     public function add_editor($name, $label, array $options = [])
     {
-        $options['classes'] = $options['classes'] . ' editor';
+        if (isset($options['classes'])) {
+            $options['classes'] = $options['classes'] . ' editor';
+        }
         $this->add_field($name, $label, 'editor', $options);
     }
 
