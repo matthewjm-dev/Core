@@ -370,9 +370,9 @@ class ipsCore_model
         return $this;
     }
 
-    public function where_find() {
-        $args = $this->add_operator('FIND', func_get_args());
-        $this->addwheretoquery(['fields' => $args]);
+    public function and_where_in() {
+        $args = $this->add_operator('IN', func_get_args());
+        $this->addwheretoquery(['operator' => 'IN', 'fields' => $args]);
 
         return $this;
     }
@@ -384,16 +384,12 @@ class ipsCore_model
         return $this;
     }
 
-    public function or_where_find() {
-        $args = $this->add_operator('FIND', func_get_args());
-        $this->addwheretoquery(['binding' => 'OR', 'fields' => $args]);
-
-        return $this;
-    }
-
-    public function and_where_in() {
-        $args = $this->add_operator('IN', func_get_args());
-        $this->addwheretoquery(['operator' => 'IN', 'fields' => $args]);
+    public function where_find() {
+        $wheres = ['fields' => $this->add_operator('FIND', func_get_args())];
+        if (!empty($this->query_where)) {
+            $wheres = array_merge($wheres, ['binding' => 'AND']);
+        }
+        $this->addwheretoquery($wheres);
 
         return $this;
     }
@@ -401,6 +397,13 @@ class ipsCore_model
     public function and_where_find() {
         $args = $this->add_operator('FIND', func_get_args());
         $this->addwheretoquery(['binding' => 'AND', 'fields' => $args]);
+
+        return $this;
+    }
+
+    public function or_where_find() {
+        $args = $this->add_operator('FIND', func_get_args());
+        $this->addwheretoquery(['binding' => 'OR', 'fields' => $args]);
 
         return $this;
     }
