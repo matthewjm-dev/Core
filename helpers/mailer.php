@@ -17,7 +17,11 @@ class ipsCore_mailer
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
         $headers .= 'From: ' . $from . "\r\n";
 
-        mail($to, $subject, $content, $headers);
+        if (mail($to, $subject, $content, $headers)) {
+        return true;
+    }
+
+        return false;
     }
 
 }
