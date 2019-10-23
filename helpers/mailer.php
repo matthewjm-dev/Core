@@ -5,6 +5,10 @@ class ipsCore_mailer
 
     public function send($to, $subject, $content, $from = false)
     {
+        if (is_array($to)) {
+            $to = implode(',', $to);
+        }
+
         if (!$from) {
             $from = ipsCore::$app->mailer['from'];
         }

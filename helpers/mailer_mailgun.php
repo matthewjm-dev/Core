@@ -51,6 +51,10 @@ class ipsCore_mailer_mailgun
     public function send($to, $subject, $content, $from = false, $args = [])
     {
         if ($this->mailgun) {
+            if (is_array($to)) {
+                $to = implode(',', $to);
+            }
+
             if (!$from) {
                 $from = $this->from;
             }
