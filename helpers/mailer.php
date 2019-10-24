@@ -18,8 +18,8 @@ class ipsCore_mailer
         $headers .= 'From: ' . $from . "\r\n";
 
         if (mail($to, $subject, $content, $headers)) {
-        return true;
-    }
+            return true;
+        }
 
         return false;
     }
