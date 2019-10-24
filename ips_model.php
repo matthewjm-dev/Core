@@ -620,12 +620,11 @@ class ipsCore_model
         return false;
     }
 
-    public function save()
+    public function save($insert = false)
     {
         $fields = [];
         $where = [];
         $first = true;
-        $insert = false;
 
         foreach ($this->fields as $field_key => $field) {
             if ($first) {
@@ -633,7 +632,9 @@ class ipsCore_model
                 if ($this->{$field_key} !== false && $this->{$field_key} !== null) {
                     $where[$field_key] = $this->{$field_key};
                 } else {
-                    $insert = $field_key;
+                    if (!$insert) {
+                        $insert = $field_key;
+                    }
                 }
             } else {
                 $fields[$field_key] = $this->{$field_key};
