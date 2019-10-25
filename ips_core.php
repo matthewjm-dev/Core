@@ -168,7 +168,7 @@ class ipsCore
         if (!$app) {
             $app = ipsCore::$app->get_directory();
         } else {
-            $app = ipsCore::get_app_dir_from_name($app);
+            $app = ipsCore::get_app_dir_by_name($app);
         }
 
         if (!is_array($controllers)) {
@@ -194,7 +194,7 @@ class ipsCore
         if (!$app) {
             $app = ipsCore::$app->get_directory();
         } else {
-            $app = ipsCore::get_app_dir_from_name($app);
+            $app = ipsCore::get_app_dir_by_name($app);
         }
 
         if (!is_array($models)) {
@@ -230,7 +230,7 @@ class ipsCore
         if (!$app) {
             $app = ipsCore::$app->get_directory();
         } else {
-            $app = ipsCore::get_app_dir_from_name($app);
+            $app = ipsCore::get_app_dir_by_name($app);
         }
 
         if (!is_array($helpers)) {
@@ -443,12 +443,33 @@ class ipsCore
         self::$mailer = new $mailer();
     }
 
-    public static function get_app_dir_from_name($name) {
+    public static function get_app_by_name($name) {
         $name = strtolower($name);
         foreach (ipsCore::$apps as $app) {
             if (strtolower($app->get_name()) == $name) {
-                return $app->get_directory();
+                return $app;
             }
+        }
+        return false;
+    }
+
+    public static function get_app_dir_by_name($name) {
+        if ($app = self::get_app_by_name($name)) {
+            return $app->get_directory();
+        }
+        return false;
+    }
+
+    public static function get_app_uri_by_name($name) {
+        if ($app = self::get_app_by_name($name)) {
+            return $app->get_uri();
+        }
+        return false;
+    }
+
+    public static function get_app_uri_slashed_by_name($name) {
+        if ($app = self::get_app_by_name($name)) {
+            return $app->get_uri_slashed();
         }
         return false;
     }

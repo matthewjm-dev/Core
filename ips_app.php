@@ -30,7 +30,7 @@ class ipsCore_app
         }
         if (isset($app['app']['uri'])) {
             $this->uri = $app['app']['uri'];
-            $this->uri_slashed = '/' . $app['app']['uri'] . '/';
+            $this->uri_slashed = '/' . $app['app']['uri'] . ($app['app']['uri'] ? '/' : '');
         } else {
             ipsCore::add_error('App.ini missing: App > Uri', true);
         }
