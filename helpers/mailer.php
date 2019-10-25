@@ -17,11 +17,15 @@ class ipsCore_mailer
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
         $headers .= 'From: ' . $from . "\r\n";
 
-        if (mail($to, $subject, $content, $headers)) {
-            return true;
+        if (!ipsCore::$app->mailer['suspend_mail']) {
+            if (mail($to, $subject, $content, $headers)) {
+                return true;
+            }
+
+            return false;
         }
 
-        return false;
+        return true;
     }
 
 }

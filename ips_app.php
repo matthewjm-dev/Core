@@ -113,6 +113,15 @@ class ipsCore_app
                     unset($configs['mailer_from']);
                 }
 
+                if (isset($configs['suspend_mail'])) {
+                    if ($configs['suspend_mail']) {
+                        $this->mailer['suspend_mail'] = true;
+                    } else {
+                        $this->mailer['suspend_mail'] = false;
+                    }
+                    unset($configs['suspend_mail']);
+                }
+
                 foreach($configs as $mail_config => $mail_config_value) {
                     $this->mailer[$mail_config] = $mail_config_value;
                 }
@@ -123,6 +132,9 @@ class ipsCore_app
             }
             if (!$this->mailer['from']) {
                 $this->mailer['from'] = 'Tester <test@example.com>';
+            }
+            if (!isset($this->mailer['suspend_mail'])) {
+                $this->mailer['suspend_mail'] = true;
             }
         } else {
             ipsCore::add_error('App Config (apps/config-' . $this->get_lower_name() . '.ini) missing', true);
