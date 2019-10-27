@@ -205,6 +205,7 @@ class ipsCore_form_builder
                 'comment' => (isset($options['comment']) ? $options['comment'] : false),
                 'classes' => (isset($options['classes']) ? $options['classes'] : false),
                 'fieldset_classes' => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] : ''),
+                'disabled' => (isset($options['disabled']) && $options['disabled'] ? true : false),
             ];
         } else {
             foreach ($errors as $error) {
@@ -770,7 +771,7 @@ class ipsCore_form_builder
 
     public function render_submit($field, $args)
     {
-        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . $field['label'] . '</button></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['name'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" ' . $args['field_attributes'] . '>' . $field['label'] . '</button></fieldset>');
     }
 
     public function render_fields()
@@ -792,7 +793,6 @@ class ipsCore_form_builder
             if (isset($field['required']) && $field['required']) {
                 $field['fieldset_classes'] .= ' required';
             }
-
 
             $field_classes = '';
             if (isset($field['classes'])) {
@@ -826,6 +826,11 @@ class ipsCore_form_builder
                 $field_value = ' value="' . htmlentities($field_default) . '"';
             }
 
+            $field_attributes = '';
+			if (isset($field['disabled']) && $field['disabled']) {
+				$field_attributes .= ' disabled';
+			}
+
             $field_comment = '';
             if (isset($field['comment']) && $field['comment']) {
                 $field_comment = '<p>' . $field['comment'] . '</p>';
@@ -835,12 +840,14 @@ class ipsCore_form_builder
             if (!method_exists($this, $render_function)) {
                 $render_function = 'render_text';
             }
+
             $args = [
 				'field_classes' => $field_classes,
 				'fieldset_classes' => $fieldset_classes,
 				'field_label' => $field_label,
 				'field_default' => $field_default,
 				'field_value' => $field_value,
+				'field_attributes' => $field_attributes,
 				'field_comment' => $field_comment,
 			];
             $this->{$render_function}($field, $args );
