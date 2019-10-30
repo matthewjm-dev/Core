@@ -11,6 +11,10 @@ class ipsCore
     public static $uri_current;
     public static $environment;
 
+    public static $var_get;
+    public static $var_post;
+    public static $var_request;
+
     public static $path_base;
     public static $path_core;
     public static $path_core_includes;
@@ -83,6 +87,10 @@ class ipsCore
         require_once(self::$path_core . 'ips_router.php');
         require_once(self::$path_core . 'ips_helper.php');
 
+        self::$var_get = (isset($_GET) && !empty($_GET) ? $_GET : []);
+        self::$var_post = (isset($_POST) && !empty($_POST) ? $_POST : []);
+        self::$var_request = (isset($_REQUEST) && !empty($_REQUEST) ? $_REQUEST : []);
+
         self::get_includes();
         /*self::find_helpers(self::$path_core_helpers);
         self::find_helpers(self::$path_app_helpers);*/
@@ -95,6 +103,28 @@ class ipsCore
     }
 
     // METHODS
+    public static function get_var($name, $type = false) {
+        if (!$type) {
+            if (isset(self::$var_post[$name])) {
+                return self::$var_post[$name];
+            } elseif (isset(self::$var_get[$name])) {
+                return self::$var_get[$name];
+            } elseif (isset(self::$var_request[$name])) {
+                return self::$var_request[$name];
+            }
+        } else {
+            if ($type == 'post' && isset(self::$var_post[$name])) {
+                return self::$var_post[$name];
+            } elseif ($type == 'get' && isset(self::$var_get[$name])) {
+                return self::$var_get[$name];
+            } elseif ($type == 'request' && isset(self::$var_request[$name])) {
+                return self::$var_request[$name];
+            }
+        }
+
+        return false;
+    }
+
     public static function set_environment()
     {
     	$env_file = ipsCore::$path_base . '/environment.ini';
