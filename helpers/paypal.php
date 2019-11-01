@@ -776,6 +776,18 @@ class ipsCore_paypal
         return false;
     }
 
+    public function update_billing() {
+
+    }
+
+    public function cancel_billing() {
+
+    }
+
+    public function suspend_billing() {
+
+    }
+
     public function get_webhooks(&$errors = []) {
         $output = false;
 
