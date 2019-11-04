@@ -70,6 +70,14 @@ class ipsCore_model
         $this->model_pkey = $pkey;
     }
 
+    public function set_prop($property, $value) {
+        if ($this->get_prop($property)) {
+            $this->{$property} = $value;
+            return true;
+        }
+        return false;
+    }
+
     // Construct
     public function __construct($name, $table = ' ')
     {
