@@ -558,13 +558,18 @@ class ipsCore_paypal
         $args = array_merge([
             'title' => false,
             'description' => false,
-            'payment_title' => false,
-            'frequency' => false,
-            'interval' => false,
-            'cycles' => false,
+            'type' => 'INFINITE', // Options: FIXED, INFINITE
+            'payment_type' => 'REGULAR', // Options: REGULAR
+            'payment_title' => false, // e.g. "Regular Payments"
+            'payment_frequency' => false, // Options: DAY, MONTH, YEAR
+            'payment_interval' => false,
+            'payment_cycles' => false,
             'amount_total' => false,
             'amount_shipping' => false,
-            'amount_setupfee' => false
+            'amount_setupfee' => false,
+            'merchant_autobill' => 'yes', // Options: yes, no
+            'merchant_failaction' => 'CONTINUE', // Options: CONTINUE
+            'merchant_failattempts' => 0,
         ], $args);
 
         if (!$args['title']) {
@@ -577,28 +582,28 @@ class ipsCore_paypal
             $errors[] = $error;
         }
 
-        if (!$args['payment_title']) { // e.g. "Regular Payments"
+        if (!$args['payment_title']) {
             $error = 'Billing setup requires a Payment Title (setup_billing)';
             $errors[] = $error;
         }
 
-        if (!$args['frequency']) { // e.g. "MONTH"
+        if (!$args['payment_frequency']) {
             $error = 'Billing setup requires a Frequency (setup_billing)';
             $errors[] = $error;
         }
 
-        if ($args['interval'] === false) {
+        if ($args['payment_interval'] === false) {
             $error = 'Billing setup requires an Interval (setup_billing)';
             $errors[] = $error;
-        } elseif (!is_numeric($args['interval'])) {
+        } elseif (!is_numeric($args['payment_interval'])) {
             $error = 'Billing setup Interval must be a number (setup_billing)';
             $errors[] = $error;
         }
 
-        if ($args['cycles'] === false) {
+        if ($args['payment_cycles'] === false) {
             $error = 'Billing setup requires a Cycle (setup_billing)';
             $errors[] = $error;
-        } elseif (!is_numeric($args['cycles'])) {
+        } elseif (!is_numeric($args['payment_cycles'])) {
             $error = 'Billing setup Cycle must be a number (setup_billing)';
             $errors[] = $error;
         }
@@ -620,18 +625,18 @@ class ipsCore_paypal
         $plan = new Plan();
         $plan->setName($args['title'])
             ->setDescription($args['description'])
-            ->setType('fixed');
+            ->setType($args['type']);
 
         // Set billing plan definitions
         $paymentDefinition = new PaymentDefinition();
         $paymentDefinition->setName($args['payment_title'])
-            ->setType('REGULAR')
-            ->setFrequency($args['frequency'])
-            ->setFrequencyInterval($args['interval'])
+            ->setType($args['payment_type'])
+            ->setFrequency($args['payment_frequency'])
+            ->setFrequencyInterval($args['payment_interval'])
             ->setAmount(new Currency(['value' => $args['amount_total'], 'currency' => $this->currency]));
 
-        if ($args['cycles']) {
-            $paymentDefinition->setCycles($args['cycles']);
+        if ($args['payment_cycles']) {
+            $paymentDefinition->setCycles($args['payment_cycles']);
         }
 
         if ($args['amount_shipping']) {
@@ -649,9 +654,9 @@ class ipsCore_paypal
         $merchantPreferences = new MerchantPreferences();
         $merchantPreferences->setReturnUrl($this->url_return)
             ->setCancelUrl($this->url_cancel)
-            ->setAutoBillAmount('yes')
-            ->setInitialFailAmountAction('CONTINUE')
-            ->setMaxFailAttempts('0');
+            ->setAutoBillAmount($args['merchant_autobill'])
+            ->setInitialFailAmountAction($args['merchant_failaction'])
+            ->setMaxFailAttempts($args['merchant_failattempts']);
 
         if ($args['amount_setupfee']) {
             $merchantPreferences->setSetupFee(new Currency([
@@ -665,10 +670,11 @@ class ipsCore_paypal
 
         if (empty($errors)) {
             if (!$this->debug) {
-                //create plan
+                // Create plan
                 try {
                     $createdPlan = $plan->create($this->api_context);
 
+                    // Activate plan
                     try {
                         $patch = new Patch();
                         $value = new PayPalModel('{"state":"ACTIVE"}');
@@ -684,18 +690,22 @@ class ipsCore_paypal
                         return $plan->getId();
 
                     } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                        $errors[] = 'PayPal Exception in Activate plan';
                         $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
                         $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
                         return false;
                     } catch (Exception $ex) {
+                        $errors[] = 'Exception in Activate plan';
                         $errors[] = 'Exception Error: ' . json_encode($ex);
                         return false;
                     }
                 } catch (PayPal\Exception\PayPalConnectionException $ex) {
+                    $errors[] = 'PayPal Exception in Create plan';
                     $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
                     $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
                     return false;
                 } catch (Exception $ex) {
+                    $errors[] = 'Exception in Create plan';
                     $errors[] = 'Exception Error: ' . json_encode($ex);
                     return false;
                 }
