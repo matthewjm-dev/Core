@@ -525,7 +525,7 @@ class ipsCore_paypal
         if (!$amount_total) {
             ipsCore::add_error('Order Amount Total is required (capture_order)', true);
         } elseif (!is_numeric($amount_total)) {
-            ipsCore::add_error('Order Amount Total must be a number (setup_billing)', true);
+            ipsCore::add_error('Order Amount Total must be a number (setup_billing_plan)', true);
         }
 
         $amount = new Amount();
@@ -552,7 +552,7 @@ class ipsCore_paypal
         return true;
     }
 
-    public function setup_billing($args, &$errors = []) {
+    public function setup_billing_plan($args, &$errors = []) {
         $this->webhook_billing();
 
         $args = array_merge([
@@ -573,51 +573,51 @@ class ipsCore_paypal
         ], $args);
 
         if (!$args['title']) {
-            $error = 'Billing setup requires a Title (setup_billing)';
+            $error = 'Billing setup requires a Title (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if (!$args['description']) {
-            $error = 'Billing setup requires a Description (setup_billing)';
+            $error = 'Billing setup requires a Description (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if (!$args['payment_title']) {
-            $error = 'Billing setup requires a Payment Title (setup_billing)';
+            $error = 'Billing setup requires a Payment Title (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if (!$args['payment_frequency']) {
-            $error = 'Billing setup requires a Frequency (setup_billing)';
+            $error = 'Billing setup requires a Frequency (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if ($args['payment_interval'] === false) {
-            $error = 'Billing setup requires an Interval (setup_billing)';
+            $error = 'Billing setup requires an Interval (setup_billing_plan)';
             $errors[] = $error;
         } elseif (!is_numeric($args['payment_interval'])) {
-            $error = 'Billing setup Interval must be a number (setup_billing)';
+            $error = 'Billing setup Interval must be a number (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if ($args['payment_cycles'] === false) {
-            $error = 'Billing setup requires a Cycle (setup_billing)';
+            $error = 'Billing setup requires a Cycle (setup_billing_plan)';
             $errors[] = $error;
         } elseif (!is_numeric($args['payment_cycles'])) {
-            $error = 'Billing setup Cycle must be a number (setup_billing)';
+            $error = 'Billing setup Cycle must be a number (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if ($args['amount_total'] === false) {
-            $error = 'Billing setup requires a Amount Total (setup_billing)';
+            $error = 'Billing setup requires a Amount Total (setup_billing_plan)';
             $errors[] = $error;
         } elseif (!is_numeric($args['amount_total'])) {
-            $error = 'Billing setup Amount Total must be a number (setup_billing)';
+            $error = 'Billing setup Amount Total must be a number (setup_billing_plan)';
             $errors[] = $error;
         }
 
         if ($args['amount_setupfee'] !== false && !is_numeric($args['amount_total'])) {
-            $error = 'Billing setup Fee must be a number (setup_billing)';
+            $error = 'Billing setup Fee must be a number (setup_billing_plan)';
             $errors[] = $error;
         }
 
@@ -717,7 +717,7 @@ class ipsCore_paypal
         return true;
     }
 
-    public function execute_billing($args, &$errors = []) {
+    public function execute_billing_plan($args, &$errors = []) {
         $args = array_merge([
             'plan_id' => false,
             'start_time' => date(DATE_ISO8601, strtotime('+1 day')), // ISO 8601
@@ -805,6 +805,34 @@ class ipsCore_paypal
     public function suspend_billing() {
 
     }
+
+    /*public function create_product() {
+        $product = new Product();
+
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, 'https://api.sandbox.paypal.com/v1/catalogs/products');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "{\n  \"name\": \"Video Streaming Service\",\n  \"description\": \"Video streaming service\",\n  \"type\": \"SERVICE\",\n  \"category\": \"SOFTWARE\",\n  \"image_url\": \"https://example.com/streaming.jpg\",\n  \"home_url\": \"https://example.com/home\"\n}");
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: Bearer Access-Token';
+        $headers[] = 'Paypal-Request-Id: PRODUCT-18062019-001';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close ($ch);
+    }
+
+    public function update_product() {
+
+    }*/
 
     public function get_webhooks(&$errors = []) {
         $output = false;
