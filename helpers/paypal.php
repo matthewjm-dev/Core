@@ -587,7 +587,7 @@ class ipsCore_paypal
             $errors[] = $error;
         }
 
-        if (!$args['interval']) {
+        if ($args['interval'] === false) {
             $error = 'Billing setup requires an Interval (setup_billing)';
             $errors[] = $error;
         } elseif (!is_numeric($args['interval'])) {
@@ -595,7 +595,7 @@ class ipsCore_paypal
             $errors[] = $error;
         }
 
-        if (!$args['cycles']) {
+        if ($args['cycles'] === false) {
             $error = 'Billing setup requires a Cycle (setup_billing)';
             $errors[] = $error;
         } elseif (!is_numeric($args['cycles'])) {
@@ -603,11 +603,16 @@ class ipsCore_paypal
             $errors[] = $error;
         }
 
-        if (!$args['amount_total']) {
+        if ($args['amount_total'] === false) {
             $error = 'Billing setup requires a Amount Total (setup_billing)';
             $errors[] = $error;
         } elseif (!is_numeric($args['amount_total'])) {
             $error = 'Billing setup Amount Total must be a number (setup_billing)';
+            $errors[] = $error;
+        }
+
+        if ($args['amount_setupfee'] !== false && !is_numeric($args['amount_total'])) {
+            $error = 'Billing setup Fee must be a number (setup_billing)';
             $errors[] = $error;
         }
 
