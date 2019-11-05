@@ -1010,10 +1010,10 @@ class ipsCore_form_builder
         if (!empty($options)) {
             foreach ($options as $option) {
                 if ($option && $option != '' && $option != ' ') {
-                    $option = explode(' : ', $option);
+                    $option = explode(':', $option);
                     $return[] = [
-                        'value' => $option[0],
-                        'text' => $option[1],
+                        'value' => trim($option[0], ' '),
+                        'text' => trim($option[1], ' '),
                     ];
                 }
             }
