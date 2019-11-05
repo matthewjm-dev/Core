@@ -595,7 +595,10 @@ class ipsCore_paypal
             $errors[] = $error;
         }
 
-        if (!$args['cycles'] || !is_numeric($args['cycles'])) {
+        if (!$args['cycles']) {
+            $error = 'Billing setup requires a Cycle (setup_billing)';
+            $errors[] = $error;
+        } elseif (!is_numeric($args['cycles'])) {
             $error = 'Billing setup Cycle must be a number (setup_billing)';
             $errors[] = $error;
         }
