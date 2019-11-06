@@ -806,8 +806,8 @@ class ipsCore_paypal
 
     }
 
-    /*public function create_product() {
-        $product = new Product();
+    public function create_product() {
+        /*$product = new Product();
 
 
         $ch = curl_init();
@@ -827,12 +827,14 @@ class ipsCore_paypal
         if (curl_errno($ch)) {
             echo 'Error:' . curl_error($ch);
         }
-        curl_close ($ch);
+        curl_close ($ch);*/
+
+        return 'prod-t35t';
     }
 
     public function update_product() {
 
-    }*/
+    }
 
     public function get_webhooks(&$errors = []) {
         $output = false;
