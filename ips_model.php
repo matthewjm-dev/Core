@@ -71,11 +71,8 @@ class ipsCore_model
     }
 
     public function set_prop($property, $value) {
-        if ($this->get_prop($property)) {
-            $this->{$property} = $value;
-            return true;
-        }
-        return false;
+        $this->{$property} = $value;
+        return true;
     }
 
     // Construct

@@ -690,23 +690,19 @@ class ipsCore_paypal
                         return $plan->getId();
 
                     } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                        $errors[] = 'PayPal Exception in Activate plan';
-                        $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
-                        $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
+                        $errors[] = 'PayPal Activate plan Exception Code: ' . $ex->getCode();
+                        $errors[] = 'PayPal Activate plan Exception Data: ' . json_encode($ex->getData());
                         return false;
                     } catch (Exception $ex) {
-                        $errors[] = 'Exception in Activate plan';
-                        $errors[] = 'Exception Error: ' . json_encode($ex);
+                        $errors[] = 'Exception in Activate plan Error: ' . json_encode($ex);
                         return false;
                     }
                 } catch (PayPal\Exception\PayPalConnectionException $ex) {
-                    $errors[] = 'PayPal Exception in Create plan';
-                    $errors[] = 'PayPal Exception Code: ' . $ex->getCode();
-                    $errors[] = 'PayPal ExceptionData: ' . json_encode($ex->getData());
+                    $errors[] = 'PayPal Create plan Exception Code: ' . $ex->getCode();
+                    $errors[] = 'PayPal Create plan Exception Data: ' . json_encode($ex->getData());
                     return false;
                 } catch (Exception $ex) {
-                    $errors[] = 'Exception in Create plan';
-                    $errors[] = 'Exception Error: ' . json_encode($ex);
+                    $errors[] = 'Exception in Create plan Error: ' . json_encode($ex);
                     return false;
                 }
             }
