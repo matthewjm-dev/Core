@@ -716,7 +716,8 @@ class ipsCore_paypal
     public function create_plan_agreement($args, &$errors = []) {
         $args = array_merge([
             'plan_id' => false,
-            'start_time' => date(DATE_ISO8601, time()), // ISO 8601 // strtotime('+1 day')
+            'start_time' => false, // Start at this time (ISO 8601 format)
+            'start_in' => false, // Start In this amount of time (in seconds) from now
             'title' => false,
             'description' => false,
             'shipping_address' => false,
@@ -730,6 +731,14 @@ class ipsCore_paypal
         if (!isset($args['title'])) {
             $error = 'Title is required';
             $errors[] = $error;
+        }
+
+        if (!$args['start_time']) {
+            if (!$args['start_in']) {
+                $args['start_time'] = date(DATE_ISO8601, time() + 300); // Default to 5 minutes from now
+            } else {
+                $args['start_time'] = date(DATE_ISO8601, time() + $args['start_in']);
+            }
         }
 
         // Create new agreement
