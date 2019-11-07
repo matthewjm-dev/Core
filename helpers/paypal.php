@@ -717,10 +717,10 @@ class ipsCore_paypal
         return true;
     }
 
-    public function execute_billing_plan($args, &$errors = []) {
+    public function create_plan_agreement($args, &$errors = []) {
         $args = array_merge([
             'plan_id' => false,
-            'start_time' => date(DATE_ISO8601, strtotime('+1 day')), // ISO 8601
+            'start_time' => date(DATE_ISO8601, time()), // ISO 8601 // strtotime('+1 day')
             'title' => false,
             'description' => false,
             'shipping_address' => false,
@@ -789,6 +789,24 @@ class ipsCore_paypal
             } else {
                 return $this->url_return;
             }
+        }
+
+        return false;
+    }
+
+    public function activate_plan_agreement($token, &$errors = []) {
+        $agreement = new \PayPal\Api\Agreement();
+
+        try {
+            // Execute agreement
+            if ($agreement->execute($token, $this->api_context)) {
+                return true;
+            }
+        } catch (PayPal\Exception\PayPalConnectionException $ex) {
+            $errors['paypal_exception_code'] = $ex->getCode();
+            $errors['paypal_exception_data'] = $ex->getData();
+        } catch (Exception $ex) {
+            $errors['exception'] = $ex;
         }
 
         return false;
