@@ -804,8 +804,10 @@ class ipsCore_paypal
 
         try {
             // Execute agreement
-            if ($agreement->execute($token, $this->api_context)) {
+            if ($agreement = $agreement->execute($token, $this->api_context)) {
                 return $agreement;
+            } else {
+                $errors[] = 'Failed to set agreement';
             }
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
             $errors['paypal_exception_code'] = $ex->getCode();
