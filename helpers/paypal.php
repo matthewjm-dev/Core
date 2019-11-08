@@ -805,7 +805,7 @@ class ipsCore_paypal
         try {
             // Execute agreement
             if ($agreement->execute($token, $this->api_context)) {
-                return true;
+                return $agreement;
             }
         } catch (PayPal\Exception\PayPalConnectionException $ex) {
             $errors['paypal_exception_code'] = $ex->getCode();
