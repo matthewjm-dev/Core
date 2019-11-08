@@ -739,6 +739,8 @@ class ipsCore_paypal
             } else {
                 $args['start_time'] = date(DATE_ISO8601, time() + $args['start_in']);
             }
+        } else {
+            $args['start_time'] = date(DATE_ISO8601, $args['start_time']); // Convert sent time from unix to ISO8601
         }
 
         // Create new agreement
