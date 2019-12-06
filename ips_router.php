@@ -98,9 +98,8 @@ class ipsCore_router
         $args = false;
 
         $uri_variations = [
-            ipsCore::$uri,
-            //ipsCore::$uri . '/',
-            //rtrim(ipsCore::$uri, '/'),
+            //ipsCore::$uri,
+            rtrim(ipsCore::$uri, '/'),
         ];
 
         // check for matching routes
@@ -198,11 +197,11 @@ class ipsCore_router
     }
 
     private function set_group_uri($uri) {
-        $this->group_uri = $uri;
+        $this->group_uri = ($this->group_uri ? $this->group_uri . '/' . $uri : $uri);
     }
 
     private function get_group_uri() {
-        return ($this->group_uri ? $this->group_uri : '');
+        return ($this->group_uri ? '/' . $this->group_uri : '');
     }
 
     private function clear_group_uri() {
@@ -274,10 +273,10 @@ class ipsCore_router
             $method = $uri;
         }
 
-        if ($uri == '') {
-            $full_uri = rtrim($this->get_group_uri(), '/');
+        if ($uri != '') {
+            $full_uri = $this->get_group_uri() . '/' . $uri;
         } else {
-            $full_uri = $this->get_group_uri() . $uri;
+            $full_uri = $this->get_group_uri();
         }
 
         $route = new ipsCore_route($full_uri, $controller, $method, $args);
