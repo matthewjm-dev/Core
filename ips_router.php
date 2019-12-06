@@ -101,6 +101,7 @@ class ipsCore_router
             //ipsCore::$uri,
             rtrim(ipsCore::$uri, '/'),
         ];
+        $num_uri_parts = count(ipsCore::$uri_parts);
 
         // check for matching routes
         foreach ($uri_variations as $uri) {
@@ -110,12 +111,26 @@ class ipsCore_router
                 $found_route = true;
                 break;
             } else {
+
+                // Loop through available Routes
                 foreach ($this->routes as $route) {
-                    $route_parts = explode('/', $route->get_uri());
-                    $num_route_parts = count($route_parts) - 1;
+
+                    // - Array of this route parts
+                    $route_parts = explode('/', ltrim($route->get_uri(), '/'));
+
+                    // - Number of this route parts
+                    $num_route_parts = count($route_parts);
+
+                    // - Loop through each Route part
                     foreach ($route_parts as $route_part_key => $route_part) {
+
+                        // -- If the route part matches the URI part, or the route part is *
                         if (isset(ipsCore::$uri_parts[$route_part_key]) && (ipsCore::$uri_parts[$route_part_key] == $route_part || $route_part === '*')) {
-                            if ($route_part_key == $num_route_parts) {
+
+                            // --- If there are no more URI route parts then this must be the route!
+                            //if ($route_part_key == $num_route_parts) {
+                            //if ($route_part_key == $num_uri_parts) {
+                            if ($num_uri_parts >= $num_route_parts) {
                                 $this->route = $route;
                                 $this->route_canonical = $uri;
 
