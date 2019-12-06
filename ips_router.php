@@ -73,6 +73,8 @@ class ipsCore_router
     public $uri;
     protected $route;
     public $route_canonical;
+    protected $group_uri = false;
+    protected $group_controller = false;
 
     // Getters
     public function get_routes()
@@ -195,10 +197,91 @@ class ipsCore_router
         $this->dispatch($this->route);
     }
 
-    public function add_route($uri, $controller, $method, $args = [])
+    private function set_group_uri($uri) {
+        $this->group_uri = $uri;
+    }
+
+    private function get_group_uri() {
+        return ($this->group_uri ? $this->group_uri : '');
+    }
+
+    private function clear_group_uri() {
+        $this->group_uri = false;
+    }
+
+    private function set_group_controller($controller) {
+        $this->group_controller = $controller;
+    }
+
+    private function get_group_controller() {
+        return $this->group_controller;
+    }
+
+    private function clear_group_controller() {
+        $this->group_controller = false;
+    }
+
+    public function add_route_group($uri, $controller, $routes)
     {
-        $route = new ipsCore_route($uri, $controller, $method, $args);
-        $this->routes[$uri] = $route;
+        $this->set_group_uri($uri);
+
+        if ($controller) {
+            $this->set_group_controller($controller);
+        }
+
+        $routes();
+
+        $this->clear_group_uri();
+        $this->clear_group_controller();
+    }
+
+    /**
+     * Can be called as:
+     * add_route('uri', 'controller', 'method', $args)
+     * add_route('uri', 'controller', 'method')
+     * add_route('uri', 'method')
+     * add_route('uri')
+     */
+    public function add_route()
+    {
+        $func_args = func_get_args();
+        $num_args = count($func_args);
+        if (!$num_args || $num_args < 1) {
+            ipsCore::add_error('Not enough arguments passed to add_route');
+        }
+
+        $uri = $func_args[0];
+        $args = [];
+
+        if ($num_args == 4) {
+            $controller = $func_args[1];
+            $method = $func_args[2];
+            $args = $func_args[3];
+        }
+
+        if ($num_args == 3) {
+            $controller = $func_args[1];
+            $method = $func_args[2];
+        }
+
+        if ($num_args == 2) {
+            $controller = $this->get_group_controller();
+            $method = $func_args[1];
+        }
+
+        if ($num_args == 1) {
+            $controller = $this->get_group_controller();
+            $method = $uri;
+        }
+
+        if ($uri == '') {
+            $full_uri = rtrim($this->get_group_uri(), '/');
+        } else {
+            $full_uri = $this->get_group_uri() . $uri;
+        }
+
+        $route = new ipsCore_route($full_uri, $controller, $method, $args);
+        $this->routes[$full_uri] = $route;
     }
 
     public function check_controller_exists($controller)
