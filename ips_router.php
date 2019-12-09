@@ -196,14 +196,13 @@ class ipsCore_router
                         if (!empty($matching_routes)) {
                             // If there are still more than 1 matching routes, choose the 1st longest route
                             if (count($matching_routes) > 1) {
-                                $longest_route = 0;
+                                $longest_route = reset($matching_routes);
                                 foreach ($matching_routes as $route_key => $route) {
-                                    if ($route->get_uri_parts_num() <= $longest_route) {
-                                        unset($matching_routes[$route_key]);
-                                    } else {
-                                        $longest_route = $route->get_uri_parts_num();
+                                    if ($route->get_uri_parts_num() > $longest_route->get_uri_parts_num()) {
+                                        $longest_route = $route;
                                     }
                                 }
+                                $matching_routes = [$longest_route];
                             }
 
                             // We have a matching route!
