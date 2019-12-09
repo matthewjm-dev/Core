@@ -270,7 +270,7 @@ class ipsCore_router
 
         if ($num_args == 1) {
             $controller = $this->get_group_controller();
-            $method = $uri;
+            $method = str_replace('/', '_', $uri);
         }
 
         if ($uri != '') {
