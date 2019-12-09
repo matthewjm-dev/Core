@@ -4,6 +4,8 @@ class ipsCore_route
 {
 
     protected $uri;
+    protected $uri_parts;
+    protected $uri_parts_num;
     protected $canonical;
     protected $controller;
     protected $method;
@@ -13,6 +15,16 @@ class ipsCore_route
     public function get_uri()
     {
         return $this->uri;
+    }
+
+    public function get_uri_parts()
+    {
+        return $this->uri_parts;
+    }
+
+    public function get_uri_parts_num()
+    {
+        return $this->uri_parts_num;
     }
 
     public function get_canonical()
@@ -39,6 +51,8 @@ class ipsCore_route
     public function set_uri($uri)
     {
         $this->uri = $uri;
+        $this->uri_parts = explode('/', $uri);
+        $this->uri_parts_num = count($this->uri_parts);
     }
 
     public function set_controller($controller)
@@ -99,7 +113,7 @@ class ipsCore_router
 
         $uri_variations = [
             //ipsCore::$uri,
-            rtrim(ipsCore::$uri, '/'),
+            trim(ipsCore::$uri, '/'),
         ];
 
         // check for matching routes
@@ -110,7 +124,7 @@ class ipsCore_router
                 $found_route = true;
                 break;
             } else {
-                foreach ($this->routes as $route) {
+                /*foreach ($this->routes as $route) {
                     $route_parts = explode('/', $route->get_uri());
                     $num_route_parts = count($route_parts) - 1;
                     foreach ($route_parts as $route_part_key => $route_part) {
@@ -121,11 +135,18 @@ class ipsCore_router
 
                                 if (!$route->get_args()) {
                                     $args = ipsCore::$uri_parts;
-                                    if ($route_part === '*') {
+
+                                    $i = 0;
+                                    while ($i <= $route_part_key) {
+                                        unset( $args[ $i ] );
+                                        $i++;
+                                    }
+
+                                    //if ($route_part === '*') {
 										// TODO: unset parts before this item
-									} else {
-										unset( $args[ $route_part_key ] );
-									}
+									//} else {
+									//	unset( $args[ $route_part_key ] );
+									//}
                                     $this->route->set_args($args);
                                 }
 
@@ -139,6 +160,61 @@ class ipsCore_router
 						}
                     }
                     if ($found_route) {
+                        break;
+                    }
+                }*/
+
+                $matching_routes = $this->routes;
+
+                // Loop though the URI route parts
+                foreach (ipsCore::$uri_parts as $uri_route_part_key => $uri_route_part) {
+                    // Loop through remaining matching routes
+                    foreach ($matching_routes as $route_key => $route) {
+                        // If the route has a part for this URI part, and the route part does not equal *
+                        if (isset($route->get_uri_parts()[$uri_route_part_key]) && $route->get_uri_parts()[$uri_route_part_key] != '*') {
+                            // If the route part for this URI part does not match
+                            if ($route->get_uri_parts()[$uri_route_part_key] != $uri_route_part) {
+                                unset($matching_routes[$route_key]); // Remove route from matching routes
+                            }
+                        }
+                    }
+                }
+
+                // If there are matching routes remaining
+                if (!empty($matching_routes)) {
+                    // If there are more than 1 matching routes
+                    if (count($matching_routes) > 1) {
+                        // Loop through remaining matching routes
+                        foreach ($matching_routes as $route_key => $route) {
+                            $route_parts = $route->get_uri_parts();
+                            if ($route->get_uri_parts_num() > count(ipsCore::$uri_parts) && end($route_parts) != '.') {
+                                unset($matching_routes[$route_key]);
+                            }
+                        }
+
+                        // If we still have matching routes
+                        if (!empty($matching_routes)) {
+                            // If there are still more than 1 matching routes, choose the 1st longest route
+                            if (count($matching_routes) > 1) {
+                                $longest_route = reset($matching_routes);
+                                foreach ($matching_routes as $route_key => $route) {
+                                    if ($route->get_uri_parts_num() > $longest_route->get_uri_parts_num()) {
+                                        $longest_route = $route;
+                                    }
+                                }
+                                $matching_routes = [$longest_route];
+                            }
+
+                            // We have a matching route!
+                            $route = reset($matching_routes);
+                            $this->set_matched_route($route);
+                            $found_route = true;
+                            break;
+                        }
+                    } else { // We have a matching route!
+                        $route = reset($matching_routes);
+                        $this->set_matched_route($route);
+                        $found_route = true;
                         break;
                     }
                 }
@@ -196,12 +272,33 @@ class ipsCore_router
         $this->dispatch($this->route);
     }
 
+    private function set_matched_route($route) {
+        $this->route = $route;
+        $this->route_canonical = ipsCore::$uri;
+        ipsCore::$uri_current .= ipsCore::$app->get_uri() . '/' . $this->route->get_controller() . '/';
+
+        $args = ipsCore::$uri_parts;
+
+        $i = 0;
+        $to_deduct = 0;
+        $parts = $route->get_uri_parts();
+        if (end($parts) == '*') {
+            $to_deduct = 1;
+        }
+        while ($i <= (($route->get_uri_parts_num() - 1) - $to_deduct)) {
+            unset($args[ $i ]);
+            $i++;
+        }
+
+        $this->route->set_args($args);
+    }
+
     private function set_group_uri($uri) {
         $this->group_uri = ($this->group_uri ? $this->group_uri . '/' . $uri : $uri);
     }
 
     private function get_group_uri() {
-        return ($this->group_uri ? '/' . $this->group_uri : '');
+        return ($this->group_uri ? $this->group_uri : '');
     }
 
     private function clear_group_uri() {
@@ -273,10 +370,12 @@ class ipsCore_router
             $method = str_replace('/', '_', $uri);
         }
 
-        if ($uri != '') {
+        if ($uri != '' && $this->get_group_uri() != '') {
             $full_uri = $this->get_group_uri() . '/' . $uri;
-        } else {
+        } elseif ($this->get_group_uri() != '') {
             $full_uri = $this->get_group_uri();
+        } else {
+            $full_uri = $uri;
         }
 
         $route = new ipsCore_route($full_uri, $controller, $method, $args);
