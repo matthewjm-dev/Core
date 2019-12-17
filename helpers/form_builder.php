@@ -431,9 +431,7 @@ class ipsCore_form_builder
 
     public function validate_select($field)
     {
-        $this->validate_field_options($field);
-
-        return false;
+        return $this->validate_field_options($field);
     }
 
     public function render_select($field, $args)
@@ -922,11 +920,13 @@ class ipsCore_form_builder
                 foreach ($values as $value) {
                     $option_key = array_search($value, array_column($this->fields[$field]['options'], 'value'));
                     if ($option_key === false) {
-                        return 'Given value ' . $value . ' is not a valid option.';
+                        return 'Submitted value ' . $value . ' is not a valid option.';
                     }
                 }
             }
         }
+
+        return false;
     }
 
     public function validate_form(&$errors)
