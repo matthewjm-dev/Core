@@ -9,9 +9,10 @@ class ips_view {
     protected $allowed_types = ['twig', 'php', 'html', 'js', 'css'];
 	protected $is_twig = false;
 	protected $twig_helper;
+	protected $view_class = '';
 
 	// Construct
-	public function __construct( $template, $show_in_layout = 'main', $type = 'twig' ) {
+	public function __construct( $template, $show_in_layout = 'main', $type = 'twig', $view_class = false ) {
         $this->template = $template;
         $this->show_in_layout = $show_in_layout;
         if (is_string($type) && in_array($type, $this->allowed_types)) {
@@ -22,6 +23,10 @@ class ips_view {
 	        ipsCore::requires_core_helper(['twig']);
 	        $this->is_twig = true;
 	        $this->twig_helper = new twig_helper();
+        }
+
+	    if ($view_class) {
+	        $this->view_class = $view_class;
         }
 
 	    if ( !$this->view_exists( ipsCore::get_view_route( $template, $this->type ) ) ) {
@@ -35,6 +40,26 @@ class ips_view {
 			return true;
 		} return false;
 	}
+
+    public function set_body_class($classes) {
+	    if (is_array($classes)) {
+	        foreach ($classes as $class) {
+	            if ($this->view_class != '') {
+                    $this->view_class .= ' ';
+                }
+                $this->view_class .= $class;
+            }
+        } else {
+            if ($this->view_class != '') {
+                $this->view_class .= ' ';
+            }
+            $this->view_class .= $classes;
+        }
+    }
+
+	public function get_body_class() {
+	    return $this->view_class;
+    }
 
 	public function build($part_data = false) {
 		ob_start();
