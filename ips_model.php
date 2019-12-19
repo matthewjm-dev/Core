@@ -545,10 +545,40 @@ class ipsCore_model
             }
         }
 
-        $item = (new ipsCore_query($this->get_model_table()))->select([
+        $args = [
             'where' => $this->get_query_where(),
             'limit' => 1,
-        ])->process(true);
+        ];
+
+        return $this->get_single($args);
+    }
+
+    public function first()
+    {
+        $args = [
+            'where' => $this->get_query_where(),
+            'orderby' => $this->get_pkey(),
+            'order' => 'ASC',
+            'limit' => 1,
+        ];
+
+        return $this->get_single($args);
+    }
+
+    public function last()
+    {
+        $args = [
+            'where' => $this->get_query_where(),
+            'orderby' => $this->get_pkey(),
+            'order' => 'DESC',
+            'limit' => 1,
+        ];
+
+        return $this->get_single($args);
+    }
+
+    private function get_single($args) {
+        $item = (new ipsCore_query($this->get_model_table()))->select($args)->process(true);
 
         if (!empty($item)) {
             $item = $item[0];
