@@ -775,7 +775,7 @@ class ipsCore_form_builder
 
     public function render_submit($field, $args)
     {
-        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="submit">' . $args['field_comment'] . '<button id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" ' . $args['field_attributes'] . '>' . $field['label'] . '</button></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="submit ' . $args['fieldset_classes'] . '">' . $args['field_comment'] . '<button id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" ' . $args['field_attributes'] . '>' . $field['label'] . '</button></fieldset>');
     }
 
     public function render_fields()
