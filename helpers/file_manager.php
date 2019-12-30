@@ -6,7 +6,7 @@ class ipsCore_file_manager
     public static $upload_directory = 'uploads/';
     public static $max_upload_size = '5000000';
     public static $allowed_types_images = ['jpg', 'png', 'jpeg', 'gif'];
-    public static $allowed_types_files = ['pdf'];
+    public static $allowed_types_files = ['pdf', 'txt', 'zip'];
 
     public static function get_sent_file($name)
     {
@@ -67,10 +67,10 @@ class ipsCore_file_manager
     public static function validate_file($raw_file, &$errors)
     {
         if (in_array($raw_file['extension'], ipsCore_file_manager::$allowed_types_files)) {
-            $check = getimagesize($raw_file["tmp_name"]);
+            $check = filesize($raw_file["tmp_name"]);
 
             if ($check === false) {
-                $errors[] = 'Uploaded Image type is not allowed (image extension faked?).';
+                $errors[] = 'Uploaded File type is not allowed (image extension faked?).';
             }
         } else {
             $errors[] = 'Uploaded File type is not allowed.';

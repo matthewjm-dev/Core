@@ -115,7 +115,7 @@ class ipsCore_form_builder
         $this->action = $action;
     }
 
-    public function set_classes($classes)
+    public function set_classes(array $classes)
     {
         $this->classes = $classes;
     }
