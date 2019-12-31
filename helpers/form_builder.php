@@ -120,6 +120,11 @@ class ipsCore_form_builder
         $this->classes = $classes;
     }
 
+    public function add_classes(array $classes)
+    {
+        $this->classes = array_merge($this->classes, $classes);
+    }
+
     public function set_field_value($field, $value)
     {
         $this->fields[$field]['value'] = $value;
@@ -247,7 +252,7 @@ class ipsCore_form_builder
 
     public function render_section_start($field)
     {
-        $this->form_html('<div id="' . $this->get_name() . '-' . $field['name'] . '" class="form-section">');
+        $this->form_html('<div id="' . $this->get_name() . '-' . $field['name'] . '" class="form-section ' . implode(' ', $field['classes']) . '">');
     }
 
     public function end_section($name)
