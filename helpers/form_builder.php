@@ -4,37 +4,37 @@ class ipsCore_form_builder
 {
 
     protected $name;
-    protected $method = 'POST';
+    protected $method  = 'POST';
     protected $action;
     protected $classes = [];
-    protected $fields = [];
+    protected $fields  = [];
     protected $form_html;
 
     public static $field_types = [
-        'int' => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
-        'price' => ['title' => 'Price', 'type' => 'decimal', 'length' => '18,2'],
-        'text' => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
-        'email' => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
-        'password' => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
-        'textarea' => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
-        'editor' => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
-        'select' => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
-        'selectmulti' => ['title' => 'Select Multi', 'type' => 'text', 'length' => false, 'link' => false],
-        'radio' => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
-        'check' => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
-        'linkselect' => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'int'             => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
+        'price'           => ['title' => 'Price', 'type' => 'decimal', 'length' => '18,2'],
+        'text'            => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
+        'email'           => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
+        'password'        => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
+        'textarea'        => ['title' => 'Text Area', 'type' => 'text', 'length' => false],
+        'editor'          => ['title' => 'WYSIWYG Editor', 'type' => 'text', 'length' => false],
+        'select'          => ['title' => 'Select', 'type' => 'text', 'length' => false, 'link' => false],
+        'selectmulti'     => ['title' => 'Select Multi', 'type' => 'text', 'length' => false, 'link' => false],
+        'radio'           => ['title' => 'Radios', 'type' => 'text', 'length' => false, 'link' => false],
+        'check'           => ['title' => 'Check Boxes', 'type' => 'text', 'length' => false, 'link' => false],
+        'linkselect'      => ['title' => 'Link Select', 'type' => 'varchar', 'length' => '255', 'link' => true],
         'linkselectmulti' => ['title' => 'Link Select Multi', 'type' => 'text', 'length' => false, 'link' => true],
-        'linkradio' => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
-        'linkcheck' => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
-        'datepicker' => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
-        'colourpicker' => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
-        'file' => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
-        'image' => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
-        'hidden' => ['title' => 'Hidden Field', 'type' => 'text', 'length' => '255', 'unselectable' => true],
+        'linkradio'       => ['title' => 'Link Radios', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'linkcheck'       => ['title' => 'Link Check Boxes', 'type' => 'varchar', 'length' => '255', 'link' => true],
+        'datepicker'      => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
+        'colourpicker'    => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
+        'file'            => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
+        'image'           => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
+        'hidden'          => ['title' => 'Hidden Field', 'type' => 'text', 'length' => '255', 'unselectable' => true],
     ];
 
     public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$^';
-    public static $password_message = 'Passwords must be at least 6 characters long, contain at least one Uppercase and Lowercase characters and at least one number.';
+    public static $password_message    = 'Passwords must be at least 6 characters long, contain at least one Uppercase and Lowercase characters and at least one number.';
 
     public static $title_options = [
         ['text' => 'Mr', 'value' => 'Mr'],
@@ -89,8 +89,8 @@ class ipsCore_form_builder
                 return $this->fields[$field]['default'];
             } else {
                 $field_type = self::get_field_types($this->fields[$field]['type']);
-                if ( $field_type['type'] == 'int') {
-                    if ( isset( $field_type['default'])) {
+                if ($field_type['type'] == 'int') {
+                    if (isset($field_type['default'])) {
                         return $field_type['default'];
                     } else {
                         return 0;
@@ -109,7 +109,7 @@ class ipsCore_form_builder
 
     public function set_action($action)
     {
-        if ( substr($action, -1) != '/' ) {
+        if (substr($action, -1) != '/') {
             $action .= '/';
         }
         $this->action = $action;
@@ -199,20 +199,20 @@ class ipsCore_form_builder
         if (empty($errors)) {
             $class = $name . ' ' . $type;
             $this->fields[$name] = [
-                'id' => $this->get_name() . '-' . $name,
-                'name' => $name,
-                'label' => $label,
-                'type' => $type,
-                'value' => (isset($options['value']) ? $options['value'] : null),
-                'default' => (isset($options['default']) ? $options['default'] : null),
-                'options' => (isset($options['options']) ? $options['options'] : []),
-                'required' => (isset($options['required']) ? $options['required'] : false),
-                'placeholder' => (isset($options['placeholder']) ? $options['placeholder'] : ''),
+                'id'                     => $this->get_name() . '-' . $name,
+                'name'                   => $name,
+                'label'                  => $label,
+                'type'                   => $type,
+                'value'                  => (isset($options['value']) ? $options['value'] : null),
+                'default'                => (isset($options['default']) ? $options['default'] : null),
+                'options'                => (isset($options['options']) ? $options['options'] : []),
+                'required'               => (isset($options['required']) ? $options['required'] : false),
+                'placeholder'            => (isset($options['placeholder']) ? $options['placeholder'] : ''),
                 'placeholder_selectable' => (isset($options['placeholder_selectable']) ? $options['placeholder_selectable'] : null),
-                'comment' => (isset($options['comment']) ? $options['comment'] : false),
-                'classes' => (isset($options['classes']) ? $options['classes'] . ' ' . $class : $class),
-                'fieldset_classes' => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] . ' ' . $class : $class),
-                'disabled' => (isset($options['disabled']) && $options['disabled'] ? true : false),
+                'comment'                => (isset($options['comment']) ? $options['comment'] : false),
+                'classes'                => (isset($options['classes']) ? $options['classes'] . ' ' . $class : $class),
+                'fieldset_classes'       => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] . ' ' . $class : $class),
+                'disabled'               => (isset($options['disabled']) && $options['disabled'] ? true : false),
             ];
         } else {
             foreach ($errors as $error) {
@@ -230,22 +230,22 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function start_section($name, $wrapper = false, $classes = [] )
+    public function start_section($name, $wrapper = false, $classes = [])
     {
         $classes[] = $name;
 
-    	if ($wrapper) {
-			$this->fields['section_start_wrapper_' . $name] = [
-				'name' => $name . '_wrapper',
-				'placeholder' => '<div id="' . $this->get_name() . '-' . $name . '-wrapper" class="form-section-wrapper ' . implode(' ', $classes) . '"><div>',
-				'type' => 'html',
-                'classes' => $classes,
-			];
-		}
+        if ($wrapper) {
+            $this->fields['section_start_wrapper_' . $name] = [
+                'name'        => $name . '_wrapper',
+                'placeholder' => '<div id="' . $this->get_name() . '-' . $name . '-wrapper" class="form-section-wrapper ' . implode(' ', $classes) . '"><div>',
+                'type'        => 'html',
+                'classes'     => $classes,
+            ];
+        }
 
         $this->fields['section_start_' . $name] = [
-            'name' => $name,
-            'type' => 'section_start',
+            'name'    => $name,
+            'type'    => 'section_start',
             'classes' => $classes,
         ];
     }
@@ -256,19 +256,19 @@ class ipsCore_form_builder
     }
 
     public function end_section($name)
-    {    	
+    {
         $this->fields['section_end_' . $name] = [
             'name' => $name,
             'type' => 'section_end',
         ];
 
-		if (isset($this->fields['section_start_wrapper_' . $name])) {
-			$this->fields['section_end_wrapper_' . $name] = [
-				'name' => $name . '_wrapper',
-				'placeholder' => '</div></div><div id="' . $this->get_name() . '-' . $name . '-shadow" class="form-section-shadow ' . implode(' ', $this->fields['section_start_wrapper_' . $name]['classes']) . '"></div>',
-				'type' => 'html',
-			];
-		}
+        if (isset($this->fields['section_start_wrapper_' . $name])) {
+            $this->fields['section_end_wrapper_' . $name] = [
+                'name'        => $name . '_wrapper',
+                'placeholder' => '</div></div><div id="' . $this->get_name() . '-' . $name . '-shadow" class="form-section-shadow ' . implode(' ', $this->fields['section_start_wrapper_' . $name]['classes']) . '"></div>',
+                'type'        => 'html',
+            ];
+        }
     }
 
     public function render_section_end($field, $args)
@@ -279,9 +279,9 @@ class ipsCore_form_builder
     public function add_html($name, $content)
     {
         $this->fields['html_' . $name] = [
-            'name' => $name,
+            'name'        => $name,
             'placeholder' => $content,
-            'type' => 'html',
+            'type'        => 'html',
         ];
     }
 
@@ -304,7 +304,7 @@ class ipsCore_form_builder
     public function render_text($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '' ) . '" /></fieldset>');
+        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '') . '" /></fieldset>');
     }
 
     /* Int */
@@ -538,13 +538,16 @@ class ipsCore_form_builder
         }
         if ($field['options']) {
             foreach ($field['options'] as $option) {
-                //$option_id = ($first) ? 'id="' . $field['id'] . '"' . '' : '';
-                $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" ' . /*$option_id .*/ ' name="' . $field['name'] . '" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
-                $first = false;
+                $this->render_radio_item($field, $args, $option);
             }
         }
         $this->form_html('</fieldset>');
+    }
+
+    public function render_radio_item($field, $args, $option)
+    {
+        $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
+        $this->form_html('<label class="radiofield"><input class="' . $args['field_classes'] . '" type="radio" name="' . $field['name'] . '" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
     }
 
     /* Check Boxes */
@@ -788,6 +791,65 @@ class ipsCore_form_builder
         return $this->render(true);
     }
 
+    public function get_field_args($field)
+    {
+        if (isset($field['required']) && $field['required']) {
+            $field['fieldset_classes'] .= ' required';
+        }
+
+        $field_classes = '';
+        if (isset($field['classes'])) {
+            $field_classes = $field['classes'];
+        }
+
+        $fieldset_classes = '';
+        if (isset($field['fieldset_classes'])) {
+            if (is_array($field['fieldset_classes'])) {
+                $fieldset_classes = implode(' ', $field['fieldset_classes']);
+            } else {
+                $fieldset_classes = $field['fieldset_classes'];
+            }
+        }
+
+        $field_label = '';
+        if (isset($field['label']) && $field['label']) {
+            $field_label = '<label for="' . $field['name'] . '">' . $field['label'] . (isset($field['required']) && $field['required'] ? '<span class="req">*</span>' : '') . '</label>';
+        }
+
+        $field_default = false;
+        if (isset($field['default'])) {
+            $field_default = $field['default'];
+        }
+
+        $field_value = '';
+        if (isset($field['value'])) {
+            $field_value = ' value="' . htmlentities($field['value']) . '"';
+        } elseif ($field_default !== false) {
+            $field['value'] = $field_default;
+            $field_value = ' value="' . htmlentities($field_default) . '"';
+        }
+
+        $field_attributes = '';
+        if (isset($field['disabled']) && $field['disabled']) {
+            $field_attributes .= ' disabled';
+        }
+
+        $field_comment = '';
+        if (isset($field['comment']) && $field['comment']) {
+            $field_comment = '<p>' . $field['comment'] . '</p>';
+        }
+
+        return [
+            'field_classes'    => $field_classes,
+            'fieldset_classes' => $fieldset_classes,
+            'field_label'      => $field_label,
+            'field_default'    => $field_default,
+            'field_value'      => $field_value,
+            'field_attributes' => $field_attributes,
+            'field_comment'    => $field_comment,
+        ];
+    }
+
     public function render($fields_only = false)
     {
         if (!$fields_only) {
@@ -798,68 +860,12 @@ class ipsCore_form_builder
         }
 
         foreach ($this->get_fields() as $field) {
-
-            if (isset($field['required']) && $field['required']) {
-                $field['fieldset_classes'] .= ' required';
-            }
-
-            $field_classes = '';
-            if (isset($field['classes'])) {
-                $field_classes = $field['classes'];
-            }
-
-            $fieldset_classes = '';
-            if (isset($field['fieldset_classes'])) {
-                if (is_array($field['fieldset_classes'])) {
-                    $fieldset_classes = implode(' ', $field['fieldset_classes']);
-                } else {
-                    $fieldset_classes = $field['fieldset_classes'];
-                }
-            }
-
-            $field_label = '';
-            if (isset($field['label']) && $field['label']) {
-                $field_label = '<label for="' . $field['name'] . '">' . $field['label'] . (isset($field['required']) && $field['required'] ? '<span class="req">*</span>' : '') . '</label>';
-            }
-
-            $field_default = false;
-            if (isset($field['default'])) {
-                $field_default = $field['default'];
-            }
-
-            $field_value = '';
-            if (isset($field['value'])) {
-                $field_value = ' value="' . htmlentities($field['value']) . '"';
-            } elseif ($field_default !== false) {
-                $field['value'] = $field_default;
-                $field_value = ' value="' . htmlentities($field_default) . '"';
-            }
-
-            $field_attributes = '';
-			if (isset($field['disabled']) && $field['disabled']) {
-				$field_attributes .= ' disabled';
-			}
-
-            $field_comment = '';
-            if (isset($field['comment']) && $field['comment']) {
-                $field_comment = '<p>' . $field['comment'] . '</p>';
-            }
-
             $render_function = 'render_' . $field['type'];
             if (!method_exists($this, $render_function)) {
                 $render_function = 'render_text';
             }
 
-            $args = [
-				'field_classes' => $field_classes,
-				'fieldset_classes' => $fieldset_classes,
-				'field_label' => $field_label,
-				'field_default' => $field_default,
-				'field_value' => $field_value,
-				'field_attributes' => $field_attributes,
-				'field_comment' => $field_comment,
-			];
-            $this->{$render_function}($field, $args );
+            $this->{$render_function}($field, $this->get_field_args($field));
         }
         if (!$fields_only) {
             $this->form_html('</form>');
@@ -1024,7 +1030,7 @@ class ipsCore_form_builder
                     $option = explode(':', $option);
                     $return[] = [
                         'value' => trim($option[0], ' '),
-                        'text' => trim($option[1], ' '),
+                        'text'  => trim($option[1], ' '),
                     ];
                 }
             }

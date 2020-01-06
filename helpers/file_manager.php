@@ -39,15 +39,17 @@ class ipsCore_file_manager
         if (empty($errors)) {
             if (file_exists(ipsCore_file_manager::$upload_directory)) {
                 $i = 2;
-                $uploadto = $raw_file['uploadto'];
-                while (file_exists($uploadto)) {
-                    $raw_file['basename'] = $raw_file['basename'] . '-' . $i;
-                    $raw_file['filename'] = $raw_file['basename'] . '.' . $raw_file['extension'];
-                    $uploadto = ipsCore_file_manager::$upload_directory . $raw_file['filename'];
+                $temp_basename = $raw_file['basename'];
+                $temp_uploadto = $raw_file['uploadto'];
+                while (file_exists($temp_uploadto)) {
+                    $temp_basename = $raw_file['basename'] . '-' . $i;
+                    $temp_uploadto = ipsCore_file_manager::$upload_directory . $temp_basename . '.' . $raw_file['extension'];
+                    //$temp_uploadto = ipsCore_file_manager::$upload_directory . $raw_file['filename'];
 
                     $i++;
                 }
-                $raw_file['uploadto'] = $uploadto;
+                $raw_file['basename'] = $temp_basename;
+                $raw_file['uploadto'] = $temp_uploadto;
 
                 if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
                     if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
@@ -96,7 +98,7 @@ class ipsCore_file_manager
 
     public static function do_delete_file($filename)
     {
-        if (unlink(ipsCore_file_manager::$upload_directory . $filename)) {
+        if (unlink(ltrim($filename, '/'))) {
             return true;
         }
 
