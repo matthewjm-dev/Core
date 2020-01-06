@@ -576,13 +576,18 @@ class ipsCore_form_builder
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="check ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         if ($field['options']) {
             foreach ($field['options'] as $option) {
-                $option_id = ($first) ? 'id="' . $field['id'] . '"' . '' : '';
-                $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
-                $this->form_html('<label class="checkfield"><input class="' . $args['field_classes'] . '" type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
+                $this->render_check_item($field, $args, $option, $first);
                 $first = false;
             }
         }
         $this->form_html('</fieldset>');
+    }
+
+    public function render_check_item($field, $args, $option, $first = false)
+    {
+        $option_id = ($first) ? 'id="' . $field['id'] . '"' . '' : '';
+        $option_selected = ((isset($option['selected']) && $option['selected'] == true) || ($option['value'] == $field['value'])) ? 'checked' : '';
+        $this->form_html('<label class="checkfield"><input class="' . $args['field_classes'] . '" type="checkbox" ' . $option_id . ' name="' . $field['name'] . '[]" value="' . $option['value'] . '" ' . $option_selected . ' />' . $option['text'] . '</label>');
     }
 
     /* Select Dropdown ( LINK field ) */
