@@ -29,6 +29,7 @@ class ipsCore_form_builder
         'datepicker'      => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
         'colourpicker'    => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
         'file'            => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
+        'file_multiple'   => ['title' => 'File Upload Multiple', 'type' => 'int', 'length' => '11', 'file' => true],
         'image'           => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
         'hidden'          => ['title' => 'Hidden Field', 'type' => 'text', 'length' => '255', 'unselectable' => true],
     ];
@@ -743,6 +744,37 @@ class ipsCore_form_builder
         $this->form_html('</fieldset>');
     }
 
+    /* File Upload */
+    public function add_file_multiple($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'file_multiple', $options);
+    }
+
+    public function validate_file_multiple($field)
+    {
+        $values = $this->fields[$field]['value'];
+
+        if (is_array($values) && count($values) == 1) {
+            if (reset($values) == 'undefined') {
+                return 'No files chosen';
+            }
+        } elseif ($values == 'undefined') {
+            return 'No files chosen';
+        }
+
+        return false;
+    }
+
+    public function render_file_multiple($field, $args)
+    {
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="file ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="file" id="' . $field['id'] . '" name="' . $field['name'] . '[]" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" multiple="multiple" />');
+        if (isset($field['preview']) && !empty($field['preview'])) {
+            $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
+        }
+        $this->form_html('</fieldset>');
+    }
+
     /* Image Upload */
     public function add_image($name, $label, array $options = [])
     {
@@ -906,9 +938,26 @@ class ipsCore_form_builder
                     }
                 }
 
-                if (isset($field_type['file'])) {
+                /*if (isset($field_type['file'])) {
                     if (isset($_FILES['files']['name'][$field_key])) {
                         $value = $_FILES['files']['name'][$field_key];
+                    }
+                }*/
+
+                if (isset($field_type['file'])) {
+                    if (isset($_FILES[$field_key]['name']) && !empty($_FILES[$field_key]['name']) && $_FILES[$field_key]['name'][0] != 'undefined') {
+                        $first = true;
+                        foreach ($_FILES[$field_key]['name'] as $file_key => $file_name) {
+                            if (!$first) {
+                                $value .= ',';
+                            }
+                            if (is_array($file_name)) {
+                                $value .= $file_name[$file_key];
+                            } else {
+                                $value .= $file_name;
+                            }
+                            $first = false;
+                        }
                     }
                 }
 

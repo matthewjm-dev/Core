@@ -3,67 +3,95 @@
 class ipsCore_file_manager
 {
 
-    public static $upload_directory = 'uploads/';
-    public static $max_upload_size = '5000000';
+    public static $upload_directory     = 'uploads/';
+    public static $max_upload_size      = '5000000';
     public static $allowed_types_images = ['jpg', 'png', 'jpeg', 'gif'];
-    public static $allowed_types_files = ['pdf', 'txt', 'zip'];
+    public static $allowed_types_files  = ['pdf', 'txt', 'zip'];
 
-    public static function get_sent_file($name)
+    public static function get_sent_file($name, $index = false)
     {
-        $file = false;
-        if (isset($_FILES['files']) && !empty($_FILES['files'])) {
-            $file = [];
-            foreach ($_FILES['files'] as $key => $value) {
-                $file[$key] = $_FILES['files'][$key][$name];
+        $files = [];
+        if (isset($_FILES[$name]) && !empty($_FILES[$name])) {
+            foreach ($_FILES[$name] as $property => $file_items) {
+                foreach ($file_items as $file_key => $file_property_value) {
+                    if (!isset($files[$file_key])) {
+                        $files[$file_key] = [
+                            'index' => $file_key,
+                        ];
+                    }
+                    if (is_array($file_property_value)) {
+                        $file_property_value = reset($file_property_value);
+                    }
+                    $files[$file_key][$property] = $file_property_value;
+                }
             }
         }
 
-        return $file;
+        return (!empty($files) ? ($index !== false ? $files[$index] : $files) : false);
     }
 
-    public static function do_upload_file($file_name, $type)
+    public static function do_upload_file($file_name, $args = [])
     {
+        $args = array_merge([
+            'index' => false,
+            'type'  => false,
+        ], $args);
+
         $errors = [];
 
-        $raw_file = ipsCore_file_manager::get_sent_file($file_name);
-        $raw_file['uploadto'] = ipsCore_file_manager::$upload_directory . $raw_file['name'];
-        $raw_file['extension'] = strtolower(pathinfo($raw_file['name'], PATHINFO_EXTENSION));
-        $raw_file['basename'] = basename($raw_file['uploadto'], "." . $raw_file['extension']);
-
-        if ($type == 'image') {
-            ipsCore_file_manager::validate_image($raw_file, $errors);
-        } elseif ($type == 'file') {
-            ipsCore_file_manager::validate_file($raw_file, $errors);
-        }
-
-        if (empty($errors)) {
-            if (file_exists(ipsCore_file_manager::$upload_directory)) {
-                $i = 2;
-                $temp_basename = $raw_file['basename'];
-                $temp_uploadto = $raw_file['uploadto'];
-                while (file_exists($temp_uploadto)) {
-                    $temp_basename = $raw_file['basename'] . '-' . $i;
-                    $temp_uploadto = ipsCore_file_manager::$upload_directory . $temp_basename . '.' . $raw_file['extension'];
-                    //$temp_uploadto = ipsCore_file_manager::$upload_directory . $raw_file['filename'];
-
-                    $i++;
-                }
-                $raw_file['basename'] = $temp_basename;
-                $raw_file['uploadto'] = $temp_uploadto;
-
-                if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
-                    if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
-                        $errors[] = 'There was a problem moving the uploaded file.';
-                    }
-                } else {
-                    $errors[] = 'That file is too large, max upload size is: ' . ipsCore::$functions->format_bytes(ipsCore_file_manager::$max_upload_size) . ' bytes.';
-                }
-            } else {
-                $errors[] = 'The uploads directory does not appear to exist.';
+        if ($raw_files = ipsCore_file_manager::get_sent_file($file_name, $args['index'])) {
+            if ($args['index'] !== false) {
+                $raw_files = [$raw_files];
             }
+            foreach ($raw_files as $raw_file_key => $raw_file) {
+                $raw_file['uploadto'] = ipsCore_file_manager::$upload_directory . $raw_file['name'];
+                $raw_file['extension'] = strtolower(pathinfo($raw_file['name'], PATHINFO_EXTENSION));
+                $raw_file['basename'] = basename($raw_file['uploadto'], "." . $raw_file['extension']);
+
+                if (!$args['type']) {
+                    $args['type'] = ipsCore_file_manager::get_file_type($file_name, $raw_file_key);
+                }
+
+                if ($args['type'] == 'image') {
+                    ipsCore_file_manager::validate_image($raw_file, $errors);
+                } elseif ($args['type'] == 'file') {
+                    ipsCore_file_manager::validate_file($raw_file, $errors);
+                } else {
+                    $errors[] = 'Could not determine file type of "' . $raw_file['basename'] . '".';
+                }
+
+                if (empty($errors)) {
+                    if (file_exists(ipsCore_file_manager::$upload_directory)) {
+                        $i = 2;
+                        $temp_basename = $raw_file['basename'];
+                        $temp_uploadto = $raw_file['uploadto'];
+                        while (file_exists($temp_uploadto)) {
+                            $temp_basename = $raw_file['basename'] . '-' . $i;
+                            $temp_uploadto = ipsCore_file_manager::$upload_directory . $temp_basename . '.' . $raw_file['extension'];
+
+                            $i++;
+                        }
+                        $raw_file['basename'] = $temp_basename;
+                        $raw_file['uploadto'] = $temp_uploadto;
+
+                        if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
+                            if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
+                                $errors[] = 'There was a problem moving the uploaded file "' . $raw_file['basename'] . '".';
+                            }
+                        } else {
+                            $errors[] = 'The file "' . $raw_file['basename'] . '" is too large, max upload size is: ' . ipsCore::$functions->format_bytes(ipsCore_file_manager::$max_upload_size) . ' bytes.';
+                        }
+                    } else {
+                        $errors[] = 'The uploads directory does not appear to exist.';
+                    }
+                }
+                $raw_files[$raw_file_key] = $raw_file;
+            }
+        } else {
+            $errors[] = 'No files found to upload.';
         }
 
-        return (empty($errors) ? $raw_file : ['errors' => $errors]);
+        return (empty($errors) ? $raw_files : ['errors' => $errors]);
     }
 
     public static function validate_file($raw_file, &$errors)
@@ -100,6 +128,35 @@ class ipsCore_file_manager
     {
         if (unlink(ltrim($filename, '/'))) {
             return true;
+        }
+
+        return false;
+    }
+
+    public static function get_file_type($file_name, $index = 0)
+    {
+        if ($raw_files = ipsCore_file_manager::get_sent_file($file_name)) {
+
+            $raw_files[$index]['extension'] = strtolower(pathinfo($raw_files[$index]['name'], PATHINFO_EXTENSION));
+
+            if (in_array($raw_files[$index]['extension'], ipsCore_file_manager::$allowed_types_images)) {
+                return 'image';
+            } elseif (in_array($raw_files[$index]['extension'], ipsCore_file_manager::$allowed_types_files)) {
+                return 'file';
+            }
+        }
+
+        return false;
+    }
+
+    public static function get_sent_file_by_name($file_name, $name)
+    {
+        if ($raw_files = ipsCore_file_manager::get_sent_file($file_name)) {
+            foreach ($raw_files as $raw_file) {
+                if ($raw_file['name'] == $name) {
+                    return $raw_file;
+                }
+            }
         }
 
         return false;
