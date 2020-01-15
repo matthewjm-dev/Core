@@ -206,7 +206,7 @@ class ipsCore_database
 
         $sql .= ($length ? '(' . $length . ')' : '');
         $sql .= ($extra ? ' ' . $extra : '');
-        $sql .= ($default ? ' DEFAULT ' . (substr($default, -2) == '()' ? $default : '"' . $default . '"') : '');
+        $sql .= ($default !== false ? ' DEFAULT ' . (substr($default, -2) == '()' ? $default : '"' . $default . '"') : '');
 
         if ($this->query($sql)) {
             return true;
