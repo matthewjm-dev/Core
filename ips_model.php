@@ -26,6 +26,9 @@ class ipsCore_model
 
     public $default_fields = [];
 
+    public $relationship_temps = [];
+    public $relationships = [];
+
     // Getters
     public function get_model_name()
     {
@@ -35,6 +38,11 @@ class ipsCore_model
     public function get_model_table()
     {
         return $this->model_table;
+    }
+
+    public function get_model_table_from_class()
+    {
+        return str_replace('_model', '', get_class($this));
     }
 
     public function get_pkey()
@@ -60,8 +68,18 @@ class ipsCore_model
         $this->model_name = $name;
     }
 
-    public function set_table($table)
+    public function set_table(&$table)
     {
+        if ($table !== false) {
+            if ($table == ' ') {
+                $table = $this->get_model_table_from_class();
+            }
+
+            if (strpos($table, ipsCore::$app->database['prefix']) !== 0) {
+                $table = ipsCore::$app->database['prefix'] . $table;
+            }
+        }
+
         $this->model_table = $table;
     }
 
@@ -75,26 +93,60 @@ class ipsCore_model
         return true;
     }
 
+    // Relationships
+    public function add_relationship($model, $name = false, $foreign_key = false, $key = false ) {
+        if (!$key) {
+            $key = $this->get_pkey();
+        }
+
+        if (!$foreign_key) {
+            $foreign_key = $key;
+        }
+
+        if (!$name) {
+            $name = $model;
+        }
+
+        $model = str_replace('/', '_', $model) . '_model';
+
+        $this->relationship_temps[$name] = [
+            'model' => $model,
+            'key' => $key,
+            'foreign_key' => $foreign_key,
+        ];
+    }
+
+    public function load_relationships() {
+        foreach ($this->relationship_temps as $relationship_name => $relationship) {
+            if (class_exists($relationship['model'])) {
+                $relationship_model = new $relationship['model']($relationship_name);
+            } else {
+                ipsCore::add_error('Requested Model Class "' . $relationship['model'] . '" Does Not Exist', true);
+            }
+
+            $items = $relationship_model->where([$relationship['foreign_key'] => $this->{$relationship['key']}])->get_all();
+
+            $this->relationships[$relationship_name] = $items;
+        }
+    }
+
     // Construct
     public function __construct($name, $table = ' ')
     {
         $this->set_name($name);
-        if ($table == ' ') {
-            $table = $name;
-        }
+
         $this->set_table($table);
 
         /*ipsCore::$database = new ipsCore_database();
         ipsCore::$session = new ipsCore_session();*/
 
-        $this->reset();
+        //$this->reset();
 
         if ($this->model_table !== false) {
             $this->model_table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
             $this->set_schema();
+            $this->sync_fields();
         }
-
-        $this->sync_fields();
     }
 
     // Methods
@@ -330,6 +382,7 @@ class ipsCore_model
         $this->query_orderby = $this->query_orderby_default;
         $this->query_limit = $this->query_limit_default;
         $this->query_offset = $this->query_offset_default;
+        $this->relationships = [];
 
         return $this;
     }
@@ -498,6 +551,9 @@ class ipsCore_model
                 foreach ($item as $item_data_key => $item_data) {
                     $object->{$item_data_key} = $item_data;
                 }
+
+                $object->load_relationships();
+
                 if ($array_keys) {
                     $objects[$object->get_id()] = $object;
                 } else {
@@ -589,6 +645,8 @@ class ipsCore_model
                 $object->{$item_data_key} = $item_data;
             }
 
+            $object->load_relationships();
+
             return $object;
         }
         return false;
@@ -617,6 +675,9 @@ class ipsCore_model
             foreach ($item as $item_data_key => $item_data) {
                 $this->{$item_data_key} = $item_data;
             }
+
+            $this->load_relationships();
+
             return true;
         }
         return false;

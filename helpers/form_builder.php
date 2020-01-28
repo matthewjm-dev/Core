@@ -150,6 +150,11 @@ class ipsCore_form_builder
     // Field Types
     public static function get_field_types($type = false, $args = [])
     {
+        if (method_exists(static::class, 'add_fields')) {
+            static::add_fields();
+        //    self::add_fields();
+        }
+
         $fields = self::$field_types;
 
         if ($type) {
@@ -214,6 +219,7 @@ class ipsCore_form_builder
                 'classes'                => (isset($options['classes']) ? $options['classes'] . ' ' . $class : $class),
                 'fieldset_classes'       => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] . ' ' . $class : $class),
                 'disabled'               => (isset($options['disabled']) && $options['disabled'] ? true : false),
+                'extra_data'             => (isset($options['extra_data']) && !empty($options['extra_data']) ? $options['extra_data'] : false),
             ];
         } else {
             foreach ($errors as $error) {
