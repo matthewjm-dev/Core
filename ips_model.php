@@ -290,7 +290,7 @@ class ipsCore_model
         }
     }*/
 
-    public function set_schema($attempted = false)
+    /*public function set_schema($attempted = false)
     {
         $this->fields = [];
 
@@ -317,7 +317,7 @@ class ipsCore_model
                 $default = $field['Default'];
                 $extra = $field['Extra'];
 
-                $this->$name = $default;
+                $this->$name = $default; // Pre-populate model field with column default
                 $this->fields[$name] = [
                     'type' => $type,
                     'default' => $default,
@@ -326,6 +326,47 @@ class ipsCore_model
 
                 if ($field['Key'] == 'PRI') {
                     $this->set_pkey($field['Field']);
+                }
+            }
+        }
+    }*/
+
+    public function set_schema()
+    {
+        $cache_key = 'schema_table_columns';
+
+        if (!$table_columns = ipsCore::get_cache($cache_key)) {
+            $table_columns = [];
+            $db = new ipsCore_database('information_schema', ipsCore::$app->database['user'], ipsCore::$app->database['pass']);
+            $sql = 'SELECT * from COLUMNS WHERE TABLE_SCHEMA="' . ipsCore::$app->database['name'] . '"';
+            $db_columns = $db->query($sql, [], true);
+
+            foreach ($db_columns as $db_column) {
+                $table_columns[$db_column['TABLE_NAME']][] = $db_column;
+            }
+
+            ipsCore::set_cache($cache_key, $table_columns);
+        }
+
+        if (isset($table_columns[$this->model_table]) && !empty($table_columns[$this->model_table])) {
+
+            foreach ($table_columns[$this->model_table] as $column) {
+                $name = $column['COLUMN_NAME'];
+                $type = $column['COLUMN_TYPE'];
+                $default = $column['COLUMN_DEFAULT'];
+                $extra = $column['EXTRA'];
+                $key = $column['COLUMN_KEY'];
+
+                $this->$name = $default; // Pre-populate model field with column default
+                $this->fields[$name] = [
+                    'type' => $type,
+                    'default' => $default,
+                    'extra' => $extra,
+                    'key' => $extra,
+                ];
+
+                if ($key == 'PRI') {
+                    $this->set_pkey($name);
                 }
             }
         }

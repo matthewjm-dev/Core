@@ -5,17 +5,29 @@ class ipsCore_database
     public $connected = false;
     public $connection;
     public $connection_error = false;
+    public $connection_details = [];
 
     public $queries_executed = [];
 
-    public function __construct()
+    public function __construct($name = false, $user = false, $pass = false, $host = false)
     {
-        if (ipsCore::$app->database['host']) {
+        $name = ($name ?: ipsCore::$app->database['name']);
+        $user = ($user ?: ipsCore::$app->database['user']);
+        $pass = ($pass ?: ipsCore::$app->database['pass']);
+        $host = ($host ?: ipsCore::$app->database['host']);
+
+        $this->connection_details = [
+            'database_host'  => $host,
+            'database_name'  => $name,
+            'connected_time' => microtime(true),
+        ];
+
+        if ($host) {
             try {
                 $this->connection = new PDO(
-                    'mysql:host=' . ipsCore::$app->database['host'] . ';dbname=' . ipsCore::$app->database['name'] . ';charset=utf8',
-                    ipsCore::$app->database['user'],
-                    ipsCore::$app->database['pass']
+                    'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8',
+                    $user,
+                    $pass
                 );
                 $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
@@ -88,12 +100,12 @@ class ipsCore_database
             $result = false;
         }
 
-        ipsCore::$database->add_executed_query($sql, $params, $start, 'Query');
+        ipsCore::$database->add_executed_query($sql, $params, $start);
 
         return $result;
     }
 
-    public function add_executed_query($query, $params, $time_start = false, $note = '', $time_finish = false) {
+    public function add_executed_query($query, $params, $time_start = false, $time_finish = false) {
         $time = ($time_start ? $time_start : microtime(true));
         $finish = ($time_finish ? $time_finish : microtime(true));
         $duration = ($finish - $time);
@@ -101,7 +113,6 @@ class ipsCore_database
         $this->queries_executed[] = [
             'query' => $query,
             'params' => $params,
-            'note' => $note,
             'time' => $time,
             'duration' => $duration,
         ];
@@ -122,15 +133,15 @@ class ipsCore_database
                             <tr><td style="width:100px;' . $bg . '">Query</td><td>' . $query['query'] . '</td></tr>
                             <tr><td style="width:100px;' . $bg . '">Params</td><td>' . print_r($query['params'], true) . '</td></tr>
                             <tr><td style="width:100px;' . $bg . '">Duration</td><td>' . round($query['duration'], 5, PHP_ROUND_HALF_UP) . ' seconds</td></tr>
-                            <tr><td style="width:100px;' . $bg . '">Notes</td><td>' . $query['note'] . '</td></tr>
                         </table>';
         }
 
         $content = '<div style="width:100%;padding:10px;background-color:#fff;">
+            <p style="padding-bottom:10px;">Database Query Dump for: ' . $this->connection_details['database_name'] . '</p>
             <p style="padding-bottom:10px;">Total Queries: ' . count($this->queries_executed) . '</p>
             <p style="padding-bottom:10px;">Total Duration: ' . round($total_duration, 3, PHP_ROUND_HALF_UP) . ' seconds</p>';
 
-        echo $content . $query_content;
+        echo $content . $query_content . '</div>';
         if ($die) {
             die();
         }
@@ -551,16 +562,13 @@ class ipsCore_query
 
         if ($return) {
             if ($data = ipsCore::$database->query($this->query_sql, $this->query_params, true)) {
-                //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Returned');
                 return $data;
             }
         } else {
             if (ipsCore::$database->query($this->query_sql, $this->query_params)) {
-                //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Success');
                 return true;
             }
         }
-        //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Failed');
         return false;
     }
 
