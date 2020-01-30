@@ -48,6 +48,8 @@ class ipsCore
     public static $request;
     public static $request_type;
 
+    public static $cache = []; // Simple, single request non persistent cache
+
     public static $data = []; // Front end data
     public static $output; // Front end page output
     public static $output_type = 'html'; // html / json
@@ -364,10 +366,19 @@ class ipsCore
 
     public static function get_data($key)
     {
-        if (isset(ipsCore::$data[$key])) {
+        if (ipsCore::has_data($key)) {
             return ipsCore::$data[$key];
         } else {
             ipsCore::add_error('Data key "' . $key . '" does not exist.');
+        }
+    }
+
+    public static function has_data($key)
+    {
+        if (isset(ipsCore::$data[$key])) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -504,4 +515,44 @@ class ipsCore
         return false;
     }
 
+    public static function cache_exists($name) {
+        if (isset(ipsCore::$cache[$name])) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function set_cache($name, $data) {
+        if (!ipsCore::cache_exists($name)) {
+            ipsCore::$cache[$name] = $data;
+            return true;
+        }
+        return false;
+    }
+
+    public static function update_cache($name, $data) {
+        if (ipsCore::cache_exists($name)) {
+            ipsCore::set_or_update_cache($name, $data);
+            return true;
+        }
+        return false;
+    }
+
+    public static function set_or_update_cache($name, $data) {
+        ipsCore::$cache[$name] = $data;
+    }
+
+    public static function get_cache($name) {
+        if (ipsCore::cache_exists($name)) {
+            return ipsCore::$cache[$name];
+        }
+        return false;
+    }
+
+    public static function remove_cache($name) {
+        if (ipsCore::cache_exists($name)) {
+            unset(ipsCore::$cache[$name]);
+        }
+        return true;
+    }
 }

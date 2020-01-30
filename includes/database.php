@@ -42,6 +42,8 @@ class ipsCore_database
 
     public function query($sql, $params = [], $return_data = false)
     {
+        $start = microtime(true);
+
         if ($this->is_connected()) {
             try {
                 $query = $this->connection->prepare($sql);
@@ -79,38 +81,56 @@ class ipsCore_database
                 }
             } catch (PDOException $e) {
                 ipsCore::add_error('Database query failure: ' . $e->getMessage());
-
-                return false;
+                $result = false;
             }
-
-            return $result;
         } else {
             ipsCore::add_error('Could not execute query, database not connected.');
+            $result = false;
         }
 
-        return false;
+        ipsCore::$database->add_executed_query($sql, $params, $start, 'Query');
+
+        return $result;
     }
 
-    public function add_executed_query($query, $params, $note) {
+    public function add_executed_query($query, $params, $time_start = false, $note = '', $time_finish = false) {
+        $time = ($time_start ? $time_start : microtime(true));
+        $finish = ($time_finish ? $time_finish : microtime(true));
+        $duration = ($finish - $time);
+
         $this->queries_executed[] = [
             'query' => $query,
             'params' => $params,
             'note' => $note,
+            'time' => $time,
+            'duration' => $duration,
         ];
     }
 
     public function dump($die = false) {
-        $content = '<div style="width:100%;border-top: 1px solid red;padding-top:10px;">
-            <div style="border-bottom: 1px solid red;padding-bottom:10px;">Total Queries: ' . count($this->queries_executed) . '</div>';
+
+        $total_duration = 0;
+        $query_content = '';
 
         foreach ($this->queries_executed as $query) {
-            $content .= '<div style="border-bottom: 1px solid red;padding-bottom:10px;">
-                            Query: ' . $query['query'] . '<br />Params: ' . print_r($query['params'], true) . '<br />Notes: ' . $query['note'] . '
-                        </div>';
-        }
-        $content .= '<br />';
+            $total_duration = $total_duration + $query['duration'];
+            $warning_duration = 0.01;
 
-        echo $content;
+            $bg = ($query['duration'] > $warning_duration ? 'background-color:red;' : '');
+
+            $query_content .= '<table style="border-bottom:2px solid red;margin-bottom:10px;border-collapse:collapse;">
+                            <tr><td style="width:100px;' . $bg . '">Query</td><td>' . $query['query'] . '</td></tr>
+                            <tr><td style="width:100px;' . $bg . '">Params</td><td>' . print_r($query['params'], true) . '</td></tr>
+                            <tr><td style="width:100px;' . $bg . '">Duration</td><td>' . round($query['duration'], 5, PHP_ROUND_HALF_UP) . ' seconds</td></tr>
+                            <tr><td style="width:100px;' . $bg . '">Notes</td><td>' . $query['note'] . '</td></tr>
+                        </table>';
+        }
+
+        $content = '<div style="width:100%;padding:10px;background-color:#fff;">
+            <p style="padding-bottom:10px;">Total Queries: ' . count($this->queries_executed) . '</p>
+            <p style="padding-bottom:10px;">Total Duration: ' . round($total_duration, 3, PHP_ROUND_HALF_UP) . ' seconds</p>';
+
+        echo $content . $query_content;
         if ($die) {
             die();
         }
@@ -118,12 +138,19 @@ class ipsCore_database
 
     public function does_table_exist($table)
     {
+        $cache_key = 'table_exists-' . $table;
+
+        if (ipsCore::get_cache($cache_key)) {
+            return true;
+        }
+
         $sql = "SHOW TABLES LIKE '" . $this->validate($table) . "'";
 
         if (empty($this->query($sql, [], true))) {
             return false;
         }
 
+        ipsCore::set_cache($cache_key, true);
         return true;
     }
 
@@ -520,18 +547,20 @@ class ipsCore_query
     }
 
     public function process($return = false) {
+        $start = microtime(true);
+
         if ($return) {
             if ($data = ipsCore::$database->query($this->query_sql, $this->query_params, true)) {
-                ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Returned');
+                //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Returned');
                 return $data;
             }
         } else {
             if (ipsCore::$database->query($this->query_sql, $this->query_params)) {
-                ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Success');
+                //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Success');
                 return true;
             }
         }
-        ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, 'Failed');
+        //ipsCore::$database->add_executed_query($this->query_sql, $this->query_params, $start, 'Failed');
         return false;
     }
 

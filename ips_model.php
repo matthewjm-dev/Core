@@ -3,7 +3,6 @@
 
 class ipsCore_model
 {
-
     protected $model_name;
     protected $model_table;
     protected $model_fields;
@@ -130,17 +129,20 @@ class ipsCore_model
         }
     }
 
+    public function get_relationship($name) {
+        if (isset($this->relationships[$name])) {
+            return $this->relationships[$name];
+        } else {
+            return [];
+        }
+    }
+
     // Construct
     public function __construct($name, $table = ' ')
     {
         $this->set_name($name);
 
         $this->set_table($table);
-
-        /*ipsCore::$database = new ipsCore_database();
-        ipsCore::$session = new ipsCore_session();*/
-
-        //$this->reset();
 
         if ($this->model_table !== false) {
             $this->model_table = (substr($table, 0, strlen(ipsCore::$app->database['prefix'])) === ipsCore::$app->database['prefix'] ? $table : ipsCore::$app->database['prefix'] . $table);
@@ -249,11 +251,16 @@ class ipsCore_model
         return $this->query_where;
     }
 
-    public function set_schema($attempted = false)
+    /*public function set_schema($attempted = false)
     {
         $this->fields = [];
 
         if ($this->model_table) {
+            $cache_key = 'schema_' . $this->model_table;
+
+            if ($fields = ipsCore::get_cache($cache_key)) {
+
+            }
             if (ipsCore::$database->does_table_exist($this->model_table)) {
                 $fields = ipsCore::$database->get_table_schema($this->get_model_table());
 
@@ -278,6 +285,47 @@ class ipsCore_model
                 if (!empty($this->model_pkey) && !$attempted) {
                     $this->create_table($this->model_table, $this->model_pkey);
                     $this->set_schema(true); // Prevent infinite loop if it fails to create table
+                }
+            }
+        }
+    }*/
+
+    public function set_schema($attempted = false)
+    {
+        $this->fields = [];
+
+        if ($this->model_table) {
+            $cache_key = 'schema_' . $this->model_table;
+
+            $fields = ipsCore::get_cache($cache_key);
+
+            if (!$fields) {
+                if (ipsCore::$database->does_table_exist($this->model_table)) {
+                    $fields = ipsCore::$database->get_table_schema($this->get_model_table());
+                    ipsCore::set_cache($cache_key, $fields);
+                } else {
+                    if (!empty($this->model_pkey) && !$attempted) {
+                        $this->create_table($this->model_table, $this->model_pkey);
+                        $this->set_schema(true); // Prevent infinite loop if it fails to create table
+                    }
+                }
+            }
+
+            foreach ($fields as $field) {
+                $name = $field['Field'];
+                $type = $field['Type'];
+                $default = $field['Default'];
+                $extra = $field['Extra'];
+
+                $this->$name = $default;
+                $this->fields[$name] = [
+                    'type' => $type,
+                    'default' => $default,
+                    'extra' => $extra
+                ];
+
+                if ($field['Key'] == 'PRI') {
+                    $this->set_pkey($field['Field']);
                 }
             }
         }

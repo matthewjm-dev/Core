@@ -148,6 +148,15 @@ class ipsCore_controller
         ipsCore::add_data($data_items);
     }
 
+    public function add_json(array $data_items)
+    {
+        if (ipsCore::has_data('json')) {
+            $data_items = array_merge(ipsCore::get_data('json'), $data_items);
+        }
+
+        ipsCore::add_data(['json' => $data_items]);
+    }
+
     public function add_stylesheet($stylesheets)
     {
 
