@@ -333,9 +333,7 @@ class ipsCore_model
 
     public function set_schema()
     {
-        $cache_key = 'schema_table_columns';
-
-        if (!$table_columns = ipsCore::get_cache($cache_key)) {
+        if (!$table_columns = ipsCore::get_cache(ipsCore::$cache_key_schema)) {
             $table_columns = [];
             $db = new ipsCore_database('information_schema', ipsCore::$app->database['user'], ipsCore::$app->database['pass']);
             $sql = 'SELECT * from COLUMNS WHERE TABLE_SCHEMA="' . ipsCore::$app->database['name'] . '"';
@@ -345,7 +343,7 @@ class ipsCore_model
                 $table_columns[$db_column['TABLE_NAME']][] = $db_column;
             }
 
-            ipsCore::set_cache($cache_key, $table_columns);
+            ipsCore::set_cache(ipsCore::$cache_key_schema, $table_columns);
         }
 
         if (isset($table_columns[$this->model_table]) && !empty($table_columns[$this->model_table])) {
@@ -353,7 +351,7 @@ class ipsCore_model
             foreach ($table_columns[$this->model_table] as $column) {
                 $name = $column['COLUMN_NAME'];
                 $type = $column['COLUMN_TYPE'];
-                $default = $column['COLUMN_DEFAULT'];
+                $default = ($column['COLUMN_DEFAULT'] === 'NULL' ? null : $column['COLUMN_DEFAULT']);
                 $extra = $column['EXTRA'];
                 $key = $column['COLUMN_KEY'];
 

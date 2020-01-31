@@ -149,10 +149,10 @@ class ipsCore_database
 
     public function does_table_exist($table)
     {
-        $cache_key = 'table_exists-' . $table;
-
-        if (ipsCore::get_cache($cache_key)) {
-            return true;
+        if ($cached_schema = ipsCore::get_cache(ipsCore::$cache_key_schema)) {
+            if (isset($cached_schema[$table])) {
+                return true;
+            }
         }
 
         $sql = "SHOW TABLES LIKE '" . $this->validate($table) . "'";
@@ -161,7 +161,8 @@ class ipsCore_database
             return false;
         }
 
-        ipsCore::set_cache($cache_key, true);
+        ipsCore::add_cache(ipsCore::$cache_key_schema, [], $table);
+
         return true;
     }
 
@@ -231,6 +232,17 @@ class ipsCore_database
         $sql = 'DROP TABLE ' . $this->validate($table);
 
         if ($this->query($sql)) {
+            if (ipsCore::get_cache($cache_key)) {
+                return true;
+            }
+
+            if ($cached_schema = ipsCore::get_cache(ipsCore::$cache_key_schema)) {
+                if (isset($cached_schema[$table])) {
+                    ipsCore::set_cache($cache_key, true);
+                    return true;
+                }
+            }
+
             return true;
         }
         ipsCore::add_error('Failed to drop table: "' . $table . '""');

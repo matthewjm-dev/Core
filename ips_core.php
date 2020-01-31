@@ -49,6 +49,7 @@ class ipsCore
     public static $request_type;
 
     public static $cache = []; // Simple, single request non persistent cache
+    public static $cache_key_schema = 'schema_table_columns';
 
     public static $data = []; // Front end data
     public static $output; // Front end page output
@@ -547,6 +548,20 @@ class ipsCore
             return ipsCore::$cache[$name];
         }
         return false;
+    }
+
+    public static function add_cache($name, $data, $key = false) {
+        if (!ipsCore::cache_exists($name)) {
+            ipsCore::set_cache($name, []);
+        }
+
+        if ($key) {
+            if (!isset(ipsCore::get_cache($name)[$key])) {
+                ipsCore::$cache[$name][$key] = $data;
+            }
+        } else {
+            ipsCore::$cache[$name][] = $data;
+        }
     }
 
     public static function remove_cache($name) {
