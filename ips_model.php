@@ -765,7 +765,7 @@ class ipsCore_model
 
             $this->load_relationships();
 
-            return true;
+            return $this;
         }
         return false;
     }
