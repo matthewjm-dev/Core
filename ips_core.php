@@ -98,7 +98,7 @@ class ipsCore
         /*self::find_helpers(self::$path_core_helpers);
         self::find_helpers(self::$path_app_helpers);*/
         self::setup_mailer();
-        self::$database = new ipsCore_database();
+        self::$database = (ipsCore::$app->database['host'] ? new ipsCore_database() : false);
         self::$session = new ipsCore_session();
         self::$functions = new ipsCore_functions();
         self::$router = new ipsCore_router();
