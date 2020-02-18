@@ -11,7 +11,7 @@ class ipsCore_form_builder
     protected $form_html;
 
     public static $field_types = [
-        'int'             => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
+        'number'          => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
         'price'           => ['title' => 'Price', 'type' => 'decimal', 'length' => '18,2'],
         'text'            => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
         'email'           => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
@@ -315,12 +315,12 @@ class ipsCore_form_builder
     }
 
     /* Int */
-    public function add_int($name, $label, array $options = [])
+    public function add_number($name, $label, array $options = [])
     {
         $this->add_field($name, $label, 'number', $options);
     }
 
-    public function validate_int($field)
+    public function validate_number($field)
     {
         $this->fields[$field]['value'] = (int)$this->fields[$field]['value'];
 
@@ -331,7 +331,7 @@ class ipsCore_form_builder
         return false;
     }
 
-    public function render_int($field, $args)
+    public function render_number($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="int ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
@@ -412,6 +412,24 @@ class ipsCore_form_builder
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="textarea ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         $this->form_html('<textarea id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . htmlentities($field['value']) . '</textarea></fieldset>');
+    }
+
+
+    /* Date Input */
+    public function add_date($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'date', $options);
+    }
+
+    public function validate_date()
+    {
+        return false;
+    }
+
+    public function render_date($field, $args)
+    {
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="date ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="date" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* WYSIWYG Editor */
