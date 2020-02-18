@@ -143,6 +143,21 @@ class ipsCore_controller
         }
     }
 
+    public function build_json(array $args = []) //$show_in_layout = true, $build = 'twig' )
+    {
+        $defaults = [
+            'json' => true,
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        if (!ipsCore::has_data('json')) {
+            $this->add_json(['success' => true]);
+        }
+
+        $this->build_view($args);
+    }
+
     public function add_data(array $data_items)
     {
         ipsCore::add_data($data_items);
@@ -155,6 +170,20 @@ class ipsCore_controller
         }
 
         ipsCore::add_data(['json' => $data_items]);
+    }
+
+    public function add_json_success(array $data_items, $mute = false)
+    {
+        $default = (!$mute ? ['success' => true] : []);
+
+        $this->add_json(array_merge($default, $data_items));
+    }
+
+    public function add_json_failure(array $data_items, $mute = false)
+    {
+        $default = (!$mute ? ['success' => true] : []);
+
+        $this->add_json(array_merge($default, $data_items));
     }
 
     public function add_stylesheet($stylesheets)
