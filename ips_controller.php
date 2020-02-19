@@ -172,27 +172,42 @@ class ipsCore_controller
         ipsCore::add_data(['json' => $data_items]);
     }
 
-    public function add_json_success($data_items, $mute = false)
+    public function add_json_success($data, $mute = false)
     {
-        $success = true;
-        if (!is_array($data_items)) {
-            $success = $data_items;
-        }
-        $default = (!$mute ? ['success' => $success] : []);
+        $args = ['success' => true];
 
-        $this->add_json(array_merge($default, $data_items));
+        if (!is_array($data)) {
+            $args['success'] = $data;
+        } else {
+            $args = array_merge($args, $data);
+        }
+
+        if ($mute) {
+            unset($args['success']);
+        }
+
+        $this->add_json($args);
     }
 
-    public function add_json_failure(array $data_items, $mute = false)
+    public function add_json_failure($data, $mute = false)
     {
-        $default = (!$mute ? ['success' => true] : []);
+        $args = ['success' => false];
 
-        $this->add_json(array_merge($default, $data_items));
+        if (!is_array($data)) {
+            $args['errors'] = [$data];
+        } else {
+            $args = array_merge($args, $data);
+        }
+
+        if ($mute) {
+            unset($args['success']);
+        }
+
+        $this->add_json($args);
     }
 
     public function add_stylesheet($stylesheets)
     {
-
         if (!is_array($stylesheets)) {
             $stylesheets = [$stylesheets];
         }
