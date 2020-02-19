@@ -172,9 +172,13 @@ class ipsCore_controller
         ipsCore::add_data(['json' => $data_items]);
     }
 
-    public function add_json_success(array $data_items, $mute = false)
+    public function add_json_success($data_items, $mute = false)
     {
-        $default = (!$mute ? ['success' => true] : []);
+        $success = true;
+        if (!is_array($data_items)) {
+            $success = $data_items;
+        }
+        $default = (!$mute ? ['success' => $success] : []);
 
         $this->add_json(array_merge($default, $data_items));
     }
