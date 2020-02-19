@@ -31,7 +31,10 @@ class ipsCore_form_builder
         'file'            => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
         'file_multiple'   => ['title' => 'File Upload Multiple', 'type' => 'int', 'length' => '11', 'file' => true],
         'image'           => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
-        'hidden'          => ['title' => 'Hidden Field', 'type' => 'text', 'length' => '255', 'unselectable' => true],
+        'hidden'          => ['title' => 'Hidden Field', 'type' => 'text', 'unselectable' => true],
+        'date'            => ['title' => 'Date Field', 'type' => 'varchar', 'length' => '255'],
+        'time'            => ['title' => 'Time Field', 'type' => 'varchar', 'length' => '255'],
+        'timestamp'       => ['title' => 'TimeStamp Field', 'type' => 'int', 'length' => '11'],
     ];
 
     public static $password_complexity = '^\S*(?=\S{6,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$^';
@@ -84,12 +87,15 @@ class ipsCore_form_builder
     {
         //return (isset($this->fields[$field]['value']) ? $this->fields[$field]['value'] : ( $this->fields[$field]['default'] ? $this->fields[$field]['default'] : NULL ) );
         if (isset($this->fields[$field])) {
+            $field_type = self::get_field_types($this->fields[$field]['type']);
             if (isset($this->fields[$field]['value']) && $this->fields[$field]['value'] != '') {
+                if ($field_type['type'] == 'int') {
+                    $this->fields[$field]['value'] = (int)$this->fields[$field]['value'];
+                }
                 return $this->fields[$field]['value'];
             } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default'] != '') {
                 return $this->fields[$field]['default'];
             } else {
-                $field_type = self::get_field_types($this->fields[$field]['type']);
                 if ($field_type['type'] == 'int') {
                     if (isset($field_type['default'])) {
                         return $field_type['default'];
@@ -414,6 +420,30 @@ class ipsCore_form_builder
         $this->form_html('<textarea id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '">' . htmlentities($field['value']) . '</textarea></fieldset>');
     }
 
+    /* Timestamp Input */
+    public function add_timestamp($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'timestamp', $options);
+    }
+
+    public function validate_timestamp($field)
+    {
+        $value = $this->fields[$field]['value'];
+
+        if (!((string) (int) $value === $value)
+            && ($value <= PHP_INT_MAX)
+            && ($value >= ~PHP_INT_MAX)) {
+            return 'Invalid Unix Timestamp';
+        }
+
+        return false;
+    }
+
+    public function render_timestamp($field, $args)
+    {
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="timestamp ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+    }
 
     /* Date Input */
     public function add_date($name, $label, array $options = [])
@@ -430,6 +460,23 @@ class ipsCore_form_builder
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="date ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
         $this->form_html('<input type="date" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+    }
+
+    /* Time Input */
+    public function add_time($name, $label, array $options = [])
+    {
+        $this->add_field($name, $label, 'time', $options);
+    }
+
+    public function validate_time()
+    {
+        return false;
+    }
+
+    public function render_time($field, $args)
+    {
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="time ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
+        $this->form_html('<input type="time" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* WYSIWYG Editor */
