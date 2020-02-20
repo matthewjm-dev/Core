@@ -149,7 +149,7 @@ class ipsCore_database
 
     public function does_table_exist($table)
     {
-        if ($cached_schema = ipsCore::get_cache(ipsCore::$cache_key_schema)) {
+        if ($cached_schema = ipsCore::get_cache(ipsCore::$cache_key_tables_exists)) {
             if (isset($cached_schema[$table])) {
                 return true;
             }
@@ -161,7 +161,7 @@ class ipsCore_database
             return false;
         }
 
-        ipsCore::add_cache(ipsCore::$cache_key_schema, [], $table);
+        ipsCore::add_cache(ipsCore::$cache_key_tables_exists, [], $table);
 
         return true;
     }

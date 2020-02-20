@@ -79,6 +79,8 @@ class ipsCore_model
             }
         }
 
+        $this->create_table($table);
+
         $this->model_table = $table;
     }
 
@@ -379,8 +381,12 @@ class ipsCore_model
     {
         $table = $this->add_prefix($table);
 
+        if (ipsCore::$database->does_table_exist($table)) {
+            return true;
+        }
+
         $fields = [
-            $id => $this->get_pkey_args(),
+           //$id => $this->get_pkey_args(),
         ];
 
         if ($this->default_fields && !empty($this->default_fields)) {

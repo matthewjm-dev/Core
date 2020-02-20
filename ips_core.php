@@ -50,6 +50,7 @@ class ipsCore
 
     public static $cache = []; // Simple, single request non persistent cache
     public static $cache_key_schema = 'schema_table_columns';
+    public static $cache_key_tables_exists = 'schema_table_exists';
 
     public static $data = []; // Front end data
     public static $output; // Front end page output
@@ -87,6 +88,7 @@ class ipsCore
         require_once(self::$path_core . 'ips_controller.php');
         require_once(self::$path_core . 'ips_model.php');
         require_once(self::$path_core . 'ips_view.php');
+        require_once(self::$path_core . 'ips_route.php');
         require_once(self::$path_core . 'ips_router.php');
         require_once(self::$path_core . 'ips_helper.php');
 

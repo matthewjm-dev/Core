@@ -1,88 +1,7 @@
-<?php // IPS-ROUTER
-
-class ipsCore_route
-{
-
-    protected $uri;
-    protected $uri_parts;
-    protected $uri_parts_num;
-    protected $canonical;
-    protected $controller;
-    protected $method;
-    protected $args;
-
-    // Getters
-    public function get_uri()
-    {
-        return $this->uri;
-    }
-
-    public function get_uri_parts()
-    {
-        return $this->uri_parts;
-    }
-
-    public function get_uri_parts_num()
-    {
-        return $this->uri_parts_num;
-    }
-
-    public function get_canonical()
-    {
-        return $this->canonical;
-    }
-
-    public function get_controller()
-    {
-        return $this->controller;
-    }
-
-    public function get_method()
-    {
-        return $this->method;
-    }
-
-    public function get_args()
-    {
-        return $this->args;
-    }
-
-    // Setters
-    public function set_uri($uri)
-    {
-        $this->uri = $uri;
-        $this->uri_parts = explode('/', $uri);
-        $this->uri_parts_num = count($this->uri_parts);
-    }
-
-    public function set_controller($controller)
-    {
-        $this->controller = $controller;
-    }
-
-    public function set_method($method)
-    {
-        $this->method = str_replace('-', '_', $method );
-    }
-
-    public function set_args($args)
-    {
-        $this->args = $args;
-    }
-
-    // Construct
-    public function __construct($uri, $controller, $method, $args = [])
-    {
-        $this->set_uri($uri);
-        $this->set_controller($controller);
-        $this->set_method($method);
-        $this->set_args($args);
-    }
-}
+<?php // IPS CORE ROUTER
 
 class ipsCore_router
 {
-
     public $routes = array();
     public $uri;
     protected $route;
@@ -124,46 +43,6 @@ class ipsCore_router
                 $found_route = true;
                 break;
             } else {
-                /*foreach ($this->routes as $route) {
-                    $route_parts = explode('/', $route->get_uri());
-                    $num_route_parts = count($route_parts) - 1;
-                    foreach ($route_parts as $route_part_key => $route_part) {
-                        if (isset(ipsCore::$uri_parts[$route_part_key]) && (ipsCore::$uri_parts[$route_part_key] == $route_part || $route_part === '*')) {
-                            if ($route_part_key == $num_route_parts) {
-                                $this->route = $route;
-                                $this->route_canonical = $uri;
-
-                                if (!$route->get_args()) {
-                                    $args = ipsCore::$uri_parts;
-
-                                    $i = 0;
-                                    while ($i <= $route_part_key) {
-                                        unset( $args[ $i ] );
-                                        $i++;
-                                    }
-
-                                    //if ($route_part === '*') {
-										// TODO: unset parts before this item
-									//} else {
-									//	unset( $args[ $route_part_key ] );
-									//}
-                                    $this->route->set_args($args);
-                                }
-
-                                ipsCore::$uri_current .= ipsCore::$app->get_uri() . '/' . $route->get_controller() . '/';
-
-                                $found_route = true;
-                                break;
-                            }
-                        } else {
-                        	break;
-						}
-                    }
-                    if ($found_route) {
-                        break;
-                    }
-                }*/
-
                 $matching_routes = $this->routes;
 
                 // Loop though the URI route parts
