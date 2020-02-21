@@ -52,6 +52,10 @@ class ipsCore_form_builder
         ['text' => 'Lord', 'value' => 'Lord'],
     ];
 
+    public $is_repeater = false;
+    public $repeater_name = false;
+    public $repeater_label = false;
+
     // Getters
     public function get_name()
     {
@@ -209,9 +213,12 @@ class ipsCore_form_builder
         }
 
         if (empty($errors)) {
+            $id = $this->get_name() . '-' . $name;
             $class = $name . ' ' . $type;
+            $name = $name . ($this->is_repeater ? '[]' : ''); // For fields in a repeater group
+
             $this->fields[$name] = [
-                'id'                     => $this->get_name() . '-' . $name,
+                'id'                     => $id,
                 'name'                   => $name,
                 'label'                  => $label,
                 'type'                   => $type,
@@ -243,6 +250,47 @@ class ipsCore_form_builder
         return false;
     }
 
+    /* Field Group */
+    public function field_group($name, $field_funcs, $options = []) {
+        $wrapper = (isset($options['wrapper']) ? $options['wrapper'] : false);
+        $classes = (isset($options['classes']) ? $options['classes'] : []);
+        $title = (isset($options['title']) ? $options['title'] : false);
+
+        $this->start_section($name, $wrapper, $classes);
+        if ($title) {
+            $field_title = 'field-group-title-' . $name;
+            $this->add_html($field_title, '<p class="form-section-title">' . $title . '</p>');
+        }
+
+        $field_funcs();
+
+        $this->end_section($name);
+    }
+
+    /* Repeater Group */
+    public function repeater_group($name, $field_funcs, $options)
+    {
+        $classes = (isset($options['classes']) ? implode(' ', $options['classes']) : '');
+        $title = (isset($options['title']) ? $options['title'] : false);
+
+        $this->is_repeater = true;
+
+        $this->add_html('repeater-group-start' . $name, '
+            <div id="repeater-group-' . $name . '" class="form-section repeater-group ' . $classes . '">
+                <p class="form-section-title">' . $title . '</p>
+                <div class="repeater-group-fields"><div class="repeater-group-item">');
+
+        $field_funcs();
+
+        $this->add_html('repeater-group-end' . $name, '
+                </div></div>
+                <button class="repeater-group-add">Add New</button>
+            </div>');
+
+        $this->is_repeater = false;
+    }
+
+    /* Start Section */
     public function start_section($name, $wrapper = false, $classes = [])
     {
         $classes[] = $name;
@@ -268,6 +316,7 @@ class ipsCore_form_builder
         $this->form_html('<div id="' . $this->get_name() . '-' . $field['name'] . '" class="form-section ' . implode(' ', $field['classes']) . '">');
     }
 
+    /* End Section */
     public function end_section($name)
     {
         $this->fields['section_end_' . $name] = [
@@ -346,7 +395,7 @@ class ipsCore_form_builder
     /* Price */
     public function add_price($name, $label, array $options = [])
     {
-        $options['classes'] = $options['classes'] . ' text';
+        $options['classes'] = (isset($options['classes']) ? $options['classes'] : '') . ' text';
         $this->add_field($name, $label, 'text', $options);
     }
 
