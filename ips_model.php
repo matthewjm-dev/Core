@@ -383,14 +383,16 @@ class ipsCore_model
     {
         if ($table) {
             $table = $this->add_prefix($table);
+            $fields = [];
 
             if (ipsCore::$database->does_table_exist($table)) {
                 return true;
             }
 
-            $fields = [
-                //$id => $this->get_pkey_args(),
-            ];
+            // Add primary key only if it doesnt exist in default fields
+            if (!isset($this->default_fields) || !isset($this->default_fields[0]['extra']) || !in_array('PRIMARY KEY', $this->default_fields[0]['extra'])) {
+                $fields[$id] = $this->get_pkey_args();
+            }
 
             if ($this->default_fields && !empty($this->default_fields)) {
                 $fields = array_merge($fields, $this->default_fields);
