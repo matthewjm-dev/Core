@@ -232,21 +232,18 @@ class ipsCore_database
         $sql = 'DROP TABLE ' . $this->validate($table);
 
         if ($this->query($sql)) {
-            if (ipsCore::get_cache($cache_key)) {
-                return true;
+            if (ipsCore::get_cache(ipsCore::$cache_key_tables_exists)) {
+                ipsCore::remove_cache(ipsCore::$cache_key_tables_exists, $table);
             }
 
-            if ($cached_schema = ipsCore::get_cache(ipsCore::$cache_key_schema)) {
-                if (isset($cached_schema[$table])) {
-                    ipsCore::set_cache($cache_key, true);
-                    return true;
-                }
+            if (ipsCore::get_cache(ipsCore::$cache_key_schema)) {
+                ipsCore::remove_cache(ipsCore::$cache_key_schema, $table);
             }
 
             return true;
         }
-        ipsCore::add_error('Failed to drop table: "' . $table . '""');
 
+        ipsCore::add_error('Failed to drop table: "' . $table . '""');
         return false;
     }
 
