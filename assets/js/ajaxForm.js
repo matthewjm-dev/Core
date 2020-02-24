@@ -30,7 +30,7 @@
                     var $field = $form.find('input[name="' + target + '"], input[name="' + target + '[]"], select[name="' + target + '"], textarea[name="' + target + '"]');
 
                     if ($field.length) {
-                        var $fieldset = $field.parent('fieldset');
+                        var $fieldset = $field.closest('fieldset');
                         var content = '<p class="message error">' + message + '</p>';
 
                         $fieldset.addClass('error').append(content);
