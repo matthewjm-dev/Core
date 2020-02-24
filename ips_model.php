@@ -79,7 +79,9 @@ class ipsCore_model
             }
         }
 
-        $this->create_table($table);
+        if ($table) {
+            $this->create_table($table);
+        }
 
         $this->model_table = $table;
     }
@@ -379,22 +381,24 @@ class ipsCore_model
 
     public function create_table($table, $id = 'id')
     {
-        $table = $this->add_prefix($table);
+        if ($table) {
+            $table = $this->add_prefix($table);
 
-        if (ipsCore::$database->does_table_exist($table)) {
-            return true;
-        }
+            if (ipsCore::$database->does_table_exist($table)) {
+                return true;
+            }
 
-        $fields = [
-           //$id => $this->get_pkey_args(),
-        ];
+            $fields = [
+                //$id => $this->get_pkey_args(),
+            ];
 
-        if ($this->default_fields && !empty($this->default_fields)) {
-            $fields = array_merge($fields, $this->default_fields);
-        }
+            if ($this->default_fields && !empty($this->default_fields)) {
+                $fields = array_merge($fields, $this->default_fields);
+            }
 
-        if (ipsCore::$database->create_table($table, $fields)) {
-            return true;
+            if (ipsCore::$database->create_table($table, $fields)) {
+                return true;
+            }
         }
         return false;
     }

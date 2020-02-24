@@ -151,9 +151,9 @@ class ipsCore_controller
 
         $args = array_merge($defaults, $args);
 
-        if (!ipsCore::has_data('json')) {
+        /*if (!ipsCore::has_data('json')) {
             $this->add_json(['success' => true]);
-        }
+        }*/
 
         $this->build_view($args);
     }
