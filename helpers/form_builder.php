@@ -52,6 +52,11 @@ class ipsCore_form_builder
         ['text' => 'Lord', 'value' => 'Lord'],
     ];
 
+    public static $bool_options = [
+        ['text' => 'Yes', 'value' => 1],
+        ['text' => 'No', 'value' => 0],
+    ];
+
     public $is_repeater = false;
     public $repeater_name = false;
     public $repeater_label = false;
