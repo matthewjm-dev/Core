@@ -142,7 +142,22 @@
 
                             if (json.fragments) { // Fragments
                                 $.each(json.fragments, function (key, value) {
-                                    $(key).replaceWith(value);
+                                    var content = '';
+                                    var init_form = false;
+
+                                    if (typeof value === 'object') {
+                                        content = value.content;
+                                        init_form = true;
+                                    } else {
+                                        content = value;
+                                    }
+
+                                    $(key).replaceWith(content);
+
+                                    if (init_form) {
+                                        var id = $(content).attr('id');
+                                        $('#' + id).ipsAjaxForm({});
+                                    }
                                 });
                             }
 
