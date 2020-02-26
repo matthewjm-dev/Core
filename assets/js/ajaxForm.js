@@ -82,7 +82,7 @@
                 auto_submit = true;
             }
 
-            if (typeof(args.loader_message) != "undefined" && args.loader_message == true) {
+            if (typeof(args.loader_message) != "undefined") {
                 loader_message = args.loader_message;
             }
 
