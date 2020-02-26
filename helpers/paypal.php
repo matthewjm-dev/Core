@@ -821,6 +821,30 @@ class ipsCore_paypal
         return false;
     }
 
+    public function cancel_plan_agreement($token, &$errors = []) {
+        $agreement = new \PayPal\Api\Agreement();
+
+        $agreement->setId($token);
+        $agreementStateDescriptor = new AgreementStateDescriptor();
+        $agreementStateDescriptor->setNote("Cancel the agreement");
+
+        try {
+            // Execute agreement
+            if ($agreement = $agreement->cancel($agreementStateDescriptor, $this->api_context)) {
+                return $agreement;
+            } else {
+                $errors[] = 'Failed to set agreement';
+            }
+        } catch (PayPal\Exception\PayPalConnectionException $ex) {
+            $errors['paypal_exception_code'] = $ex->getCode();
+            $errors['paypal_exception_data'] = $ex->getData();
+        } catch (Exception $ex) {
+            $errors['exception'] = $ex;
+        }
+
+        return false;
+    }
+
     public function update_billing() {
 
     }
