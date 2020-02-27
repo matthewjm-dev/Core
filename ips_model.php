@@ -445,6 +445,15 @@ class ipsCore_model
         // TODO: Check schema if column already exists
 
         if (ipsCore::$database->create_column($this->get_model_table(), $name, $type, $length, $default, $extra)) {
+            ipsCore::$cache[ipsCore::$cache_key_schema][$this->get_prop('model_table')][] = [
+                'TABLE_NAME' => $this->get_prop('model_table'),
+                'COLUMN_NAME' => $name,
+                'COLUMN_DEFAULT' => $default,
+                'COLUMN_KEY' => '',
+                'DATA_TYPE' => $type,
+                'COLUMN_TYPE' => $type . '(' . $length . ')',
+                'EXTRA' => $extra,
+            ];
             return true;
         }
         return false;
