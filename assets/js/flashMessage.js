@@ -27,7 +27,6 @@ function add_flash( message, type ) {
 // Remove flash messages after 3 seconds that exist on page load
 $( document ).ready( function() {
     setTimeout(function() {
-        console.log('removing existing flash messages');
         var $flash = $('section#flash-messages .container p.message');
         $flash.fadeOut(400, function() {
             $flash.remove();

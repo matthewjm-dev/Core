@@ -5,62 +5,62 @@
 */
 //jQuery( function( $ ) {
 
-	var error_methods = {
+var error_methods = {
 
-		'add_error': function( $form, target, message ) {
-			var $field = $( '#' + target );
+    'add_error': function ($form, target, message) {
+        var $field = $form.find('input[name="' + target + '"], input[name="' + target + '[]"], select[name="' + target + '"], textarea[name="' + target + '"]');
 
-			if ( $field.length ) {
-				var $fieldset = $field.parents( 'fieldset' );
-				var content = '<p class="message">' + message + '</p>';
+        if ($field.length) {
+            var $fieldset = $field.closest('fieldset');
+            var content = '<p class="message error">' + message + '</p>';
 
-				$fieldset.addClass( 'error' ).append( content );
-			} else {
-				var content = '<p class="error message">' + message + '<i class="fas fa-exclamation-circle"></i></p>';
+            $fieldset.addClass('error').append(content);
+        } else {
+            var content = '<p class="message error">' + message + '</p>';
 
-				error_methods.add_message( $form, content );
-			}
-		},
+            methods.add_message($form, content);
+        }
+    },
 
-		'add_message': function( $form, content ) {
-			$form.prepend( content );
-		},
+    'add_message': function ($form, content) {
+        $form.prepend(content);
+    },
 
-		'remove_error': function( $target ) {
-			$target.removeClass( 'error' ).find( '.message' ).remove();
-		},
+    'remove_error': function ($target) {
+        $target.removeClass('error').find('.message').remove();
+    },
 
-		'clear_form': function( $form ) {
-			$form.find( '.message' ).remove();
-			$form.find( '.error' ).removeClass( 'error' );
-		},
+    'clear_form': function ($form) {
+        $form.find('.message').remove();
+        $form.find('.error').removeClass('error');
+    },
 
-		'watch_errors': function( $form ) {
-			$form.on( 'click', 'input, focus, select, textarea', function() {
-				var $fieldset = $( this ).parents( 'fieldset' );
-				if ( $fieldset.hasClass( 'error') ) {
-					error_methods.remove_error( $fieldset );
-				}
-			} );
-		}
-	}
+    'watch_errors': function ($form) {
+        $form.on('click', 'input, focus, select, textarea', function () {
+            var $fieldset = $(this).parents('fieldset');
+            if ($fieldset.hasClass('error')) {
+                error_methods.remove_error($fieldset);
+            }
+        });
+    }
+}
 
-	function show_errors( $form, errors ) {
-		error_methods.clear_form( $form );
+function show_errors($form, errors) {
+    error_methods.clear_form($form);
 
-		$.each( errors, function( input, message ) {
-			error_methods.add_error( $form, input, message );
-		} );
+    $.each(errors, function (input, message) {
+        error_methods.add_error($form, input, message);
+    });
 
-		error_methods.watch_errors( $form );
-	}
+    error_methods.watch_errors($form);
+}
 
-	function show_success( $form, message ) {
-		error_methods.clear_form( $form );
+function show_success($form, message) {
+    error_methods.clear_form($form);
 
-		var content = '<p class="success message">' + message + '</p>';
+    var content = '<p class="success message">' + message + '</p>';
 
-		error_methods.add_message( $form, content );
-	}
+    error_methods.add_message($form, content);
+}
 
 //});
