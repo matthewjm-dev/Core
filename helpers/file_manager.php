@@ -126,6 +126,12 @@ class ipsCore_file_manager
 
     public static function do_delete_file($filename)
     {
+        $filename = ltrim($filename, '/');
+
+        if (!file_exists($filename)) {
+            return true;
+        }
+
         if (unlink(ltrim($filename, '/'))) {
             return true;
         }
