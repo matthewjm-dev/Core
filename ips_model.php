@@ -79,7 +79,7 @@ class ipsCore_model
             }
         }
 
-        if ($table) {
+        if ($table && !ipsCore::$database->does_table_exist($table)) {
             $this->create_table($table);
         }
 
@@ -384,10 +384,6 @@ class ipsCore_model
         if ($table) {
             $table = $this->add_prefix($table);
             $fields = [];
-
-            if (ipsCore::$database->does_table_exist($table)) {
-                return true;
-            }
 
             // Add primary key only if it doesnt exist in default fields
             if (!isset($this->default_fields) || !isset($this->default_fields[0]['extra']) || !in_array('PRIMARY KEY', $this->default_fields[0]['extra'])) {
