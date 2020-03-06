@@ -566,9 +566,13 @@ class ipsCore
         }
     }
 
-    public static function remove_cache($name) {
+    public static function remove_cache($name, $item = false) {
         if (ipsCore::cache_exists($name)) {
-            unset(ipsCore::$cache[$name]);
+            if ($item) {
+                unset(ipsCore::$cache[$name][$item]);
+            } else {
+                unset(ipsCore::$cache[$name]);
+            }
         }
         return true;
     }
