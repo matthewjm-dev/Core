@@ -192,7 +192,7 @@ class ipsCore_database
                 $sql .= '`' . $field_key . '` ';
                 $sql .= (isset($field['type']) ? $field['type'] : 'text');
                 $sql .= (isset($field['length']) ? '(' . $field['length'] . ')' : '');
-                $sql .= (isset($field['default']) ? ' DEFAULT ' . $field['length'] : '');
+                $sql .= (isset($field['default']) ? ' DEFAULT ' . $field['default'] : '');
                 $sql .= (isset($field['extra']) ? ' ' . implode(' ', $field['extra']) : '');
             }
 
