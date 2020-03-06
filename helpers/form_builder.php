@@ -1218,4 +1218,14 @@ class ipsCore_form_builder
         return serialize($return);
     }
 
+    public function option_exists($value, $options) {
+        foreach ($options as $option) {
+            if ($option['value'] == $value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }
