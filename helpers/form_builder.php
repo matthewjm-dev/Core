@@ -423,11 +423,11 @@ class ipsCore_form_builder
 
     public function validate_email($field)
     {
-        if (filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
+        if ($this->fields[$field]['value'] == '' || filter_var($this->fields[$field]['value'], FILTER_VALIDATE_EMAIL)) {
             return false;
         }
 
-        return true;
+        return 'That is not a valid email address';
     }
 
     public function render_email($field, $args)

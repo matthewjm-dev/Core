@@ -158,6 +158,11 @@ class ipsCore_controller
         $this->build_view($args);
     }
 
+    public function add_js_vars(array $vars)
+    {
+        ipsCore::add_js_vars($vars);
+    }
+
     public function add_data(array $data_items)
     {
         ipsCore::add_data($data_items);
@@ -170,6 +175,13 @@ class ipsCore_controller
         }
 
         ipsCore::add_data(['json' => $data_items]);
+    }
+
+    public function add_json_redirect($url)
+    {
+        $this->add_json([
+            'redirect' => $url,
+        ]);
     }
 
     public function add_json_success($data, $mute = false)
@@ -189,15 +201,18 @@ class ipsCore_controller
         $this->add_json($args);
     }
 
-    public function add_json_failure($data, $mute = false)
+    public function add_json_failure($errors, $mute = false)
     {
-        $args = ['success' => false];
+        $args = [
+            'success' => false,
+            'errors' => [],
+        ];
 
-        if (!is_array($data)) {
-            $args['errors'] = [$data];
-        } else {
-            $args = array_merge($args, $data);
+        if (!is_array($errors)) {
+            $errors = [$errors];
         }
+
+        $args['errors'] = $errors;
 
         if ($mute) {
             unset($args['success']);

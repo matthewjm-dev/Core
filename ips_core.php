@@ -33,7 +33,7 @@ class ipsCore
     public static $site_base;
 
     public static $includes = [];
-    public static $helpers = [];
+    public static $helpers  = [];
     //public static $helpers_active = [];
 
     public static $functions;
@@ -48,14 +48,16 @@ class ipsCore
     public static $request;
     public static $request_type;
 
-    public static $cache = []; // Simple, single request non persistent cache
-    public static $cache_key_schema = 'schema_table_columns';
+    public static $cache                   = []; // Simple, single request non persistent cache
+    public static $cache_key_schema        = 'schema_table_columns';
     public static $cache_key_tables_exists = 'schema_table_exists';
 
-    public static $data = []; // Front end data
+    public static $data        = []; // Front end data
+    public static $js_vars_key = 'js_vars';
     public static $output; // Front end page output
     public static $output_type = 'html'; // html / json
 
+    protected static $reserved_js_vars   = ['app_url'];
     protected static $reserved_data_keys = ['stylesheets', 'scripts', 'page_title', /*'breadcrumbs', 'flash_message'*/];
 
     public static function init()
@@ -79,7 +81,8 @@ class ipsCore
         self::get_core_app();
     }
 
-    public static function get_core_app() {
+    public static function get_core_app()
+    {
         require_once(self::$path_core . 'ips_app.php');
     }
 
@@ -100,6 +103,7 @@ class ipsCore
         /*self::find_helpers(self::$path_core_helpers);
         self::find_helpers(self::$path_app_helpers);*/
         self::setup_mailer();
+        self::setup_js_vars();
         self::$database = (ipsCore::$app->database['host'] ? new ipsCore_database() : false);
         self::$session = new ipsCore_session();
         self::$functions = new ipsCore_functions();
@@ -108,7 +112,8 @@ class ipsCore
     }
 
     // METHODS
-    public static function get_var($name, $type = false) {
+    public static function get_var($name, $type = false)
+    {
         if (!$type) {
             if (isset(self::$var_post[$name])) {
                 return self::$var_post[$name];
@@ -132,12 +137,12 @@ class ipsCore
 
     public static function set_environment()
     {
-    	$env_file = ipsCore::$path_base . '/environment.ini';
+        $env_file = ipsCore::$path_base . '/environment.ini';
         if (file_exists($env_file) && $environment_settings = parse_ini_file(ipsCore::$path_base . '/environment.ini', true)) {
-			self::$environment = $environment_settings[ 'environment_settings' ][ 'environment' ];
-		} else {
-        	die('Environment file missing');
-		}
+            self::$environment = $environment_settings['environment_settings']['environment'];
+        } else {
+            die('Environment file missing');
+        }
     }
 
     public static function is_environment_dev()
@@ -356,6 +361,17 @@ class ipsCore
         return $view->display(true);
     }
 
+    public static function add_js_vars(array $js_vars)
+    {
+        foreach ($js_vars as $key => $value) {
+            if (!in_array($key, ipsCore::$reserved_js_vars)) {
+                ipsCore::$data[ipsCore::$js_vars_key][$key] = $value;
+            } else {
+                ipsCore::add_error('Js Var key "' . $key . '" ( "' . print_r($value, true) . '" ) is reserved.');
+            }
+        }
+    }
+
     public static function add_data(array $data_items)
     {
         foreach ($data_items as $data_key => $data_value) {
@@ -474,7 +490,8 @@ class ipsCore
         }
     }
 
-    public static function setup_mailer() {
+    public static function setup_mailer()
+    {
         $mailer_file = 'mailer';
 
         if (ipsCore::$app->mailer['type'] != 'mailer') {
@@ -487,7 +504,8 @@ class ipsCore
         self::$mailer = new $mailer();
     }
 
-    public static function get_app_by_name($name) {
+    public static function get_app_by_name($name)
+    {
         $name = strtolower($name);
         foreach (ipsCore::$apps as $app) {
             if (strtolower($app->get_name()) == $name) {
@@ -497,35 +515,49 @@ class ipsCore
         return false;
     }
 
-    public static function get_app_dir_by_name($name) {
+    public static function get_app_dir_by_name($name)
+    {
         if ($app = self::get_app_by_name($name)) {
             return $app->get_directory();
         }
         return false;
     }
 
-    public static function get_app_uri_by_name($name) {
+    public static function get_app_uri_by_name($name)
+    {
         if ($app = self::get_app_by_name($name)) {
             return $app->get_uri();
         }
         return false;
     }
 
-    public static function get_app_uri_slashed_by_name($name) {
+    public static function get_app_uri_slashed_by_name($name)
+    {
         if ($app = self::get_app_by_name($name)) {
             return $app->get_uri_slashed();
         }
         return false;
     }
 
-    public static function cache_exists($name) {
+    public static function setup_js_vars()
+    {
+        ipsCore::$data[ipsCore::$js_vars_key] = [
+            'app_name' => ipsCore::$app->get_name(),
+            'app_uri' => ipsCore::$app->get_uri(),
+            'app_uri_slashed' => ipsCore::$app->get_uri_slashed(),
+        ];
+    }
+
+    public static function cache_exists($name)
+    {
         if (isset(ipsCore::$cache[$name])) {
             return true;
         }
         return false;
     }
 
-    public static function set_cache($name, $data) {
+    public static function set_cache($name, $data)
+    {
         if (!ipsCore::cache_exists($name)) {
             ipsCore::$cache[$name] = $data;
             return true;
@@ -533,7 +565,8 @@ class ipsCore
         return false;
     }
 
-    public static function update_cache($name, $data) {
+    public static function update_cache($name, $data)
+    {
         if (ipsCore::cache_exists($name)) {
             ipsCore::set_or_update_cache($name, $data);
             return true;
@@ -541,18 +574,21 @@ class ipsCore
         return false;
     }
 
-    public static function set_or_update_cache($name, $data) {
+    public static function set_or_update_cache($name, $data)
+    {
         ipsCore::$cache[$name] = $data;
     }
 
-    public static function get_cache($name) {
+    public static function get_cache($name)
+    {
         if (ipsCore::cache_exists($name)) {
             return ipsCore::$cache[$name];
         }
         return false;
     }
 
-    public static function add_cache($name, $data, $key = false) {
+    public static function add_cache($name, $data, $key = false)
+    {
         if (!ipsCore::cache_exists($name)) {
             ipsCore::set_cache($name, []);
         }
@@ -566,7 +602,8 @@ class ipsCore
         }
     }
 
-    public static function remove_cache($name, $item = false) {
+    public static function remove_cache($name, $item = false)
+    {
         if (ipsCore::cache_exists($name)) {
             if ($item) {
                 unset(ipsCore::$cache[$name][$item]);
