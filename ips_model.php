@@ -386,7 +386,7 @@ class ipsCore_model
             $fields = [];
 
             // Add primary key only if it doesnt exist in default fields
-            if (!isset($this->default_fields) || !isset($this->default_fields[0]['extra']) || !in_array('PRIMARY KEY', $this->default_fields[0]['extra'])) {
+            if (!isset($this->default_fields) || !isset($this->default_fields[array_key_first($this->default_fields)]['extra']) || !in_array('PRIMARY KEY', $this->default_fields[array_key_first($this->default_fields)]['extra'])) {
                 $fields[$id] = $this->get_pkey_args();
             }
 
