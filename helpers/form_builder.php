@@ -57,9 +57,9 @@ class ipsCore_form_builder
         ['text' => 'No', 'value' => 0],
     ];
 
-    public $is_repeater = false;
     public $repeater_name = false;
-    public $repeater_label = false;
+    public $repeater_row_key = false;
+    public $repeater_row = false;
 
     // Getters
     public function get_name()
@@ -220,14 +220,16 @@ class ipsCore_form_builder
         if (empty($errors)) {
             $id = $this->get_name() . '-' . $name;
             $class = $name . ' ' . $type;
-            $name = $name . ($this->is_repeater ? '[]' : ''); // For fields in a repeater group
+            $value = (isset($options['value']) ? $options['value'] : ($this->repeater_name && isset($this->repeater_row[$name]) ? $this->repeater_row[$name] : null));
+            $key = $name . ($this->repeater_name ? '[' . $this->repeater_row_key . ']' : ''); // For fields in a repeater group
+            $name = $name . ($this->repeater_name ? '[]' : '');
 
-            $this->fields[$name] = [
+            $this->fields[$key] = [
                 'id'                     => $id,
                 'name'                   => $name,
                 'label'                  => $label,
                 'type'                   => $type,
-                'value'                  => (isset($options['value']) ? $options['value'] : null),
+                'value'                  => $value,
                 'default'                => (isset($options['default']) ? $options['default'] : null),
                 'options'                => (isset($options['options']) ? $options['options'] : []),
                 'required'               => (isset($options['required']) ? $options['required'] : false),
@@ -238,6 +240,7 @@ class ipsCore_form_builder
                 'fieldset_classes'       => (isset($options['fieldset_classes']) ? $options['fieldset_classes'] . ' ' . $class : $class),
                 'disabled'               => (isset($options['disabled']) && $options['disabled'] ? true : false),
                 'extra_data'             => (isset($options['extra_data']) && !empty($options['extra_data']) ? $options['extra_data'] : false),
+                'repeater_group'         => ($this->repeater_name ? $this->repeater_name : false),
             ];
         } else {
             foreach ($errors as $error) {
@@ -277,22 +280,37 @@ class ipsCore_form_builder
     {
         $classes = (isset($options['classes']) ? implode(' ', $options['classes']) : '');
         $title = (isset($options['title']) ? $options['title'] : false);
+        $data = (isset($options['data']) ? unserialize($options['data']) : []);
 
-        $this->is_repeater = true;
+        $this->repeater_name = $name;
 
-        $this->add_html('repeater-group-start' . $name, '
+        $this->add_html('repeater-group-start-' . $name, '
             <div id="repeater-group-' . $name . '" class="form-section repeater-group ' . $classes . '">
                 <p class="form-section-title">' . $title . '</p>
-                <div class="repeater-group-fields"><div class="repeater-group-item">');
+                <div class="repeater-group-fields">');
 
-        $field_funcs();
+        if (empty($data)) {
+            $this->add_html('repeater-group-row-start-' . $name, '<div class="repeater-group-item">');
+            $field_funcs();
+            $this->add_html('repeater-group-row-end-' . $name, '</div>');
+        } else {
+            foreach ($data as $row_key => $row) {
+                $this->repeater_row_key = $row_key;
+                $this->repeater_row = $row;
+                $this->add_html('repeater-group-row-start-' . $row_key . '-' . $name, '<div class="repeater-group-item">');
+                $field_funcs();
+                $this->add_html('repeater-group-row-end-' . $row_key . '-' . $name, '</div>');
+            }
+        }
 
         $this->add_html('repeater-group-end' . $name, '
-                </div></div>
+                </div>
                 <button class="repeater-group-add">Add New</button>
             </div>');
 
-        $this->is_repeater = false;
+        $this->repeater_name = false;
+        $this->repeater_row_key = false;
+        $this->repeater_row = false;
     }
 
     /* Start Section */
@@ -382,10 +400,20 @@ class ipsCore_form_builder
 
     public function validate_number($field)
     {
-        $this->fields[$field]['value'] = (int)$this->fields[$field]['value'];
+        if ($this->fields[$field]['repeater_group'] && is_array($this->fields[$field]['value'])) {
+            foreach ($this->fields[$field]['value'] as $value_key => $value) {
+                $this->fields[$field]['value'][$value_key] = (int)$this->fields[$field]['value'][$value_key];
 
-        if (!is_int($this->fields[$field]['value'])) {
-            return 'Field is not an integer';
+                if (!is_int($this->fields[$field]['value'][$value_key])) {
+                    return 'Field is not an integer';
+                }
+            }
+        } else {
+            $this->fields[$field]['value'] = (int)$this->fields[$field]['value'];
+
+            if (!is_int($this->fields[$field]['value'])) {
+                return 'Field is not an integer';
+            }
         }
 
         return false;
@@ -1041,14 +1069,24 @@ class ipsCore_form_builder
         if (!$fields) {
             $fields = (isset($_REQUEST) ? $_REQUEST : []);
         }
+
         foreach ($this->get_fields() as $field_key => $field) {
             if ($field_type = self::get_field_types($field['type'])) {
                 $value = false;
+                $set_value = false;
 
                 if (is_object($fields)) {
                     if (isset($fields->$field_key)) {
                         $value = $fields->$field_key;
-                    } else {
+                        $set_value = true;
+                    } elseif ($array_field_key = $this->is_field_key_array($field_key)) {
+                        if (isset($fields->$array_field_key)) {
+                            $value = $fields->$array_field_key;
+                            $set_value = true;
+                        }
+                    }
+
+                    if (!$set_value) {
                         if (isset($field->default) && !empty($field->default)) {
                             $value = $field->default;
                         }
@@ -1056,7 +1094,15 @@ class ipsCore_form_builder
                 } else {
                     if (isset($fields[$field_key])) {
                         $value = $fields[$field_key];
-                    } else {
+                        $set_value = true;
+                    } elseif ($array_field_key = $this->is_field_key_array($field_key)) {
+                        if (isset($fields[$array_field_key])) {
+                            $value = $fields[$array_field_key];
+                            $set_value = true;
+                        }
+                    }
+
+                    if (!$set_value) {
                         if (isset($field['default']) && !empty($field['default'])) {
                             $value = $field['default'];
                         }
@@ -1226,6 +1272,36 @@ class ipsCore_form_builder
         }
 
         return false;
+    }
+
+    public function is_field_key_array($field_key) {
+        $test = '[]';
+        $test_len = 2;
+        $field_key_length = strlen($field_key);
+
+        if ($test_len > $field_key_length) {
+            return false;
+        }
+
+        if (substr_compare($field_key, $test, $field_key_length - $test_len, $test_len) === 0) {
+            return str_replace($test, '', $field_key);
+        }
+
+        return false;
+    }
+
+    public function get_repeater_group($group_key) {
+        $items = [];
+
+        foreach ($this->fields as $field_key => $field) {
+            if (isset($field['repeater_group']) && $field['repeater_group'] == $group_key) {
+                foreach ($field['value'] as $value_key => $value) {
+                    $items[$value_key][$this->is_field_key_array($field_key)] = $value;
+                }
+            }
+        }
+
+        return $items;
     }
 
 }

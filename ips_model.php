@@ -480,6 +480,16 @@ class ipsCore_model
     /* Query Functions */
 
     public function reset() {
+        $this->reset_query();
+
+        foreach ($this->fields as $field_key => $field) {
+            $this->set_prop($field_key, $field['default']);
+        }
+
+        return $this;
+    }
+
+    public function reset_query() {
         $this->query_join = $this->query_join_default;
         $this->query_where = $this->query_where_default;
         $this->query_order = $this->query_order_default;
@@ -865,6 +875,14 @@ class ipsCore_model
                     $extra = (isset($default_field['extra']) ? $default_field['extra'] : false);
                     $this->create_column($default_field_key, $default_field['type'], $length, $default, $extra);
                 }
+            }
+        }
+    }
+
+    public function populate_from_form($form, array $excludes = []) {
+        foreach ($this->fields as $field_key => $field) {
+            if (!in_array($field_key, $excludes)) {
+                $this->set_prop($field_key, $form->get_field_value($field_key));
             }
         }
     }
