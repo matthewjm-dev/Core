@@ -12,7 +12,7 @@ class ipsCore_form_builder
 
     public static $field_types = [
         'number'          => ['title' => 'Number', 'type' => 'int', 'length' => '11'],
-        'price'           => ['title' => 'Price', 'type' => 'decimal', 'length' => '18,2'],
+        'price'           => ['title' => 'Price', 'type' => 'int', 'length' => '11'],
         'text'            => ['title' => 'Text Input', 'type' => 'varchar', 'length' => '255'],
         'email'           => ['title' => 'Email Address Input', 'type' => 'varchar', 'length' => '255'],
         'password'        => ['title' => 'Password Input', 'type' => 'varchar', 'length' => '255'],
@@ -289,17 +289,20 @@ class ipsCore_form_builder
                 <p class="form-section-title">' . $title . '</p>
                 <div class="repeater-group-fields">');
 
+        $row_start = '<div class="repeater-group-item">';
+        $row_end = '<div class="repeater-group-item-remove"><i class="fa fa-trash"></i></div></div>';
+
         if (empty($data)) {
-            $this->add_html('repeater-group-row-start-' . $name, '<div class="repeater-group-item">');
+            $this->add_html('repeater-group-row-start-' . $name, $row_start);
             $field_funcs();
-            $this->add_html('repeater-group-row-end-' . $name, '</div>');
+            $this->add_html('repeater-group-row-end-' . $name, $row_end);
         } else {
             foreach ($data as $row_key => $row) {
                 $this->repeater_row_key = $row_key;
                 $this->repeater_row = $row;
-                $this->add_html('repeater-group-row-start-' . $row_key . '-' . $name, '<div class="repeater-group-item">');
+                $this->add_html('repeater-group-row-start-' . $row_key . '-' . $name, $row_start);
                 $field_funcs();
-                $this->add_html('repeater-group-row-end-' . $row_key . '-' . $name, '</div>');
+                $this->add_html('repeater-group-row-end-' . $row_key . '-' . $name, $row_end);
             }
         }
 
@@ -389,7 +392,7 @@ class ipsCore_form_builder
     public function render_text($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '') . '" /></fieldset>');
+        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $args['field_value'] . '" placeholder="' . (isset($field['placeholder']) ? $field['placeholder'] : '') . '" /></fieldset>');
     }
 
     /* Int */
@@ -422,25 +425,43 @@ class ipsCore_form_builder
     public function render_number($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="int ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Price */
     public function add_price($name, $label, array $options = [])
     {
         $options['classes'] = (isset($options['classes']) ? $options['classes'] : '') . ' text';
-        $this->add_field($name, $label, 'text', $options);
+        $this->add_field($name, $label, 'price', $options);
     }
 
-    public function validate_price()
+    public function validate_price($field)
     {
+        if ($this->fields[$field]['repeater_group'] && is_array($this->fields[$field]['value'])) {
+            foreach ($this->fields[$field]['value'] as $value_key => $value) {
+                $this->fields[$field]['value'][$value_key] = (int)($this->fields[$field]['value'][$value_key] * 100);
 
+                if (!is_int($this->fields[$field]['value'][$value_key])) {
+                    return 'Field is not a Price integer';
+                }
+            }
+        } else {
+            $this->fields[$field]['value'] = (int)($this->fields[$field]['value'] * 100);
+
+            if (!is_int($this->fields[$field]['value'])) {
+                return 'Field is not a Price integer';
+            }
+        }
+
+        return false;
     }
 
     public function render_price($field, $args)
     {
+        $display_price = ($args['field_value'] > 0 ? number_format($args['field_value'] / 100, 2) : 0);
+
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="price ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $display_price . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Email Address */
@@ -461,7 +482,7 @@ class ipsCore_form_builder
     public function render_email($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="email ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="email" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="email" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Password */
@@ -482,7 +503,7 @@ class ipsCore_form_builder
     public function render_password($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="password ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="password" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="password" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Textarea */
@@ -524,7 +545,7 @@ class ipsCore_form_builder
     public function render_timestamp($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="timestamp ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="number" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Date Input */
@@ -541,7 +562,7 @@ class ipsCore_form_builder
     public function render_date($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="date ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="date" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="date" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* Time Input */
@@ -558,7 +579,7 @@ class ipsCore_form_builder
     public function render_time($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="time ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="time" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<input type="time" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
     }
 
     /* WYSIWYG Editor */
@@ -890,7 +911,7 @@ class ipsCore_form_builder
     public function render_file($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="file ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="file" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<input type="file" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
             $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
         }
@@ -921,7 +942,7 @@ class ipsCore_form_builder
     public function render_file_multiple($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['id'] . '" class="file ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="file" id="' . $field['id'] . '" name="' . $field['name'] . '[]" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" multiple="multiple" />');
+        $this->form_html('<input type="file" id="' . $field['id'] . '" name="' . $field['name'] . '[]" class="' . $args['field_classes'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" multiple="multiple" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
             $this->form_html('<p class="preview"><a class="preview" href="' . $field['preview']['url'] . '" ></a><a class="preview-remove" href="' . $field['preview']['remove'] . '" ></a></p>');
         }
@@ -942,7 +963,7 @@ class ipsCore_form_builder
     public function render_image($field, $args)
     {
         $this->form_html('<fieldset id="field-' . $field['name'] . '" class="image ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '"' . $args['field_value'] . ' placeholder="' . $field['placeholder'] . '" />');
+        $this->form_html('<input type="file" id="' . $field['name'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $args['field_value'] . '" placeholder="' . $field['placeholder'] . '" />');
         if (isset($field['preview']) && !empty($field['preview'])) {
             $this->form_html('<div class="preview" src="' . $field['preview']['url'] . '" ><a class="preview-url" href="' . $field['preview']['url'] . '"><a class="preview-remove" href="' . $field['preview']['remove'] . '"></a></a></div>');
         }
@@ -962,7 +983,7 @@ class ipsCore_form_builder
 
     public function render_hidden($field, $args)
     {
-        $this->form_html('<input type="hidden" id="' . $field['id'] . '" name="' . $field['name'] . '"' . $args['field_value'] . ' />');
+        $this->form_html('<input type="hidden" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" />');
     }
 
     /* Submit */
@@ -1013,10 +1034,10 @@ class ipsCore_form_builder
 
         $field_value = '';
         if (isset($field['value'])) {
-            $field_value = ' value="' . htmlentities($field['value']) . '"';
+            $field_value = htmlentities($field['value']);
         } elseif ($field_default !== false) {
             $field['value'] = $field_default;
-            $field_value = ' value="' . htmlentities($field_default) . '"';
+            $field_value = htmlentities($field_default);
         }
 
         $field_attributes = '';

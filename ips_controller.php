@@ -426,7 +426,7 @@ class ipsCore_controller
             }
 
             if ($args['model']->has_field('removed') && !$args['include_removed']) {
-                $args['model']->where(['removed' => 0]);
+                $args['model']->where(['removed' => 'IS NULL']);
             }
 
             $this->set_pagination($args);

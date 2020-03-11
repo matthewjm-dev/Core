@@ -62,6 +62,11 @@ class ipsCore_model
     }
 
     // Setters
+    public function set_id($id)
+    {
+        $this->{$this->get_pkey()} = $id;
+    }
+
     public function set_name($name)
     {
         $this->model_name = $name;
@@ -787,7 +792,8 @@ class ipsCore_model
 
         if ($item) {
             foreach ($item as $item_data_key => $item_data) {
-                $this->{$item_data_key} = $item_data;
+                //$this->{$item_data_key} = $item_data;
+                $this->set_prop($item_data_key, $item_data);
             }
 
             $this->load_relationships();
@@ -852,6 +858,13 @@ class ipsCore_model
         }
 
         if (!empty($fields) && ($insert || !empty($where))) {
+            $time = time();
+            if (array_key_exists('created', $fields) && $fields['created'] === null) {
+                $fields['created'] = $time;
+            }
+            if (array_key_exists('modified', $fields)) {
+                $fields['modified'] = $time;
+            }
             if ($insert !== false) {
                 if ($id = ipsCore::$database->insert($this->get_model_table(), $fields)) {
                     $this->{$insert} = $id;
@@ -880,9 +893,16 @@ class ipsCore_model
     }
 
     public function populate_from_form($form, array $excludes = []) {
-        foreach ($this->fields as $field_key => $field) {
-            if (!in_array($field_key, $excludes)) {
+        /*foreach ($this->fields as $field_key => $field) {
+            if (!in_array($field_key, $excludes) && !$field['key']) {
                 $this->set_prop($field_key, $form->get_field_value($field_key));
+            }
+        }*/
+        foreach ($form->get_fields() as $field_key => $field) {
+            if (!in_array($field_key, $excludes)) {
+                if ($this->has_field($field_key)) {
+                    $this->set_prop($field_key, $field['value']);
+                }
             }
         }
     }

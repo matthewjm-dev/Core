@@ -15,4 +15,8 @@ jQuery(function ($) {
 
         new_field_group.appendTo('.repeater-group-fields');
     });
+
+    $('.repeater-group').on('click', '.repeater-group-item .repeater-group-item-remove', function() {
+       $(this).parents('.repeater-group-item').remove();
+    });
 });
