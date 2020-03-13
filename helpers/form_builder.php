@@ -270,7 +270,11 @@ class ipsCore_form_builder
             $this->add_html($field_title, '<p class="form-section-title">' . $title . '</p>');
         }
 
+        $this->add_html('field-group-inner-start-' . $name, '<div class="form-section-inner">');
+
         $field_funcs();
+
+        $this->add_html('field-group-inner-end-' . $name, '</div>');
 
         $this->end_section($name);
     }
