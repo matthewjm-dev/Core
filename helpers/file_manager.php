@@ -72,7 +72,9 @@ class ipsCore_file_manager
 
                     if (empty($errors)) {
                         // Update the $file 'uploadto' and 'basename' vars if file with the same name exists
-                        self::get_unused_name($args['path'], $raw_file['uploadto'], $raw_file['basename'], $raw_file['extension']);
+                        if (self::get_unused_name($args['path'], $raw_file['uploadto'], $raw_file['basename'], $raw_file['extension'])) {
+                            $raw_file['name'] = $raw_file['basename'] . '.' . $raw_file['extension'];
+                        }
 
                         if ($raw_file["size"] <= self::$max_upload_size) {
                             if (!move_uploaded_file($raw_file["tmp_name"], $raw_file['uploadto'])) {
@@ -125,10 +127,12 @@ class ipsCore_file_manager
     }
 
     public static function get_unused_name($path, &$uploadto, &$basename, $extension) {
+        $has_changed = false;
         $i = 2;
         $temp_uploadto = $uploadto;
         $temp_basename = $basename;
         while (file_exists($temp_uploadto)) {
+            $has_changed = true;
             $temp_basename = $basename . '-' . $i;
             $temp_uploadto = $path . $temp_basename . '.' . $extension;
 
@@ -136,6 +140,8 @@ class ipsCore_file_manager
         }
         $uploadto = $temp_uploadto;
         $basename = $temp_basename;
+
+        return $has_changed;
 
         /*$i = 2;
 $temp_basename = $raw_file['basename'];
@@ -176,14 +182,20 @@ if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
     public static function get_file_type($file_name, $index = 0)
     {
         if ($raw_files = ipsCore_file_manager::get_sent_file($file_name)) {
-
             $raw_files[$index]['extension'] = strtolower(pathinfo($raw_files[$index]['name'], PATHINFO_EXTENSION));
 
-            if (in_array($raw_files[$index]['extension'], ipsCore_file_manager::$allowed_types_images)) {
-                return 'image';
-            } elseif (in_array($raw_files[$index]['extension'], ipsCore_file_manager::$allowed_types_files)) {
-                return 'file';
-            }
+            return ipsCore_file_manager::get_file_type_from_extension($raw_files[$index]['extension']);
+        }
+
+        return false;
+    }
+
+    public static function get_file_type_from_extension($extension)
+    {
+        if (in_array($extension, ipsCore_file_manager::$allowed_types_images)) {
+            return 'image';
+        } elseif (in_array($extension, ipsCore_file_manager::$allowed_types_files)) {
+            return 'file';
         }
 
         return false;
