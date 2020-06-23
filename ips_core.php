@@ -58,7 +58,7 @@ class ipsCore
     public static $output_type = 'html'; // html / json
 
     protected static $reserved_js_vars   = ['app_url'];
-    protected static $reserved_data_keys = ['stylesheets', 'scripts', 'page_title', /*'breadcrumbs', 'flash_message'*/];
+    protected static $reserved_data_keys = ['stylesheets', 'scripts', 'page_title', 'canonical'/*'breadcrumbs', 'flash_message'*/];
 
     public static function init()
     {

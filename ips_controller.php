@@ -8,6 +8,7 @@ class ipsCore_controller
     protected $name;
     protected $view;
     protected $view_class = '';
+    protected $canonical = '';
     protected $additional;
 
     public $models = [];
@@ -31,6 +32,11 @@ class ipsCore_controller
     public function get_additional()
     {
         return $this->additional;
+    }
+
+    public function get_canonical()
+    {
+        return $this->canonical;
     }
 
     // SETTERS
@@ -62,10 +68,9 @@ class ipsCore_controller
         $this->additional = $additional;
     }
 
-    public function __construct($controller, $additional = false)
+    public function set_canonical($canonical)
     {
-        $this->set_name($controller);
-        $this->set_additional($additional);
+        ipsCore::$data['canonical_url'] = rtrim(ipsCore::$site_base, '/') . $canonical;
     }
 
     public function set_page_title($title)
@@ -75,6 +80,17 @@ class ipsCore_controller
 
     public function set_error404($func = 'call_error404') {
         ipsCore::$router->get_route()->set_method($func);
+    }
+
+    /**
+     * ipsCore_controller constructor.
+     * @param      $controller
+     * @param bool $additional
+     */
+    public function __construct($controller, $additional = false)
+    {
+        $this->set_name($controller);
+        $this->set_additional($additional);
     }
 
     public function call_error404()
@@ -137,9 +153,9 @@ class ipsCore_controller
                 $this->set_view($view_path);
             }
 
-            $class = $args['class'] . ($args['class'] != '' ? ' ' : '') . $this->get_view_class();
+            $view_class = $args['class'] . ($args['class'] != '' ? ' ' : '') . $this->get_view_class();
 
-            ipsCore::$output = new ips_view($this->view, $args['layout'], $args['type'], $class);
+            ipsCore::$output = new ips_view($this->view, $args['layout'], $args['type'], $view_class);
         }
     }
 
@@ -387,7 +403,8 @@ class ipsCore_controller
         ];
 
         $args = array_merge($defaults, $args);
-        if ($args['current_page'] === false) {
+
+        if ($args['current_page'] === false || !is_numeric($args['current_page'])) {
             $args['current_page'] = 1;
         }
 
@@ -414,6 +431,10 @@ class ipsCore_controller
             ];
 
             $args = array_merge($defaults, $args);
+
+            if ($args['current_page'] === false || !is_numeric($args['current_page'])) {
+                $args['current_page'] = 1;
+            }
 
             $offset = ($args['current_page'] - 1) * $args['per_page'];
 

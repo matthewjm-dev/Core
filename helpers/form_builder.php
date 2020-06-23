@@ -29,7 +29,7 @@ class ipsCore_form_builder
         'datepicker'      => ['title' => 'Date Picker', 'type' => 'varchar', 'length' => '255'],
         'colourpicker'    => ['title' => 'Color Picker', 'type' => 'varchar', 'length' => '255'],
         'file'            => ['title' => 'File Upload', 'type' => 'int', 'length' => '11', 'file' => true],
-        'file_multiple'   => ['title' => 'File Upload Multiple', 'type' => 'int', 'length' => '11', 'file' => true],
+        'file_multiple'   => ['title' => 'File Upload Multiple', 'type' => 'varcar', 'length' => '255', 'file' => true],
         'image'           => ['title' => 'Image Upload', 'type' => 'int', 'length' => '11', 'file' => false],
         'hidden'          => ['title' => 'Hidden Field', 'type' => 'text', 'unselectable' => true],
         'date'            => ['title' => 'Date Field', 'type' => 'varchar', 'length' => '255'],
@@ -1173,7 +1173,7 @@ class ipsCore_form_builder
                     }
                 }
 
-                $this->fields[$field_key]['value'] = $value;
+                $this->set_field_value($field_key, $value);
             }
         }
     }
