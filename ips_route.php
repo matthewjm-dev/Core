@@ -9,6 +9,7 @@ class ipsCore_route
     protected $controller;
     protected $method;
     protected $args;
+    protected $module_app;
 
     // Getters
     public function get_uri()
@@ -46,6 +47,11 @@ class ipsCore_route
         return $this->args;
     }
 
+    public function get_module_app()
+    {
+        return $this->module_app;
+    }
+
     // Setters
     public function set_uri($uri)
     {
@@ -69,12 +75,18 @@ class ipsCore_route
         $this->args = $args;
     }
 
+    public function set_module_app($module_app)
+    {
+        $this->module_app = $module_app;
+    }
+
     // Construct
-    public function __construct($uri, $controller, $method, $args = [])
+    public function __construct($uri, $controller, $method, $args = [], $module_app = false)
     {
         $this->set_uri($uri);
         $this->set_controller($controller);
         $this->set_method($method);
         $this->set_args($args);
+        $this->set_module_app($module_app);
     }
 }

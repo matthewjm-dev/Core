@@ -1,0 +1,254 @@
+form {
+	.form-section {
+		position: relative;
+		padding: 10px 0;
+		background-color: #F9F9F9;
+		border: 1px solid $colour-body;
+		border-top-width: 2px;
+		border-bottom: 2px solid #333;
+		margin-bottom: 30px;
+
+		.form-section-title {
+			margin: 0 0 10px;
+			padding: 10px 15px;
+			position: relative;
+			top: -10px;
+			background-color: #b1b1b1;
+			font-size: 20px;
+			font-weight: 600;
+			border-bottom: 1px solid #000;
+		}
+
+		&:after {
+			content: '';
+			display: block;
+			clear: both;
+		}
+	}
+
+	.form-section-wrapper {
+		& > div {
+			.form-section {
+
+			}
+		}
+	}
+
+	fieldset {
+		border: 0;
+		margin: 0 0 15px 0;
+		position: relative;
+		padding: 0 15px;
+
+		input[type="text"],
+		input[type="password"],
+		input[type="number"],
+		input[type="email"],
+		input[type="telephone"],
+		select,
+		textarea {
+			width: 100%;
+			height: 30px;
+			display: block;
+		}
+
+		textarea {
+			min-height: 80px;
+			resize: vertical;
+		}
+
+		label {
+			display: block;
+			font-weight: 700;
+			margin-bottom: 5px;
+			line-height: 22px;
+		}
+
+		p {
+			margin: 0 0 7px;
+		}
+
+		input {
+			width: 250px;
+			height: 30px;
+			padding: 0 10px;
+		}
+
+		input[type="text"],
+		input[type="password"] {
+			border: 1px solid $colour-body;
+			line-height: 20px;
+		}
+
+		&.select {
+
+			&.multiple {
+				select {
+					min-height: 100px;
+				}
+			}
+		}
+
+		&.radio, &.check {
+			.radiofield, .checkfield {
+				position: relative;
+				display: block;
+				line-height: 1;
+				margin-bottom: 10px;
+				font-weight: normal;
+
+				input {
+					width: 18px;
+					height: 18px;
+					float: left;
+					display: inline;
+					margin: 0 5px 0 0;
+				}
+			}
+		}
+
+		&.price {
+			.price-wrap {
+				display: inline-block;
+				position: relative;
+
+				.price-symbol {
+					width: 20px;
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					left: 0;
+					border-right: 1px solid $colour-body;
+					font-size: 24px;
+					text-align: center;
+					background-color: $colour-body-alt;
+				}
+
+				input {
+					padding-left: 25px;
+				}
+			}
+		}
+
+		&.toggle {
+			label {
+				.toggle-title {
+					display: block;
+				}
+
+				.toggle-text {
+					float: left;
+					display: inline-block;
+					line-height: 34px;
+					padding: 0 10px 0 0;
+
+					&:last-child {
+						padding: 0 0 0 10px;
+					}
+				}
+
+				input {
+					opacity: 0;
+					width: 0;
+					height: 0;
+				}
+
+				.slider {
+					width: 60px;
+					height: 34px;
+					display: inline-block;
+					position: relative;
+					float: left;
+					cursor: pointer;
+					background-color: $colour-body-alt;
+					-webkit-transition: .4s;
+					transition: .4s;
+				}
+
+				.slider:before {
+					position: absolute;
+					content: "";
+					height: 26px;
+					width: 26px;
+					left: 4px;
+					bottom: 4px;
+					background-color: $white;
+					-webkit-transition: .4s;
+					transition: .4s;
+				}
+
+				input:checked + .slider {
+					background-color: $colour-main-alt;
+				}
+
+				input:focus + .slider {
+					box-shadow: 0 0 1px $colour-main-alt;
+				}
+
+				input:checked + .slider:before {
+					-webkit-transform: translateX(26px);
+					-ms-transform: translateX(26px);
+					transform: translateX(26px);
+				}
+			}
+		}
+
+		&.required {
+
+		}
+
+		&.error {
+			input, select {
+				border-color: red;
+			}
+
+			&.radio, &.check {
+				border: 1px solid red;
+			}
+
+			.message {
+				margin: 0;
+				position: absolute;
+				left: 5px;
+				bottom: -22px;
+				font-size: 12px;
+				border: 0;
+				background: none;
+				color: red;
+			}
+		}
+
+		&.hidden {
+			display: none;
+		}
+
+		&.image-preview {
+			img {
+				max-width: 100px;
+			}
+		}
+
+		&.file-preview {
+
+		}
+
+		&.submit {
+			width: auto;
+			float: right;
+			margin: 0 15px 0 0;
+			padding: 0;
+		}
+
+		[class^='select2'] {
+			border-radius: 0px !important;
+		}
+	}
+}
+
+@include md-down() {
+
+	form fieldset {
+		width: 100%;
+		float: none;
+	}
+}

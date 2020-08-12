@@ -1,0 +1,17 @@
+/* Transform */
+@mixin ips-transform( $args ) {
+	-webkit-transform: $args;
+	-moz-transform: $args;
+	-ms-transform: $args;
+	-o-transform: $args;
+	transform: $args;
+}
+
+/* Turn off transform */
+@mixin ips-no_transform(){
+	-webkit-transform: none;
+	-moz-transform: none;
+	-ms-transform: none;
+	-o-transform: none;
+	transform: none;
+}

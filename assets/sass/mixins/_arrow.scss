@@ -1,0 +1,15 @@
+@mixin ips-arrow( $size, $thickness, $color, $angle, $top:0, $right:0, $bottom:0, $left:0 ) {
+  &:before {
+	width:$size;
+	height:$size;
+	content:'';
+	display:inline-block;
+	border-style:solid;
+	border-width:$thickness $thickness 0 0;
+	border-color:$color;
+	position:absolute;
+	margin:auto;
+	top:$top;right:$right;bottom:$bottom;left:$left;
+	@include ips-transform( rotate( $angle ) );
+  }
+}

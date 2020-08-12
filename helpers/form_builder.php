@@ -57,6 +57,8 @@ class ipsCore_form_builder
         ['text' => 'No', 'value' => 0],
     ];
 
+    public static $currency_symbol = '&pound;';
+
     public $repeater_name = false;
     public $repeater_row_key = false;
     public $repeater_row = false;
@@ -464,8 +466,12 @@ class ipsCore_form_builder
     {
         $display_price = ($args['field_value'] > 0 ? number_format($args['field_value'] / 100, 2) : 0);
 
-        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="price ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment']);
-        $this->form_html('<input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $display_price . '" placeholder="' . $field['placeholder'] . '" /></fieldset>');
+        $this->form_html('<fieldset id="field-' . $field['id'] . '" class="price ' . $args['fieldset_classes'] . '">' . $args['field_label'] . $args['field_comment'] .
+            '<span class="price-wrap">
+                <span class="price-symbol">' . self::$currency_symbol . '</span>
+                <input type="text" id="' . $field['id'] . '" name="' . $field['name'] . '" class="' . $args['field_classes'] . '" value="' . $display_price . '" placeholder="' . $field['placeholder'] . '" />
+            </span>
+        </fieldset>');
     }
 
     /* Email Address */
@@ -988,6 +994,45 @@ class ipsCore_form_builder
     public function render_hidden($field, $args)
     {
         $this->form_html('<input type="hidden" id="' . $field['id'] . '" name="' . $field['name'] . '" value="' . $args['field_value'] . '" />');
+    }
+
+    /* Toggle Button */
+    public function add_toggle($name, $label, array $options = []) {
+        $this->add_field($name, $label, 'toggle', $options);
+    }
+
+    public function validate_toggle($field)
+    {
+        $this->validate_field_options($field);
+
+        return false;
+    }
+
+    public function render_toggle($field, $args)
+    {
+        if (count($field['options']) == 2) {
+            $this->form_html('<fieldset id="field-' . $field['id'] . '" class="' . $args['fieldset_classes'] . '">' . $args['field_comment']);
+
+            $true = $field['options'][0];
+            $false = $field['options'][1];
+
+            if ($field['value'] == '') {
+                $option_selected = ($field['default'] ? 'checked' : '');
+            } else {
+                $option_selected = ((isset($true['selected']) && $true['selected'] == 1) || ($true['value'] == $field['value'])) ? 'checked' : '';
+            }
+
+            $this->form_html('<label for="' . $field['name'] . '">
+                    <span class="toggle-title">' . $field['label'] . '</span>
+                    <span class="toggle-text">' . $false['text'] . '</span>
+                    <input class="' . $args['field_classes'] . '" type="checkbox" id="' . $field['name'] . '" name="' . $field['name'] . '" value="' . $true['value'] . '" ' . $option_selected . ' />
+                    <span class="slider"></span>
+                    <span class="toggle-text">' . $true['text'] . '</span>
+                </label>
+            </fieldset>');
+        } else {
+            ipsCore::add_error('2 Options are required for Toggle fields');
+        }
     }
 
     /* Submit */

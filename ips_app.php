@@ -2,12 +2,14 @@
 
 class ipsCore_app
 {
+    private $title;
     private $name;
     private $directory;
     private $uri;
     private $uri_slashed;
     private $version;
     private $core_version;
+    private $supports_modules = false;
 
     public $database = [
         'host' => false, 'name' => false, 'user' => false, 'pass' => false, 'prefix' => false,
@@ -23,32 +25,51 @@ class ipsCore_app
         } else {
             ipsCore::add_error('App.ini missing: App > Name', true);
         }
+
+        if (isset($app['app']['title'])) {
+            $this->title = $app['app']['title'];
+        } else {
+            $this->title = $this->name;
+        }
+
         if (isset($app['app']['dir'])) {
             $this->directory = $app['app']['dir'];
         } else {
             ipsCore::add_error('App.ini missing: directory', true);
         }
+
         if (isset($app['app']['uri'])) {
             $this->uri = $app['app']['uri'];
             $this->uri_slashed = '/' . $app['app']['uri'] . ($app['app']['uri'] ? '/' : '');
         } else {
             ipsCore::add_error('App.ini missing: App > Uri', true);
         }
+
         if (isset($app['app']['version'])) {
             $this->version = $app['app']['version'];
         } else {
             ipsCore::add_error('App.ini missing: version', true);
         }
+
         if (isset($app['core']['version'])) {
             $this->core_version = $app['core']['version'];
         } else {
             ipsCore::add_error('App.ini missing: Core > Version', true);
         }
 
+        if (isset($app['app']['support_modules'])) {
+            $this->support_modules = $app['app']['support_modules'];
+        }
+
         $this->load_config();
     }
 
     // Getters
+    public function get_title()
+    {
+        return $this->title;
+    }
+
     public function get_name()
     {
         return $this->name;
@@ -82,6 +103,11 @@ class ipsCore_app
     public function get_core_version()
     {
         return $this->core_version;
+    }
+
+    public function does_support_modules()
+    {
+        return $this->support_modules;
     }
 
     // Methods

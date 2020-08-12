@@ -1,0 +1,7 @@
+@mixin ips-fill_parent( $offset:0 ) {
+	position:absolute;
+	top:0;
+	right:$offset;
+	bottom:0;
+	left:$offset;
+}

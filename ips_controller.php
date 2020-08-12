@@ -7,6 +7,7 @@ class ipsCore_controller
 
     protected $name;
     protected $view;
+    protected $view_app = false;
     protected $view_class = '';
     protected $additional;
 
@@ -21,6 +22,11 @@ class ipsCore_controller
     public function get_view()
     {
         return $this->view;
+    }
+
+    public function get_view_app()
+    {
+        return $this->view_app;
     }
 
     public function get_view_class()
@@ -39,9 +45,10 @@ class ipsCore_controller
         $this->name = $name;
     }
 
-    public function set_view($view)
+    public function set_view($view, $app = false)
     {
         $this->view = $view;
+        $this->view_app = $app;
     }
 
     public function set_view_class($class)
@@ -129,7 +136,7 @@ class ipsCore_controller
         $args = array_merge($defaults, $args);
 
         if ($args['json']) {
-            ipsCore::$output = new ips_json($this->view, $args['type']);
+            ipsCore::$output = new ips_json($this->view, $this->view_app, $args['type']);
             ipsCore::$output_type = 'json';
         } else {
             if (!$this->get_view()) {
@@ -139,7 +146,7 @@ class ipsCore_controller
 
             $class = $args['class'] . ($args['class'] != '' ? ' ' : '') . $this->get_view_class();
 
-            ipsCore::$output = new ips_view($this->view, $args['layout'], $args['type'], $class);
+            ipsCore::$output = new ips_view($this->view, $this->view_app, $args['layout'], $args['type'], $class);
         }
     }
 

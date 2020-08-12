@@ -10,7 +10,8 @@ class twig_helper
 
     public function __construct()
     {
-        $this->loader = new FilesystemLoader(ipsCore::$path_app . '/views/');
+        //$this->loader = new FilesystemLoader(ipsCore::$path_app . '/views/');
+        $this->loader = new FilesystemLoader(ipsCore::$path_apps);
         $this->twig = new Environment($this->loader);
     }
 

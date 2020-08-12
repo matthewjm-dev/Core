@@ -1,0 +1,50 @@
+@mixin ips-button() {
+	height: auto;
+	display: block;
+	line-height: 30px;
+	border: 0;
+	padding: 5px 10px;
+	background-color: $brand-grey;
+	text-align: center;
+	cursor: pointer;
+	@include font-primary(15px, 400, $brand-white);
+	@include ips-transition(background-color 0.25s ease-in-out);
+
+	i {
+		margin-right: 5px;
+	}
+
+	&:enabled {
+		&:hover {
+			background-color: #555;
+		}
+
+		&.active {
+			background-color: $brand-grey-alt;
+
+			&:hover {
+				background-color: #555;
+			}
+		}
+	}
+
+	&:disabled {
+		cursor: default;
+		background-color: $brand-grey-alt;
+	}
+}
+
+@mixin ips-button-alt() {
+	background-color: $brand-grey-alt;
+
+	&:hover {
+		background-color: #555;
+	}
+
+	&.active {
+
+		&:hover {
+			background-color: #555;
+		}
+	}
+}

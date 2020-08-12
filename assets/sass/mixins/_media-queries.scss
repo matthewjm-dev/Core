@@ -1,0 +1,76 @@
+/* Anything above maximum breakpoint */
+@mixin xl() {
+	@include media-breakpoint-up(xl) {
+		@content;
+	}
+}
+
+/* LG */
+@mixin lg() {
+	@include media-breakpoint-down(lg) {
+		@include media-breakpoint-up(lg) {
+			@content;
+		}
+	}
+}
+
+@mixin lg-up() {
+	@include media-breakpoint-up(lg) {
+		@content;
+	}
+}
+
+@mixin lg-down() {
+	@include media-breakpoint-down(lg) {
+		@content;
+	}
+}
+
+/* MD */
+@mixin md() {
+	@include media-breakpoint-down(md) {
+		@include media-breakpoint-up(md) {
+			@content;
+		}
+	}
+}
+
+@mixin md-up() {
+	@include media-breakpoint-up(md) {
+		@content;
+	}
+}
+
+@mixin md-down() {
+	@include media-breakpoint-down(md) {
+		@content;
+	}
+}
+
+/* SM */
+@mixin sm() {
+	@include media-breakpoint-down(sm) {
+		@include media-breakpoint-up(sm) {
+			@content;
+		}
+	}
+}
+
+@mixin sm-up() {
+	@include media-breakpoint-up(sm) {
+		@content;
+	}
+}
+
+@mixin sm-down() {
+	@include media-breakpoint-down(sm) {
+		@content;
+	}
+}
+
+/* XS */
+@mixin xs() {
+	@include media-breakpoint-down(xs) {
+		@content;
+	}
+}

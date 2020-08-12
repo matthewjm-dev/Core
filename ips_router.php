@@ -29,6 +29,7 @@ class ipsCore_router
         $controller = 'pages';
         $method = 'index';
         $args = false;
+        $app = false;
 
         $uri_variations = [
             //ipsCore::$uri,
@@ -133,6 +134,25 @@ class ipsCore_router
                     if (!empty($path_parts)) {
                         $args = $path_parts;
                     }
+                } elseif (ipsCore::$app->does_support_modules() && count($path_parts) >= 2 && $this->check_module_exists($path_parts[1], ipsCore::get_app_dir_by_name($path_parts[0]))) {
+                    $app = array_shift($path_parts);
+                    $controller = array_shift($path_parts);
+                    ipsCore::$uri_current .= '/' . $app . '/' . $controller;
+
+                    if (!empty($path_parts)) {
+                        require_once(ipsCore::get_module_route($controller, ipsCore::get_app_dir_by_name($app)));
+
+                        if (method_exists($controller . '_controller', str_replace('-', '_', $path_parts[0]))) {
+                            $method = array_shift($path_parts);
+                            ipsCore::$uri_current .= '/' . $method;
+                        } else {
+                            $method = 'index';
+                        }
+                    }
+
+                    if (!empty($path_parts)) {
+                        $args = $path_parts;
+                    }
                 } else {
                     $method = 'call_error404';
                 }
@@ -145,7 +165,7 @@ class ipsCore_router
                 ipsCore::$uri_current .= '/';
             }
 
-            $this->route = new ipsCore_route(ipsCore::$uri_current, $controller, $method, $args);
+            $this->route = new ipsCore_route(ipsCore::$uri_current, $controller, $method, $args, $app);
         }
 
         $this->dispatch($this->route);
@@ -270,6 +290,15 @@ class ipsCore_router
         return false;
     }
 
+    public function check_module_exists($module, $app = false)
+    {
+        if (file_exists(ipsCore::get_module_route($module, $app))) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function dispatch(ipsCore_route $route)
     {
         $controller = $route->get_controller();
@@ -280,27 +309,30 @@ class ipsCore_router
             $controller = $controller_parts_last;
         }
 
-        if ($this->check_controller_exists($controller)) {
+        if ($route->get_module_app() && $this->check_module_exists($controller, ipsCore::get_app_dir_by_name($route->get_module_app()))) {
+            require_once(ipsCore::get_module_route($controller, ipsCore::get_app_dir_by_name($route->get_module_app())));
+        } elseif ($this->check_controller_exists($controller)) {
             require_once(ipsCore::get_controller_route($controller));
-            $controller_name = str_replace('/', '_', $controller) . '_controller';
+        } else {
+            ipsCore::add_error('Requested Controller or Module "' . $controller . '" Does Not Exist');
+        }
 
-            if (class_exists($controller_name)) {
-                ipsCore::$controller = new $controller_name($controller);
+        $controller_name = str_replace('/', '_', $controller) . '_controller';
 
-                if (!method_exists(ipsCore::$controller, $route->get_method())) {
-                    //$route->set_action($route->get_method());
-                    $route->set_method('index');
-                }
-                if (is_array($route->get_args())) {
-                    ipsCore::$controller->{$route->get_method()}(...$route->get_args());
-                } else {
-                    ipsCore::$controller->{$route->get_method()}($route->get_args());
-                }
+        if (class_exists($controller_name)) {
+            ipsCore::$controller = new $controller_name($controller);
+
+            if (!method_exists(ipsCore::$controller, $route->get_method())) {
+                //$route->set_action($route->get_method());
+                $route->set_method('index');
+            }
+            if (is_array($route->get_args())) {
+                ipsCore::$controller->{$route->get_method()}(...$route->get_args());
             } else {
-                ipsCore::add_error('Requested Controller Class "' . $controller_name . '" Does Not Exist');
+                ipsCore::$controller->{$route->get_method()}($route->get_args());
             }
         } else {
-            ipsCore::add_error('Requested Controller "' . $controller . '" Does Not Exist');
+            ipsCore::add_error('Requested Controller or Module Class "' . $controller_name . '" Does Not Exist');
         }
     }
 

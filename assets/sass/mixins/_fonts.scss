@@ -1,0 +1,15 @@
+@mixin font-primary( $size:$font-primary-default-size, $weight:$font-primary-default-weight, $colour:$font-primary-default-colour, $spacing:$font-primary-default-spacing ) {
+	font-family: $font-primary;
+	font-size: $size;
+	font-weight: $weight;
+	letter-spacing: $spacing;
+	color: $colour;
+}
+
+@mixin font-secondary( $size:$font-secondary-default-size, $weight:$font-secondary-default-weight, $colour:$font-secondary-default-colour, $spacing:$font-secondary-default-spacing ) {
+	font-family: $font-secondary;
+	font-size: $size;
+	font-weight: $weight;
+	letter-spacing: $spacing;
+	color: $colour;
+}

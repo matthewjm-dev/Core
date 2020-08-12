@@ -91,6 +91,7 @@ class ipsCore
         require_once(self::$path_core . 'ips_controller.php');
         require_once(self::$path_core . 'ips_model.php');
         require_once(self::$path_core . 'ips_view.php');
+        require_once(self::$path_core . 'ips_json.php');
         require_once(self::$path_core . 'ips_route.php');
         require_once(self::$path_core . 'ips_router.php');
         require_once(self::$path_core . 'ips_helper.php');
@@ -190,6 +191,17 @@ class ipsCore
         }
     }
 
+    public static function get_app_by($property, $value) {
+        $method = 'get_' . $property;
+        foreach (ipsCore::$apps as $app_id => $app) {
+            if ($app->$method() == $value) {
+                return $app;
+            }
+        }
+
+        return false;
+    }
+
     public static function get_includes()
     {
         $includes = glob(self::$path_core_includes . '*.php');
@@ -223,6 +235,32 @@ class ipsCore
                 return true;
             } else {
                 self::add_error('Required Controller "' . $controller . '" does not exist.');
+
+                return false;
+            }
+        }
+    }
+
+    public static function requires_module($modules, $app = false)
+    {
+        if (!$app) {
+            $app = ipsCore::$app->get_directory();
+        } else {
+            $app = ipsCore::get_app_dir_by_name($app);
+        }
+
+        if (!is_array($modules)) {
+            $modules = [$modules];
+        }
+        foreach ($modules as $module) {
+            $module_path = self::get_module_route($module, $app);
+
+            if (file_exists($module_path)) {
+                require_once($module_path);
+
+                return true;
+            } else {
+                self::add_error('Required Module "' . $module . '" does not exist.');
 
                 return false;
             }
@@ -290,6 +328,11 @@ class ipsCore
         return self::get_file_route($controller, 'controllers', $app);
     }
 
+    public static function get_module_route($module, $app = false)
+    {
+        return self::get_file_route($module, 'modules', $app);
+    }
+
     public static function get_model_route($model, $app = false)
     {
         return self::get_file_route($model, 'models', $app);
@@ -305,9 +348,14 @@ class ipsCore
         return self::get_file_route($object, 'objects', $app);
     }
 
-    public static function get_view_route($view, $type = 'twig')
+    public static function get_view_route($view, $app = false, $type = 'twig')
     {
-        return self::get_file_route($view, 'views', false, $type);
+        return self::get_file_route($view, 'views', $app, $type);
+    }
+
+    public static function get_view_route_extensionless($view, $app = false, $type = 'twig')
+    {
+        return self::get_file_route($view, 'views', $app, $type, false);
     }
 
     public static function get_layout_route($layout, $type = 'php')
@@ -320,7 +368,7 @@ class ipsCore
         return self::get_file_route($part, 'parts');
     }
 
-    private static function get_file_route($file, $dir, $app = false, $extension = false)
+    private static function get_file_route($file, $dir, $app = false, $extension = false, $include_extension = true)
     {
         $path = ipsCore::$path_app;
 
@@ -332,7 +380,7 @@ class ipsCore
             $path = ipsCore::$path_apps . $app;
         }
 
-        $file = $path . '/' . $dir . '/' . $file . '.' . $extension;
+        $file = $path . '/' . $dir . '/' . $file . ($include_extension ? '.' . $extension : '');
 
         return $file;
     }
@@ -355,7 +403,7 @@ class ipsCore
 
     public static function get_part($name, $data = [], $type = 'twig')
     {
-        $view = new ips_view($name, false, $type);
+        $view = new ips_view($name, false, false, $type);
         $view->build($data);
 
         return $view->display(true);
