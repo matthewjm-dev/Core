@@ -107,12 +107,14 @@ class ipsCore_form_builder
             } elseif (isset($this->fields[$field]['default']) && $this->fields[$field]['default'] != '') {
                 return $this->fields[$field]['default'];
             } else {
-                if ($field_type['type'] == 'int') {
+                if ($field_type['type'] == 'int' && !$field_type['file']) {
                     if (isset($field_type['default'])) {
                         return $field_type['default'];
                     } else {
                         return 0;
                     }
+                } elseif ($field_type['file']) {
+                    return $_FILES[$field];
                 }
             }
         }
