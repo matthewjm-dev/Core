@@ -18,6 +18,8 @@ class ipsCore_app
         'type' => false, 'from' => false, 'settings' => [],
     ];
 
+    public $config = [];
+
     public function __construct($app)
     {
         if (isset($app['app']['name'])) {
@@ -111,6 +113,14 @@ class ipsCore_app
     }
 
     // Methods
+	public function unset_config($prefix, &$config) {
+		foreach($config as $config_item_key => $config_item) {
+			$prefix_length = strlen($prefix);
+			if (strtolower(substr($config_item_key, 0, $prefix_length)) == $prefix) {
+				unset($config[$config_item_key]);
+			}
+		}
+	}
 
     public function load_config() {
         $config_file = ipsCore::$path_apps . 'config-' . $this->get_lower_name() . '.ini';
@@ -124,6 +134,8 @@ class ipsCore_app
                 $this->database['user'] =  $config['db-' . ipsCore::$environment]['user'];
                 $this->database['pass'] =  $config['db-' . ipsCore::$environment]['password'];
                 $this->database['prefix'] =  $config['db-' . ipsCore::$environment]['prefix'];
+
+                $this->unset_config('db-', $config);
             }
 
             if (isset($config['mail-' . ipsCore::$environment])) {
@@ -151,6 +163,8 @@ class ipsCore_app
                 foreach($configs as $mail_config => $mail_config_value) {
                     $this->mailer[$mail_config] = $mail_config_value;
                 }
+
+				$this->unset_config('mail-', $config);
             }
 
             if (!$this->mailer['type']) {
@@ -162,6 +176,19 @@ class ipsCore_app
             if (!isset($this->mailer['suspend_mail'])) {
                 $this->mailer['suspend_mail'] = true;
             }
+
+			foreach($config as $config_key => $config_items) {
+				if (!isset($this->config[$config_key])) {
+					//$config_name = str_replace('-', '_', $config_key);
+					$this->config[$config_key] = $config_items;
+
+					//foreach ($config_items as $config_item_key => $config_item_value) {
+					//	$this->$config_key[$config_item_key] = $config_item_value;
+					//}
+				} else {
+					ipsCore::add_error('App Config "' . $config_key . '" (apps/config-' . $this->get_lower_name() . '.ini) could not be added as a property with that name already exists', false);
+				}
+			}
         } else {
             ipsCore::add_error('App Config (apps/config-' . $this->get_lower_name() . '.ini) missing', true);
         }
