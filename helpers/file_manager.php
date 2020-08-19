@@ -243,12 +243,28 @@ if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
     }
 
     public static function upload_from_url($url, $path = '') {
-		$pathinfo = pathinfo($url);
-		$image = self::get_upload_directory($path);
-		file_put_contents($image, file_get_contents($url));
-	}
+		if ($image_details = pathinfo($url)) {
 
-	public static function create_thumbnail($path) {
+            if (in_array($image_details['extension'], ipsCore_file_manager::$allowed_types_images)) {
+                $dirCheck = self::check_directory($path);
 
+                if ($dirCheck === true) {
+                    $path = self::get_upload_directory($path);
+                    $image_path = $path . $image_details['basename'];
+                    self::get_unused_name($path, $image_path, $image_details['filename'], $image_details['extension']);
+
+                    if (file_put_contents($image_path, file_get_contents($url))) {
+                        return [
+                            'basename' => $image_details['filename'],
+                            'filename' => $image_details['filename'] . '.' . $image_details['extension'],
+                            'extension' => $image_details['extension'],
+                            'path' => $image_path,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return false;
 	}
 }
