@@ -102,7 +102,7 @@ class ipsCore_file_manager
             $check = filesize($raw_file["tmp_name"]);
 
             if ($check === false) {
-                $errors[] = 'Uploaded File type is not allowed (image extension faked?).';
+                $errors[] = 'Uploaded File type is not allowed (file extension faked?).';
             }
         } else {
             $errors[] = 'Uploaded File type is not allowed.';
@@ -241,4 +241,14 @@ if ($raw_file["size"] <= ipsCore_file_manager::$max_upload_size) {
 
         return true;
     }
+
+    public static function upload_from_url($url, $path = '') {
+		$pathinfo = pathinfo($url);
+		$image = self::get_upload_directory($path);
+		file_put_contents($image, file_get_contents($url));
+	}
+
+	public static function create_thumbnail($path) {
+
+	}
 }
