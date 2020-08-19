@@ -28,6 +28,8 @@ class ipsCore_model
     public $relationship_temps = [];
     public $relationships = [];
 
+    protected $has_unsaved_changes = false;
+
     // Getters
     public function get_model_name()
     {
@@ -97,8 +99,14 @@ class ipsCore_model
     }
 
     public function set_prop($property, $value) {
-        $this->{$property} = $value;
-        return true;
+    	if ($this->{$property} != $value) {
+    		$this->has_unsaved_changes = true;
+			$this->{$property} = $value;
+
+			return true;
+		}
+
+    	return false;
     }
 
     // Relationships
@@ -161,6 +169,9 @@ class ipsCore_model
     }
 
     // Methods
+	public function has_unsaved_changes() {
+    	return $this->has_unsaved_changes;
+	}
     public function has_field($name) {
         if (isset($this->fields[$name])) {
             return true;
@@ -838,6 +849,10 @@ class ipsCore_model
 
     public function save($insert = false)
     {
+    	if (!$this->has_unsaved_changes()) {
+    		return true;
+		}
+
         $fields = [];
         $where = [];
         $first = true;
