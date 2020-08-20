@@ -147,8 +147,12 @@ class ipsCore_model
     }
 
     public function get_relationship($name) {
-        if (isset($this->relationships[$name])) {
-            return $this->relationships[$name];
+        if (isset($this->relationships[$name]) && $this->relationships[$name]) {
+        	if (count($this->relationships[$name]) == 1) {
+				return $this->relationships[ $name ][0];
+			} else {
+				return $this->relationships[ $name ];
+			}
         } else {
             return [];
         }
