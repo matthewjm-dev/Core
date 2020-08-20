@@ -40,7 +40,7 @@
 				methods.add_loader($(this));
 
 				if (typeof args.before === 'function') {
-					args.before.call(this);
+					args.before.call(this, methods);
 				}
 
 				var $button = $(this);
